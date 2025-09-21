@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: houseping
+  profiles:
+    active: local
+
+server:
+  port: 8080
+
+# API 설정
+applyhome:
+  api:
+    base-url: https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1
+    key: ***REDACTED_API_KEY***
+
+
+lh:
+  api:
+    base-url: http://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1
+    key: ***REDACTED_API_KEY***
+
+# 텔레그램 설정
+telegram:
+  bot:
+    token: ***REDACTED_TELEGRAM_TOKEN***
+  admin:
+    chat:
+      id: ***REDACTED_CHAT_IDS***
+
+# 로깅 설정
+logging:
+  level:
+    com.yunbok.houseping: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 액추에이터 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+---
+# 로컬 개발 프로필
+spring:
+  config:
+    activate:
+      on-profile: local
+
+logging:
+  level:
+    com.yunbok.houseping: DEBUG
+
+---
+# 프로덕션 프로필
+spring:
+  config:
+    activate:
+      on-profile: production
+
+logging:
+  level:
+    com.yunbok.houseping: INFO
+    root: WARN
