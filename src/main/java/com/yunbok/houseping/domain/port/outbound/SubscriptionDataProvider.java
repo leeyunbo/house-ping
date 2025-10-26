@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface SubscriptionDataProvider {
 
-    List<SubscriptionInfo> fetch(String areaCode, LocalDate targetDate);
+    List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate);
 }

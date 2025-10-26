@@ -27,13 +27,13 @@ public class ApplyHomeSubscriptionInfo implements SubscriptionInfo {
     @Override
     public String getDisplayMessage() {
         return String.format("""
-                        %s [%s] %s
+                        [%s] %s
                         📅 접수: %s ~ %s
                         🏆 발표: %s
                         🏠 세대수: %d세대
                         🔗 %s
                         """,
-                houseType, area, houseName,
+                area, houseName,
                 receiptStartDate, receiptEndDate,
                 winnerAnnounceDate,
                 totalSupplyCount,
@@ -50,12 +50,12 @@ public class ApplyHomeSubscriptionInfo implements SubscriptionInfo {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ApplyHomeSubscriptionInfo that = (ApplyHomeSubscriptionInfo) o;
-        return Objects.equals(detailUrl, that.detailUrl);
+        return Objects.equals(houseManageNo, that.houseManageNo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(detailUrl);
+        return Objects.hashCode(houseManageNo);
     }
 }
 

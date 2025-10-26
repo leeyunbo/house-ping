@@ -5,6 +5,7 @@ import com.yunbok.houseping.domain.port.outbound.NotificationSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -14,9 +15,15 @@ import java.util.Map;
 /**
  * 텔레그램 알림 어댑터
  * ⭐ 요약 메시지에 청약Home + LH 데이터 소스별 구분 표시 추가
+ * feature.notification.telegram-enabled=true 일 때만 활성화
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(
+    name = "feature.notification.telegram-enabled",
+    havingValue = "true",
+    matchIfMissing = false
+)
 public class TelegramNotificationAdapter implements NotificationSender {
 
     private final WebClient webClient;

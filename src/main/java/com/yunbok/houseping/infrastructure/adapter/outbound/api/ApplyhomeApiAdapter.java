@@ -1,11 +1,13 @@
 package com.yunbok.houseping.infrastructure.adapter.outbound.api;
 
 import com.yunbok.houseping.domain.model.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.domain.model.HouseType;
 import com.yunbok.houseping.domain.model.SubscriptionInfo;
 import com.yunbok.houseping.domain.port.outbound.SubscriptionDataProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -15,9 +17,15 @@ import java.util.*;
 
 /**
  * 청약Home API 어댑터
+ * feature.subscription.applyhome-api-enabled=true 일 때만 활성화
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(
+    name = "feature.subscription.applyhome-api-enabled",
+    havingValue = "true",
+    matchIfMissing = false
+)
 public class ApplyhomeApiAdapter implements SubscriptionDataProvider {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -32,90 +40,91 @@ public class ApplyhomeApiAdapter implements SubscriptionDataProvider {
     }
 
     @Override
-    public List<SubscriptionInfo> fetch(String areaCode, LocalDate targetDate) {
-        List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchRegularApts(areaCode, targetDate));
-        allSubscriptions.addAll(fetchPrivatePreApts(areaCode, targetDate));
-        allSubscriptions.addAll(fetchNewlywedApts(areaCode, targetDate));
-        allSubscriptions.addAll(fetchRemainingApts(areaCode, targetDate));
-        return allSubscriptions;
+    public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {
+        try {
+            log.info("[청약Home API] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
+
+            List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchRegularApts(areaName, targetDate));
+            allSubscriptions.addAll(fetchPrivatePreApts(areaName, targetDate));
+            allSubscriptions.addAll(fetchNewlywedApts(areaName, targetDate));
+            allSubscriptions.addAll(fetchRemainingApts(areaName, targetDate));
+
+            log.info("[청약Home API] {} 지역에서 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
+            return allSubscriptions;
+
+        } catch (Exception e) {
+            log.error("[청약Home API] 데이터 수집 실패: {}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
     }
 
-    private List<ApplyHomeSubscriptionInfo> fetchRegularApts(String areaCode, LocalDate targetDate) {
-        return fetchAptSubscriptions("01", areaCode, targetDate);
+    private List<ApplyHomeSubscriptionInfo> fetchRegularApts(String areaName, LocalDate targetDate) {
+        return fetchAptSubscriptions(HouseType.APT, areaName, targetDate);
     }
 
-    private List<ApplyHomeSubscriptionInfo> fetchPrivatePreApts(String areaCode, LocalDate targetDate) {
-        return fetchAptSubscriptions("09", areaCode, targetDate);
+    private List<ApplyHomeSubscriptionInfo> fetchPrivatePreApts(String areaName, LocalDate targetDate) {
+        return fetchAptSubscriptions(HouseType.PRIVATE_PRE_SUBSCRIPTION, areaName, targetDate);
     }
 
-    private List<ApplyHomeSubscriptionInfo> fetchNewlywedApts(String areaCode, LocalDate targetDate) {
-        return fetchAptSubscriptions("10", areaCode, targetDate);
+    private List<ApplyHomeSubscriptionInfo> fetchNewlywedApts(String areaName, LocalDate targetDate) {
+        return fetchAptSubscriptions(HouseType.NEWLYWED_TOWN, areaName, targetDate);
     }
 
-    private List<ApplyHomeSubscriptionInfo> fetchRemainingApts(String areaCode, LocalDate targetDate) {
-        return fetchRemainingAptSubscriptions(areaCode, targetDate);
+    private List<ApplyHomeSubscriptionInfo> fetchRemainingApts(String areaName, LocalDate targetDate) {
+        return fetchRemainingAptSubscriptions(areaName, targetDate);
     }
 
     /**
      * 일반 APT API 호출
      */
-    private List<ApplyHomeSubscriptionInfo> fetchAptSubscriptions(String houseSecd, String areaCode, LocalDate targetDate) {
-        String dateStr = targetDate.format(DATE_FORMATTER);
-
+    private List<ApplyHomeSubscriptionInfo> fetchAptSubscriptions(HouseType houseType, String areaName, LocalDate targetDate) {
         Map<String, Object> response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/getAPTLttotPblancDetail")
                         .queryParam("page", 1)
-                        .queryParam("perPage", 100)
-                        .queryParam("cond[HOUSE_SECD::EQ]", houseSecd)
-                        .queryParam("cond[SUBSCRPT_AREA_CODE::EQ]", areaCode)
-                        .queryParam("cond[RCRIT_PBLANC_DE::EQ]", targetDate)
+                        .queryParam("perPage", 5000)
+                        .queryParam("cond[HOUSE_SECD::EQ]", houseType.getHouseSecd())
+                        .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
                         .queryParam("serviceKey", apiKey)
                         .build())
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
 
-        log.info("청약홈 API 응답 (houseSecd: {}, areaCode: {}, date: {}): {}", houseSecd, areaCode, dateStr, response);
-
-        return parseAptResponse(response, getHouseTypeName(houseSecd));
+        return parseAptResponse(response, houseType.getDisplayName(), targetDate);
     }
 
     /**
      * 잔여세대 APT API 호출
      */
-    private List<ApplyHomeSubscriptionInfo> fetchRemainingAptSubscriptions(String areaCode, LocalDate targetDate) {
-        String dateStr = targetDate.format(DATE_FORMATTER);
-
+    private List<ApplyHomeSubscriptionInfo> fetchRemainingAptSubscriptions(String areaName, LocalDate targetDate) {
         Map<String, Object> response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/getRemndrLttotPblancDetail")
                         .queryParam("page", 1)
-                        .queryParam("perPage", 100)
-                        .queryParam("cond[HOUSE_SECD::EQ]", "04") // 무순위
-                        .queryParam("cond[SUBSCRPT_AREA_CODE::EQ]", areaCode)
-                        .queryParam("cond[RCRIT_PBLANC_DE::GTE]", dateStr)
-                        .queryParam("cond[RCRIT_PBLANC_DE::LTE]", dateStr)
+                        .queryParam("perPage", 5000)
+                        .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
                         .queryParam("serviceKey", apiKey)
                         .build())
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
 
-        return parseRemainingResponse(response);
+        return parseRemainingResponse(response, targetDate);
     }
 
     /**
      * 일반 APT API 응답 파싱
      */
     @SuppressWarnings("unchecked")
-    private List<ApplyHomeSubscriptionInfo> parseAptResponse(Map<String, Object> response, String houseType) {
+    private List<ApplyHomeSubscriptionInfo> parseAptResponse(Map<String, Object> response, String houseType, LocalDate targetDate) {
         if (response == null) return Collections.emptyList();
 
         List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
         if (data == null) return Collections.emptyList();
 
         return data.stream()
+                .filter(item -> isReceiptDateInRange((String) item.get("RCEPT_BGNDE"), targetDate))
                 .map(item -> buildSubscriptionInfo(item, houseType))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -126,17 +135,31 @@ public class ApplyhomeApiAdapter implements SubscriptionDataProvider {
      * 잔여세대 API 응답 파싱
      */
     @SuppressWarnings("unchecked")
-    private List<ApplyHomeSubscriptionInfo> parseRemainingResponse(Map<String, Object> response) {
+    private List<ApplyHomeSubscriptionInfo> parseRemainingResponse(Map<String, Object> response, LocalDate targetDate) {
         if (response == null) return Collections.emptyList();
 
         List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
         if (data == null) return Collections.emptyList();
 
         return data.stream()
-                .map(item -> buildRemainingSubscriptionInfo(item))
+                .filter(item -> isReceiptDateInRange((String) item.get("SUBSCRPT_RCEPT_BGNDE"), targetDate))
+                .map(this::buildRemainingSubscriptionInfo)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    private boolean isReceiptDateInRange(String dateStr, LocalDate targetDate) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return false;
+        }
+
+        try {
+            LocalDate date = LocalDate.parse(dateStr, DATE_FORMATTER);
+            return date.equals(targetDate);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -174,7 +197,7 @@ public class ApplyhomeApiAdapter implements SubscriptionDataProvider {
                     .houseManageNo(getString(item, "HOUSE_MANAGE_NO"))
                     .pblancNo(getString(item, "PBLANC_NO"))
                     .houseName(getString(item, "HOUSE_NM"))
-                    .houseType("무순위")
+                    .houseType(HouseType.REMAINING.getDisplayName())
                     .area(getString(item, "SUBSCRPT_AREA_CODE_NM"))
                     .announceDate(parseDate(getString(item, "RCRIT_PBLANC_DE")))
                     .receiptStartDate(parseDate(getString(item, "SUBSCRPT_RCEPT_BGNDE")))
@@ -223,12 +246,4 @@ public class ApplyhomeApiAdapter implements SubscriptionDataProvider {
         }
     }
 
-    private String getHouseTypeName(String houseSecd) {
-        return switch (houseSecd) {
-            case "01" -> "APT";
-            case "09" -> "민간사전청약";
-            case "10" -> "신혼희망타운";
-            default -> "기타";
-        };
-    }
 }

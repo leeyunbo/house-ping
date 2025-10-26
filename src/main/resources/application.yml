@@ -5,19 +5,34 @@ spring:
     active: local
 
 server:
-  port: 8080
+  port: 10030
+
+# 기능 토글 설정
+feature:
+  subscription:
+    # API 다운 시 false로 변경하여 비활성화
+    applyhome-api-enabled: true   # 청약Home API (정상 작동 중)
+    applyhome-web-enabled: false  # 청약Home 웹 캘린더 (외부 접근 차단)
+    lh-api-enabled: true          # LH API (정상 작동 중 - 복구됨)
+    lh-web-enabled: false         # LH 웹 캘린더 (비활성화 - API 사용)
+  notification:
+    telegram-enabled: false       # 텔레그램 알림
+    slack-enabled: true           # Slack 알림
 
 # API 설정
 applyhome:
   api:
     base-url: https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1
     key: ***REDACTED_API_KEY***
-
+  web:
+    base-url: https://www.applyhome.co.kr
 
 lh:
   api:
     base-url: http://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1
     key: ***REDACTED_API_KEY***
+  web:
+    base-url: https://apply.lh.or.kr
 
 # 텔레그램 설정
 telegram:
@@ -26,6 +41,11 @@ telegram:
   admin:
     chat:
       id: ***REDACTED_CHAT_IDS***
+
+# Slack 설정
+slack:
+  webhook:
+    url: ***REDACTED_SLACK_WEBHOOK***
 
 # 로깅 설정
 logging:

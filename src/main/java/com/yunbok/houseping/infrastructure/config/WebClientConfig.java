@@ -17,8 +17,14 @@ public class WebClientConfig {
     @Value("${applyhome.api.base-url}")
     private String applyHomeBaseUrl;
 
+    @Value("${applyhome.web.base-url}")
+    private String applyHomeWebBaseUrl;
+
     @Value("${lh.api.base-url}")
     private String lhBaseUrl;
+
+    @Value("${lh.web.base-url}")
+    private String lhWebBaseUrl;
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -44,6 +50,30 @@ public class WebClientConfig {
     public WebClient lhWebClient() {
         return WebClient.builder()
                 .baseUrl(lhBaseUrl)
+                .defaultHeader("Content-Type", "application/json")
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
+    }
+
+    /**
+     * 청약Home 웹 캘린더용 WebClient (API 다운 시 대체)
+     */
+    @Bean
+    public WebClient applyHomeWebCalendarClient() {
+        return WebClient.builder()
+                .baseUrl(applyHomeWebBaseUrl)
+                .defaultHeader("Content-Type", "application/json")
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
+    }
+
+    /**
+     * LH 웹 캘린더용 WebClient (API 다운 시 대체)
+     */
+    @Bean
+    public WebClient lhWebCalendarClient() {
+        return WebClient.builder()
+                .baseUrl(lhWebBaseUrl)
                 .defaultHeader("Content-Type", "application/json")
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
