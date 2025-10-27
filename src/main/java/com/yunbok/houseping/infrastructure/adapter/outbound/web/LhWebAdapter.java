@@ -3,7 +3,7 @@ package com.yunbok.houseping.infrastructure.adapter.outbound.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yunbok.houseping.domain.model.LhSubscriptionInfo;
 import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.domain.port.outbound.SubscriptionDataProvider;
+import com.yunbok.houseping.domain.port.outbound.SubscriptionOuterWorldProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
     havingValue = "true",
     matchIfMissing = true  // 설정이 없으면 기본 활성화
 )
-public class LhWebAdapter implements SubscriptionDataProvider {
+public class LhWebAdapter implements SubscriptionOuterWorldProvider {
 
     private static final DateTimeFormatter LH_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final DateTimeFormatter LH_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
@@ -56,29 +56,15 @@ public class LhWebAdapter implements SubscriptionDataProvider {
             String selectYear = String.valueOf(targetDate.getYear());
             String selectMonth = String.format("%02d", targetDate.getMonthValue());
 
-            // POST 요청 파라미터 구성
+            // POST 요청 파라미터 구성 (분양주택만 조회)
             MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
             formData.add("panDt", panDt);
             formData.add("selectYear", selectYear);
             formData.add("selectMonth", selectMonth);
-            formData.add("calSrchType", "01"); // 01=임대, 02=분양
+            formData.add("calSrchType", "02"); // 02=분양 (임대 제외)
 
-            // detail.do 엔드포인트로 JSON 데이터 요청 (String으로 받아서 수동 파싱)
+            // detail.do 엔드포인트로 JSON 데이터 요청
             String responseStr = webClient.post()
-                    .uri("/lhapply/apply/sc/detail.do")
-                    .body(BodyInserters.fromFormData(formData))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-            log.info("[{}] 임대주택 응답 수신: {}", LH_PROVIDER_NAME, responseStr);
-
-            Map<String, Object> response = objectMapper.readValue(responseStr, Map.class);
-            List<SubscriptionInfo> rentalResult = parseDetailResponse(response, areaName, targetDate, "임대주택");
-
-            // 분양 주택도 조회
-            formData.set("calSrchType", "02");
-            responseStr = webClient.post()
                     .uri("/lhapply/apply/sc/detail.do")
                     .body(BodyInserters.fromFormData(formData))
                     .retrieve()
@@ -87,17 +73,12 @@ public class LhWebAdapter implements SubscriptionDataProvider {
 
             log.info("[{}] 분양주택 응답 수신: {}", LH_PROVIDER_NAME, responseStr);
 
-            response = objectMapper.readValue(responseStr, Map.class);
-
+            Map<String, Object> response = objectMapper.readValue(responseStr, Map.class);
             List<SubscriptionInfo> saleResult = parseDetailResponse(response, areaName, targetDate, "분양주택");
 
-            List<SubscriptionInfo> allResults = new ArrayList<>();
-            allResults.addAll(rentalResult);
-            allResults.addAll(saleResult);
+            log.info("[{}] {} 지역에서 {}개 데이터 수집 완료", LH_PROVIDER_NAME, areaName, saleResult.size());
 
-            log.info("[{}] {} 지역에서 {}개 데이터 수집 완료", LH_PROVIDER_NAME, areaName, allResults.size());
-
-            return allResults;
+            return saleResult;
 
         } catch (Exception e) {
             log.error("[{}] 데이터 수집 실패: {}", LH_PROVIDER_NAME, e.getMessage(), e);
@@ -154,15 +135,15 @@ public class LhWebAdapter implements SubscriptionDataProvider {
      * 지역 필터링 (지역명이 일치하거나 포함되는지 확인)
      */
     private boolean matchesArea(Map<String, Object> item, String areaName) {
-        // LH API는 지역 정보를 여러 필드로 제공할 수 있음
-        // cnpCdNm: 지역 코드명
-        // 또는 다른 필드명일 수 있으므로 여러 후보를 확인
+        String cnpCdNm = getString(item, "cnpCdNm");
 
-        // 일단 모든 공고를 받아들이고, 실제 데이터를 확인한 후 필터링 로직 개선
-        // LH는 보통 전국 단위로 공고를 내므로 지역 필터링이 필요없을 수도 있음
+        // 지역 정보가 없으면 포함 (전국/미분류로 표시됨)
+        if (cnpCdNm == null || cnpCdNm.isEmpty()) {
+            return true;
+        }
 
-        // TODO: 실제 응답 데이터를 확인한 후 정확한 필드명으로 필터링
-        return true; // 일단 모든 지역 허용
+        // 지역 정보가 있으면 서울/경기만 필터링
+        return cnpCdNm.contains(areaName);
     }
 
     /**
@@ -171,11 +152,12 @@ public class LhWebAdapter implements SubscriptionDataProvider {
     private Optional<LhSubscriptionInfo> buildLhSubscriptionInfo(Map<String, Object> item, String houseType) {
         try {
             String panNm = getString(item, "panNm");
+            String cnpCdNm = getString(item, "cnpCdNm");
 
             return Optional.of(LhSubscriptionInfo.builder()
                     .houseName(panNm + " [" + LH_PROVIDER_NAME + "]")
                     .houseType(houseType)
-                    .area(getString(item, "cnpCdNm"))
+                    .area(cnpCdNm != null ? cnpCdNm : "전국/미분류")
                     .announceDate(parseLhDate(getString(item, "panNtStDt")))
                     .receiptEndDate(parseLhDate(getString(item, "acpEdDttm")))
                     .detailUrl(getString(item, "dtlUrl"))
@@ -223,6 +205,12 @@ public class LhWebAdapter implements SubscriptionDataProvider {
             log.warn("[{}] 날짜 파싱 실패: {}", LH_PROVIDER_NAME, dateStr);
             return null;
         }
+    }
+
+    @Override
+    public List<SubscriptionInfo> fetchAll(String areaName) {
+        // LH는 "접수중" 상태만 조회하므로 fetch와 동일
+        return fetch(areaName, LocalDate.now());
     }
 
     /**

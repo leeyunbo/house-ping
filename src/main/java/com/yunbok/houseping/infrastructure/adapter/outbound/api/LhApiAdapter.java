@@ -4,7 +4,7 @@ import com.yunbok.houseping.domain.model.AreaCodeMapping;
 import com.yunbok.houseping.domain.model.LhApiTypeCode;
 import com.yunbok.houseping.domain.model.LhSubscriptionInfo;
 import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.domain.port.outbound.SubscriptionDataProvider;
+import com.yunbok.houseping.domain.port.outbound.SubscriptionOuterWorldProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.net.http.HttpHeaders;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -24,11 +23,11 @@ import java.util.*;
 @Slf4j
 @Component
 @ConditionalOnProperty(
-    name = "feature.subscription.lh-api-enabled",
-    havingValue = "true",
-    matchIfMissing = false
+        name = "feature.subscription.lh-api-enabled",
+        havingValue = "true",
+        matchIfMissing = false
 )
-public class LhApiAdapter implements SubscriptionDataProvider {
+public class LhApiAdapter implements SubscriptionOuterWorldProvider {
 
     private static final DateTimeFormatter LH_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String LH_PROVIDER_NAME = "LH";
@@ -44,34 +43,78 @@ public class LhApiAdapter implements SubscriptionDataProvider {
 
     @Override
     public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {
+        log.info("[LH API] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
+
+        // 분양주택과 신혼희망타운만 조회 (임대주택 제외)
+        List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchRegularApts(areaName));
+        allSubscriptions.addAll(fetchNewlywedApts(areaName));
+
+        log.info("[LH API] {} 지역에서 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
+        return allSubscriptions;
+
+    }
+
+    @Override
+    public List<SubscriptionInfo> fetchAll(String areaName) {
         try {
-            log.info("[LH API] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
+            log.info("[LH API] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
 
             // 분양주택과 신혼희망타운만 조회 (임대주택 제외)
-            List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchRegularApts(areaName, targetDate));
-            allSubscriptions.addAll(fetchNewlywedApts(areaName, targetDate));
+            List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchAllRegularApts(areaName));
+            allSubscriptions.addAll(fetchAllNewlywedApts(areaName));
 
-            log.info("[LH API] {} 지역에서 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
+            log.info("[LH API] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
             return allSubscriptions;
 
         } catch (Exception e) {
-            log.error("[LH API] 데이터 수집 실패: {}", e.getMessage(), e);
+            log.error("[LH API] 전체 데이터 수집 실패: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
 
-    private List<LhSubscriptionInfo> fetchRegularApts(String areaName, LocalDate targetDate) {
-        return fetchLhSubscriptions(LhApiTypeCode.SALE_APT, areaName, targetDate);
+    private List<LhSubscriptionInfo> fetchRegularApts(String areaName) {
+        return fetchLhSubscriptions(LhApiTypeCode.SALE_APT, areaName);
     }
 
-    private List<LhSubscriptionInfo> fetchNewlywedApts(String areaName, LocalDate targetDate) {
-        return fetchLhSubscriptions(LhApiTypeCode.NEWLYWED_APT, areaName, targetDate);
+    private List<LhSubscriptionInfo> fetchNewlywedApts(String areaName) {
+        return fetchLhSubscriptions(LhApiTypeCode.NEWLYWED_APT, areaName);
+    }
+
+    private List<LhSubscriptionInfo> fetchAllRegularApts(String areaName) {
+        return fetchAllLhSubscriptions(LhApiTypeCode.SALE_APT, areaName);
+    }
+
+    private List<LhSubscriptionInfo> fetchAllNewlywedApts(String areaName) {
+        return fetchAllLhSubscriptions(LhApiTypeCode.NEWLYWED_APT, areaName);
     }
 
     /**
-     * LH API 공통 호출 메서드
+     * LH API 공통 호출 메서드 (특정 날짜)
      */
-    private List<LhSubscriptionInfo> fetchLhSubscriptions(LhApiTypeCode apiTypeCode, String areaName, LocalDate targetDate) {
+    private List<LhSubscriptionInfo> fetchLhSubscriptions(LhApiTypeCode apiTypeCode, String areaName) {
+        String lhAreaCode = AreaCodeMapping.getLhAreaCodeByName(areaName);
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("serviceKey", apiKey)
+                        .queryParam("PG_SZ", 5000)
+                        .queryParam("PAGE", 1)
+                        .queryParam("UPP_AIS_TP_CD", apiTypeCode.getTypeCode())
+                        .queryParam("PAN_SS", "접수중")
+                        .queryParam("CNP_CD", lhAreaCode)
+                        .build())
+                .retrieve()
+                .bodyToMono(List.class)
+                .block();
+
+        return parseLhResponse(response, apiTypeCode.getDisplayName());
+    }
+
+    /**
+     * LH API 공통 호출 메서드 (전체 데이터)
+     */
+    private List<LhSubscriptionInfo> fetchAllLhSubscriptions(LhApiTypeCode apiTypeCode, String areaName) {
         String lhAreaCode = AreaCodeMapping.getLhAreaCodeByName(areaName);
 
         @SuppressWarnings("unchecked")
@@ -87,14 +130,14 @@ public class LhApiAdapter implements SubscriptionDataProvider {
                 .bodyToMono(List.class)
                 .block();
 
-        return parseLhResponse(response, apiTypeCode.getDisplayName(), targetDate);
+        return parseAllLhResponse(response, apiTypeCode.getDisplayName());
     }
 
     /**
-     * LH API 응답 파싱 및 필터링
+     * LH API 응답 파싱 및 필터링 (특정 날짜)
      */
     @SuppressWarnings("unchecked")
-    private List<LhSubscriptionInfo> parseLhResponse(List<Map<String, Object>> response, String houseType, LocalDate targetDate) {
+    private List<LhSubscriptionInfo> parseLhResponse(List<Map<String, Object>> response, String houseType) {
         if (response == null || response.size() < 2) {
             log.info("LH API 응답이 비어있거나 구조가 올바르지 않음");
             return Collections.emptyList();
@@ -109,7 +152,6 @@ public class LhApiAdapter implements SubscriptionDataProvider {
 
         return dsList.stream()
                 .filter(entry -> "접수중".equals(entry.get("PAN_SS")))  // 접수중인 공고만
-                .filter(entry -> isAnnounceDate(entry, targetDate))     // 공고일이 targetDate와 일치
                 .map(item -> buildLhSubscriptionInfo(item, houseType))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -117,21 +159,27 @@ public class LhApiAdapter implements SubscriptionDataProvider {
     }
 
     /**
-     * 공고일이 targetDate와 일치하는지 확인
+     * LH API 응답 파싱 (전체 데이터 - 날짜 필터링 없음)
      */
-    private boolean isAnnounceDate(Map<String, Object> item, LocalDate targetDate) {
-        String panNtStDt = getString(item, "PAN_NT_ST_DT");
-        if (panNtStDt == null || panNtStDt.isEmpty()) {
-            return false;
+    @SuppressWarnings("unchecked")
+    private List<LhSubscriptionInfo> parseAllLhResponse(List<Map<String, Object>> response, String houseType) {
+        if (response == null || response.size() < 2) {
+            log.info("LH API 응답이 비어있거나 구조가 올바르지 않음");
+            return Collections.emptyList();
         }
 
-        try {
-            LocalDate announceDate = parseLhDate(panNtStDt);
-            return announceDate != null && announceDate.equals(targetDate);
-        } catch (Exception e) {
-            log.warn("[LH API] 공고일 파싱 실패: {}", panNtStDt);
-            return false;
+        Map<String, Object> responseData = response.get(1);
+        List<Map<String, Object>> dsList = (List<Map<String, Object>>) responseData.get("dsList");
+
+        if (dsList == null || dsList.isEmpty()) {
+            return Collections.emptyList();
         }
+
+        return dsList.stream()
+                .map(item -> buildLhSubscriptionInfo(item, houseType))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     /**

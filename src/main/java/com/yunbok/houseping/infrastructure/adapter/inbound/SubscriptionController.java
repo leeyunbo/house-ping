@@ -3,6 +3,7 @@ package com.yunbok.houseping.infrastructure.adapter.inbound;
 import com.yunbok.houseping.domain.model.SubscriptionInfo;
 import com.yunbok.houseping.domain.port.CollectSubscriptionUseCase;
 import com.yunbok.houseping.domain.service.SubscriptionCollectorService;
+import com.yunbok.houseping.domain.service.SubscriptionSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,6 +26,7 @@ public class SubscriptionController {
 
     private final CollectSubscriptionUseCase collectSubscriptionUseCase;
     private final SubscriptionCollectorService subscriptionCollectorService;
+    private final SubscriptionSyncService subscriptionSyncService;
 
     /**
      * 수동으로 청약 정보 수집 실행
@@ -78,6 +80,55 @@ public class SubscriptionController {
             return ResponseEntity.internalServerError().body(Map.of(
                 "success", false,
                 "message", "청약 정보 수집 중 오류가 발생했습니다: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * 초기 데이터 동기화 (향후 12개월 데이터 로드)
+     */
+    @PostMapping("/sync/initial")
+    public ResponseEntity<Map<String, Object>> syncInitialData() {
+        try {
+            log.info("🔧 [수동] 초기 데이터 동기화를 시작합니다.");
+            SubscriptionSyncService.SyncResult result = subscriptionSyncService.syncInitialData();
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "초기 데이터 동기화가 완료되었습니다.",
+                "inserted", result.inserted,
+                "updated", result.updated,
+                "skipped", result.skipped,
+                "total", result.total()
+            ));
+        } catch (Exception e) {
+            log.error("초기 데이터 동기화 중 오류 발생", e);
+            return ResponseEntity.internalServerError().body(Map.of(
+                "success", false,
+                "message", "초기 데이터 동기화 중 오류가 발생했습니다: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * 오래된 데이터 정리
+     */
+    @PostMapping("/cleanup")
+    public ResponseEntity<Map<String, Object>> cleanupOldData() {
+        try {
+            log.info("🔧 [수동] 오래된 데이터 정리를 시작합니다.");
+            int deletedCount = subscriptionSyncService.cleanupOldData();
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "오래된 데이터 정리가 완료되었습니다.",
+                "deletedCount", deletedCount
+            ));
+        } catch (Exception e) {
+            log.error("오래된 데이터 정리 중 오류 발생", e);
+            return ResponseEntity.internalServerError().body(Map.of(
+                "success", false,
+                "message", "오래된 데이터 정리 중 오류가 발생했습니다: " + e.getMessage()
             ));
         }
     }

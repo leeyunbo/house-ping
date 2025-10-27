@@ -3,6 +3,23 @@ spring:
     name: houseping
   profiles:
     active: local
+  datasource:
+    url: jdbc:h2:file:~/Project/data/houseping
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
 
 server:
   port: 10030
@@ -10,14 +27,20 @@ server:
 # 기능 토글 설정
 feature:
   subscription:
-    # API 다운 시 false로 변경하여 비활성화
+    # API 어댑터 (API 다운 시 false로 변경하여 비활성화)
     applyhome-api-enabled: true   # 청약Home API (정상 작동 중)
-    applyhome-web-enabled: false  # 청약Home 웹 캘린더 (외부 접근 차단)
-    lh-api-enabled: true          # LH API (정상 작동 중 - 복구됨)
-    lh-web-enabled: false         # LH 웹 캘린더 (비활성화 - API 사용)
+    lh-api-enabled: true          # LH API (정상 작동 중)
+    # DB 어댑터 (Fallback용, API 실패 시 자동으로 DB 조회)
+    applyhome-db-enabled: true    # 청약Home DB Fallback (활성화)
+    lh-db-enabled: true           # LH DB Fallback (활성화)
   notification:
     telegram-enabled: false       # 텔레그램 알림
     slack-enabled: true           # Slack 알림
+
+# 동기화 설정
+sync:
+  initial-range-months: 12        # 초기 데이터 동기화 범위 (개월)
+  daily-range-months: 1           # 일일 데이터 동기화 범위 (개월)
 
 # API 설정
 applyhome:
@@ -47,12 +70,9 @@ slack:
   webhook:
     url: ***REDACTED_SLACK_WEBHOOK***
 
-# 로깅 설정
+# 로깅 설정 (상세 설정은 logback-spring.xml 참조)
 logging:
-  level:
-    com.yunbok.houseping: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  config: classpath:logback-spring.xml
 
 # 액추에이터 설정
 management:
@@ -71,9 +91,7 @@ spring:
     activate:
       on-profile: local
 
-logging:
-  level:
-    com.yunbok.houseping: DEBUG
+# 로컬 환경에서는 logback-spring.xml의 local 프로파일 설정 사용
 
 ---
 # 프로덕션 프로필
@@ -82,7 +100,4 @@ spring:
     activate:
       on-profile: production
 
-logging:
-  level:
-    com.yunbok.houseping: INFO
-    root: WARN
+# 프로덕션 환경에서는 logback-spring.xml의 production 프로파일 설정 사용

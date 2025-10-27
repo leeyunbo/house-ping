@@ -3,7 +3,6 @@ package com.yunbok.houseping.domain.service;
 import com.yunbok.houseping.domain.model.SubscriptionInfo;
 import com.yunbok.houseping.domain.port.CollectSubscriptionUseCase;
 import com.yunbok.houseping.domain.port.outbound.NotificationSender;
-import com.yunbok.houseping.domain.port.outbound.SubscriptionDataProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionCollectorService implements CollectSubscriptionUseCase {
 
-    private final List<SubscriptionDataProvider> dataProviders; // ⭐ List로 변경!
+    private final List<SubscriptionProviderOrchestrator> dataOrchestrator;
     private final NotificationSender notificationSender;
 
     private static final List<String> TARGET_AREA_NAMES = Arrays.asList("서울", "경기");
@@ -34,7 +33,7 @@ public class SubscriptionCollectorService implements CollectSubscriptionUseCase 
     @Override
     public List<SubscriptionInfo> collectAndNotifyTodaySubscriptions() {
         LocalDate today = LocalDate.now();
-        log.info("🚀 {}의 신규 청약 정보 수집을 시작합니다. (데이터 소스: {}개)", today, dataProviders.size());
+        log.info("🚀 {}의 신규 청약 정보 수집을 시작합니다. (데이터 소스: {}개)", today, dataOrchestrator.size());
 
         try {
             List<SubscriptionInfo> newSubscriptions = new ArrayList<>();
@@ -67,11 +66,10 @@ public class SubscriptionCollectorService implements CollectSubscriptionUseCase 
      * 테스트용: 특정 날짜의 청약 정보 수집 (Slack 발송 안함)
      */
     public List<SubscriptionInfo> collectSubscriptionsForDate(LocalDate targetDate) {
-        log.info("🔍 [테스트] {}의 청약 정보 수집을 시작합니다. (데이터 소스: {}개)", targetDate, dataProviders.size());
+        log.info("🔍 [테스트] {}의 청약 정보 수집을 시작합니다. (데이터 소스: {}개)", targetDate, dataOrchestrator.size());
 
         List<SubscriptionInfo> newSubscriptions = new ArrayList<>();
 
-        // 각 지역별로 모든 유형의 청약 정보 수집
         for (String areaName : TARGET_AREA_NAMES) {
             newSubscriptions.addAll(collectAllAptTypesFromArea(areaName, targetDate));
         }
@@ -88,14 +86,13 @@ public class SubscriptionCollectorService implements CollectSubscriptionUseCase 
 
         log.info("🏠 {} 지역의 청약 정보를 수집합니다.", areaName);
 
-        for (SubscriptionDataProvider dataProvider : dataProviders) {
-            String providerName = dataProvider.getClass().getSimpleName();
-            log.info("[{}] {} 데이터 수집 시작", providerName, areaName);
+        for (SubscriptionProviderOrchestrator dataOrchestrator : dataOrchestrator) {
+            log.info("{} 데이터 수집 시작", areaName);
 
-            List<SubscriptionInfo> providerSubscriptions = dataProvider.fetch(areaName, targetDate);
+            List<SubscriptionInfo> providerSubscriptions = dataOrchestrator.orchestrate(areaName, targetDate);
             areaSubscriptions.addAll(providerSubscriptions);
 
-            log.info("[{}] {} 지역에서 {}개의 청약 정보를 수집했습니다.", providerName, areaName, providerSubscriptions.size());
+            log.info("{} 지역에서 {}개의 청약 정보를 수집했습니다.", areaName, providerSubscriptions.size());
         }
 
         log.info("📊 {} 지역에서 총 {}개의 청약 정보를 수집했습니다.", areaName, areaSubscriptions.size());
