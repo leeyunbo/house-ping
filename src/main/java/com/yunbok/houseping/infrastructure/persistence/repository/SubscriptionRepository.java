@@ -2,6 +2,7 @@ package com.yunbok.houseping.infrastructure.persistence.repository;
 
 import com.yunbok.houseping.infrastructure.persistence.entity.SubscriptionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,8 @@ import java.util.Optional;
  * 청약 정보 Repository
  */
 @Repository
-public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity, Long> {
+public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity, Long>,
+        JpaSpecificationExecutor<SubscriptionEntity> {
 
     /**
      * 특정 날짜에 접수 시작하는 청약 조회
@@ -80,4 +82,16 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
      * 데이터 건수 조회
      */
     long countBySource(String source);
+
+    /**
+     * 사용 가능한 지역 목록
+     */
+    @Query("SELECT DISTINCT s.area FROM SubscriptionEntity s WHERE s.area IS NOT NULL ORDER BY s.area")
+    List<String> findDistinctAreas();
+
+    /**
+     * 데이터 소스 목록
+     */
+    @Query("SELECT DISTINCT s.source FROM SubscriptionEntity s WHERE s.source IS NOT NULL ORDER BY s.source")
+    List<String> findDistinctSources();
 }

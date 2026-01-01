@@ -56,12 +56,12 @@ public class LhWebAdapter implements SubscriptionOuterWorldProvider {
             String selectYear = String.valueOf(targetDate.getYear());
             String selectMonth = String.format("%02d", targetDate.getMonthValue());
 
-            // POST 요청 파라미터 구성 (분양주택만 조회)
+            // POST 요청 파라미터 구성 (분양 + 임대 전체 조회)
             MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
             formData.add("panDt", panDt);
             formData.add("selectYear", selectYear);
             formData.add("selectMonth", selectMonth);
-            formData.add("calSrchType", "02"); // 02=분양 (임대 제외)
+            formData.add("calSrchType", "01"); // 01=전체 (분양 + 임대)
 
             // detail.do 엔드포인트로 JSON 데이터 요청
             String responseStr = webClient.post()
@@ -71,14 +71,14 @@ public class LhWebAdapter implements SubscriptionOuterWorldProvider {
                     .bodyToMono(String.class)
                     .block();
 
-            log.info("[{}] 분양주택 응답 수신: {}", LH_PROVIDER_NAME, responseStr);
+            log.info("[{}] 분양+임대 응답 수신: {}", LH_PROVIDER_NAME, responseStr);
 
             Map<String, Object> response = objectMapper.readValue(responseStr, Map.class);
-            List<SubscriptionInfo> saleResult = parseDetailResponse(response, areaName, targetDate, "분양주택");
+            List<SubscriptionInfo> result = parseDetailResponse(response, areaName, targetDate);
 
-            log.info("[{}] {} 지역에서 {}개 데이터 수집 완료", LH_PROVIDER_NAME, areaName, saleResult.size());
+            log.info("[{}] {} 지역에서 {}개 데이터 수집 완료", LH_PROVIDER_NAME, areaName, result.size());
 
-            return saleResult;
+            return result;
 
         } catch (Exception e) {
             log.error("[{}] 데이터 수집 실패: {}", LH_PROVIDER_NAME, e.getMessage(), e);
@@ -90,7 +90,7 @@ public class LhWebAdapter implements SubscriptionOuterWorldProvider {
      * detail.do API 응답 파싱
      */
     @SuppressWarnings("unchecked")
-    private List<SubscriptionInfo> parseDetailResponse(Map<String, Object> response, String areaName, LocalDate targetDate, String houseType) {
+    private List<SubscriptionInfo> parseDetailResponse(Map<String, Object> response, String areaName, LocalDate targetDate) {
         if (response == null) {
             log.info("[{}] 응답이 null입니다.", LH_PROVIDER_NAME);
             return Collections.emptyList();
@@ -105,7 +105,7 @@ public class LhWebAdapter implements SubscriptionOuterWorldProvider {
         return panList.stream()
                 .filter(item -> isReceiptStartDate(item, targetDate))
                 .filter(item -> matchesArea(item, areaName))
-                .map(item -> buildLhSubscriptionInfo(item, houseType))
+                .map(this::buildLhSubscriptionInfo)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .<SubscriptionInfo>map(info -> info)
@@ -149,10 +149,11 @@ public class LhWebAdapter implements SubscriptionOuterWorldProvider {
     /**
      * LH 데이터를 SubscriptionInfo로 변환
      */
-    private Optional<LhSubscriptionInfo> buildLhSubscriptionInfo(Map<String, Object> item, String houseType) {
+    private Optional<LhSubscriptionInfo> buildLhSubscriptionInfo(Map<String, Object> item) {
         try {
             String panNm = getString(item, "panNm");
             String cnpCdNm = getString(item, "cnpCdNm");
+            String houseType = determineHouseType(item);
 
             return Optional.of(LhSubscriptionInfo.builder()
                     .houseName(panNm + " [" + LH_PROVIDER_NAME + "]")
@@ -167,6 +168,23 @@ public class LhWebAdapter implements SubscriptionOuterWorldProvider {
             log.warn("[{}] SubscriptionInfo 생성 실패: {}", LH_PROVIDER_NAME, e.getMessage());
             return Optional.empty();
         }
+    }
+
+    /**
+     * 응답 데이터에서 주택 유형 결정
+     */
+    private String determineHouseType(Map<String, Object> item) {
+        String uppAisTpCd = getString(item, "uppAisTpCd");
+        if (uppAisTpCd == null) {
+            return "LH 주택";
+        }
+
+        return switch (uppAisTpCd) {
+            case "05" -> "LH 분양주택";
+            case "06" -> "LH 임대주택";
+            case "39" -> "LH 신혼희망타운";
+            default -> "LH 주택";
+        };
     }
 
     /**

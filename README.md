@@ -35,6 +35,10 @@
 java -jar build/libs/houseping-0.0.1-SNAPSHOT.jar --spring.profiles.active=production
 ```
 
+### 관리자 페이지
+- 서버 기동 후 `http://localhost:10030/admin/subscriptions` 접속
+- 저장된 청약 데이터를 키워드, 지역, 데이터 소스, 접수 기간으로 필터링하여 조회할 수 있습니다.
+
 ## 스케줄링
 - **매일 09:00**: 신규 청약 정보 수집 및 알림 발송
 

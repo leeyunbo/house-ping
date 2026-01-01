@@ -45,9 +45,10 @@ public class LhApiAdapter implements SubscriptionOuterWorldProvider {
     public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {
         log.info("[LH API] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
 
-        // 분양주택과 신혼희망타운만 조회 (임대주택 제외)
+        // 분양주택, 신혼희망타운, 임대주택 조회
         List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchRegularApts(areaName));
         allSubscriptions.addAll(fetchNewlywedApts(areaName));
+        allSubscriptions.addAll(fetchRentalApts(areaName));
 
         log.info("[LH API] {} 지역에서 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
         return allSubscriptions;
@@ -59,9 +60,10 @@ public class LhApiAdapter implements SubscriptionOuterWorldProvider {
         try {
             log.info("[LH API] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
 
-            // 분양주택과 신혼희망타운만 조회 (임대주택 제외)
+            // 분양주택, 신혼희망타운, 임대주택 조회
             List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchAllRegularApts(areaName));
             allSubscriptions.addAll(fetchAllNewlywedApts(areaName));
+            allSubscriptions.addAll(fetchAllRentalApts(areaName));
 
             log.info("[LH API] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
             return allSubscriptions;
@@ -80,12 +82,20 @@ public class LhApiAdapter implements SubscriptionOuterWorldProvider {
         return fetchLhSubscriptions(LhApiTypeCode.NEWLYWED_APT, areaName);
     }
 
+    private List<LhSubscriptionInfo> fetchRentalApts(String areaName) {
+        return fetchLhSubscriptions(LhApiTypeCode.RENTAL_APT, areaName);
+    }
+
     private List<LhSubscriptionInfo> fetchAllRegularApts(String areaName) {
         return fetchAllLhSubscriptions(LhApiTypeCode.SALE_APT, areaName);
     }
 
     private List<LhSubscriptionInfo> fetchAllNewlywedApts(String areaName) {
         return fetchAllLhSubscriptions(LhApiTypeCode.NEWLYWED_APT, areaName);
+    }
+
+    private List<LhSubscriptionInfo> fetchAllRentalApts(String areaName) {
+        return fetchAllLhSubscriptions(LhApiTypeCode.RENTAL_APT, areaName);
     }
 
     /**

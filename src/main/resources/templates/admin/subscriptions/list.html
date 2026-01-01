@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Houseping Admin - 청약 데이터 조회</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f7f9fb; color: #222; }
+        h1 { margin-bottom: 10px; }
+        .meta { color: #666; margin-bottom: 24px; }
+        form { background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        label { font-size: 12px; text-transform: uppercase; color: #777; display: block; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #d0d7de; border-radius: 4px; }
+        .actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button.primary { background: #2563eb; color: #fff; }
+        button.secondary { background: #e5e7eb; color: #111; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        th, td { padding: 12px; border-bottom: 1px solid #eef2f7; text-align: left; }
+        th { background: #f1f5f9; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: #475569; }
+        tbody tr:hover { background: #f8fafc; }
+        .pagination { margin-top: 20px; display: flex; gap: 12px; align-items: center; }
+        .pagination a { color: #2563eb; text-decoration: none; }
+        .tag { display: inline-block; padding: 2px 6px; border-radius: 999px; font-size: 11px; background: #e0f2fe; color: #0369a1; }
+        .empty { padding: 24px; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+<h1>Houseping 관리자</h1>
+<p class="meta">DB에 저장된 청약 데이터를 검색하고 확인할 수 있습니다.</p>
+
+<form method="get">
+    <div>
+        <label for="keyword">키워드</label>
+        <input type="text" id="keyword" name="keyword" placeholder="주택명 검색"
+               th:value="${search.keyword}">
+    </div>
+    <div>
+        <label for="area">지역</label>
+        <select id="area" name="area">
+            <option value="">전체</option>
+            <option th:each="areaVal : ${areas}"
+                    th:value="${areaVal}"
+                    th:selected="${areaVal == search.area}"
+                    th:text="${areaVal}">서울</option>
+        </select>
+    </div>
+    <div>
+        <label for="source">데이터 소스</label>
+        <select id="source" name="source">
+            <option value="">전체</option>
+            <option th:each="sourceVal : ${sources}"
+                    th:value="${sourceVal}"
+                    th:selected="${sourceVal == search.source}"
+                    th:text="${sourceVal == 'APPLYHOME_API' ? '청약Home' : (sourceVal == 'LH_API' ? 'LH' : sourceVal)}">APPLYHOME_API</option>
+        </select>
+    </div>
+    <div>
+        <label for="startDate">접수 시작일 (From)</label>
+        <input type="date" id="startDate" name="startDate"
+               th:value="${search.startDate}">
+    </div>
+    <div>
+        <label for="endDate">접수 시작일 (To)</label>
+        <input type="date" id="endDate" name="endDate"
+               th:value="${search.endDate}">
+    </div>
+    <div>
+        <label for="size">페이지 크기</label>
+        <input type="number" id="size" name="size" min="5" max="100"
+               th:value="${search.size}">
+    </div>
+    <div class="actions">
+        <button type="submit" class="primary">검색</button>
+        <button type="submit" class="secondary" name="reset" value="true"
+                onclick="window.location.href='/admin/subscriptions';return false;">초기화</button>
+    </div>
+</form>
+
+<div th:if="${resultPage.totalElements == 0}" class="empty">
+    조건에 맞는 데이터가 없습니다. 다른 조건으로 검색하세요.
+</div>
+
+<div th:if="${resultPage.totalElements > 0}">
+    <p class="meta" th:text="|총 ${resultPage.totalElements}건 · ${resultPage.number + 1} / ${resultPage.totalPages} 페이지|"></p>
+    <table>
+        <thead>
+        <tr>
+            <th>주택명</th>
+            <th>지역 / 유형</th>
+            <th>접수기간</th>
+            <th>발표일</th>
+            <th>소스</th>
+            <th>상세</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="subscription : ${resultPage.content}">
+            <td>
+                <strong th:text="${subscription.houseName}">주택명</strong><br>
+                <small th:text="${subscription.totalSupplyCount != null ? subscription.totalSupplyCount + ' 세대' : '세대수 미정'}"></small>
+            </td>
+            <td>
+                <span th:text="${subscription.area}">서울</span><br>
+                <span class="tag" th:text="${subscription.houseType}">APT</span>
+            </td>
+            <td>
+                <span th:text="${subscription.receiptStartDate}"></span><br>
+                <span th:text="${subscription.receiptEndDate}"></span>
+            </td>
+            <td th:text="${subscription.winnerAnnounceDate}">-</td>
+            <td th:text="${subscription.source == 'APPLYHOME_API' ? '청약Home' : (subscription.source == 'LH_API' ? 'LH' : subscription.source)}">APPLYHOME_API</td>
+            <td>
+                <a th:if="${subscription.detailUrl != null}" th:href="${subscription.detailUrl}" target="_blank">상세보기</a><br>
+                <small th:text="${subscription.contact}"></small>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <a th:if="${resultPage.hasPrevious()}"
+           th:href="@{/admin/subscriptions(page=${resultPage.number - 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
+            이전
+        </a>
+        <span th:text="|${resultPage.number + 1} / ${resultPage.totalPages}|"></span>
+        <a th:if="${resultPage.hasNext()}"
+           th:href="@{/admin/subscriptions(page=${resultPage.number + 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
+            다음
+        </a>
+    </div>
+</div>
+</body>
+</html>
