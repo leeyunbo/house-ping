@@ -42,6 +42,15 @@ sync:
   initial-range-months: 12        # 초기 데이터 동기화 범위 (개월)
   daily-range-months: 1           # 일일 데이터 동기화 범위 (개월)
 
+# 청약 수집 설정
+subscription:
+  target-areas:
+    - 서울
+    - 경기
+  api:
+    page-size: 5000
+    default-page: 1
+
 # API 설정
 applyhome:
   api:

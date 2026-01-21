@@ -8,18 +8,41 @@ script/*.pid
 # Build artifacts
 build/
 .gradle/
+out/
+target/
 *.jar
-
-# Images
-*.png
-*.jpg
-*.jpeg
+*.war
+*.class
 
 # IDE
 .idea/
 *.iml
 .vscode/
+*.swp
+*.swo
+*~
 
 # Logs
 logs/
 *.log
+
+# Database
+data/
+*.mv.db
+*.trace.db
+
+# Environment & Local config
+.env
+.env.*
+application-local.yml
+application-local.properties
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+test-output/
