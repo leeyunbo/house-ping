@@ -41,7 +41,7 @@ public class FallbackOrchestrator implements SubscriptionProviderOrchestrator {
             Supplier<List<SubscriptionInfo>> fetcher, String sourceName) {
         try {
             List<SubscriptionInfo> result = fetcher.get();
-            if (result != null && !result.isEmpty()) {
+            if (result != null) {
                 log.info("[{}] {} succeeded: {} items", name, sourceName, result.size());
                 return Optional.of(result);
             }

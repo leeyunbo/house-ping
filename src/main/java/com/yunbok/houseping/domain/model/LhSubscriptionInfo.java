@@ -15,9 +15,15 @@ public class LhSubscriptionInfo implements SubscriptionInfo {
     private String houseType;
     private String area;
     private LocalDate announceDate;
+    private LocalDate receiptStartDate;
     private LocalDate receiptEndDate;
     private String detailUrl;
     private String subscriptionStatus;
+
+    @Override
+    public LocalDate getReceiptStartDate() {
+        return receiptStartDate != null ? receiptStartDate : announceDate;
+    }
 
     @Override
     public String getDisplayMessage() {
