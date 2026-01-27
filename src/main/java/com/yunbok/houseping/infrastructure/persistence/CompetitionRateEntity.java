@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class CompetitionRateEntity {
 
     @Id
@@ -83,13 +86,7 @@ public class CompetitionRateEntity {
     /**
      * 수집 일시
      */
-    @Column(name = "collected_at", nullable = false)
+    @CreatedDate
+    @Column(name = "collected_at", nullable = false, updatable = false)
     private LocalDateTime collectedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (collectedAt == null) {
-            collectedAt = LocalDateTime.now();
-        }
-    }
 }

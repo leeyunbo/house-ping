@@ -1,7 +1,7 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Repository
 public interface CompetitionRateRepository extends JpaRepository<CompetitionRateEntity, Long>,
-        JpaSpecificationExecutor<CompetitionRateEntity> {
+        QuerydslPredicateExecutor<CompetitionRateEntity> {
 
     /**
      * 특정 청약 건의 경쟁률 조회

@@ -2,6 +2,7 @@ package com.yunbok.houseping.adapter.in.web.admin;
 
 import com.yunbok.houseping.infrastructure.persistence.CompetitionRateEntity;
 import com.yunbok.houseping.infrastructure.persistence.CompetitionRateRepository;
+import com.yunbok.houseping.infrastructure.persistence.QSubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,8 @@ public class DashboardQueryService {
 
     private final CompetitionRateRepository competitionRateRepository;
     private final SubscriptionRepository subscriptionRepository;
+
+    private static final QSubscriptionEntity subscription = QSubscriptionEntity.subscriptionEntity;
 
     public DashboardStatisticsDto getStatistics() {
         List<CompetitionRateEntity> allRates = competitionRateRepository.findAll();
@@ -48,9 +52,8 @@ public class DashboardQueryService {
                 .distinct()
                 .toList();
 
-        return subscriptionRepository.findAll((root, query, cb) ->
-                        root.get("houseManageNo").in(houseManageNos))
-                .stream()
+        return StreamSupport
+                .stream(subscriptionRepository.findAll(subscription.houseManageNo.in(houseManageNos)).spliterator(), false)
                 .collect(Collectors.toMap(
                         SubscriptionEntity::getHouseManageNo,
                         entity -> entity,
