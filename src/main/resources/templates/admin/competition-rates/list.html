@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Houseping Admin - 청약 데이터 조회</title>
+    <title>Houseping Admin - 경쟁률 데이터 조회</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,6 +11,7 @@
             --success: #10b981;
             --success-dark: #059669;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --bg: #f8fafc;
             --card: #ffffff;
             --border: #e2e8f0;
@@ -111,6 +112,37 @@
             color: #991b1b;
         }
 
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
         .action-bar {
             display: flex;
             gap: 12px;
@@ -142,6 +174,17 @@
             box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
         }
 
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #f87171 100%);
+            color: white;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+        }
+
         .search-card {
             background: var(--card);
             padding: 24px;
@@ -152,7 +195,7 @@
 
         .search-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 16px;
         }
 
@@ -279,9 +322,15 @@
             margin-bottom: 4px;
         }
 
-        .house-count {
+        .house-area {
             font-size: 13px;
             color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .house-code {
+            font-size: 11px;
+            color: #94a3b8;
         }
 
         .tag {
@@ -293,52 +342,41 @@
             font-weight: 600;
         }
 
-        .tag-applyhome {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1d4ed8;
+        .tag-rank1 {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
         }
 
-        .tag-lh {
-            background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
-            color: #c2410c;
+        .tag-rank2 {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #3730a3;
         }
 
-        .tag-type {
-            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
-            color: #7c3aed;
+        .rate {
+            font-weight: 700;
+            font-size: 15px;
         }
 
-        .date-range {
+        .rate.low {
+            color: var(--success);
+        }
+
+        .rate.mid {
+            color: var(--warning);
+        }
+
+        .rate.high {
+            color: var(--danger);
+        }
+
+        .supply-info {
             font-size: 14px;
-        }
-
-        .date-range .start {
-            color: var(--text);
-        }
-
-        .date-range .end {
             color: var(--text-muted);
         }
 
-        .detail-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--primary);
-            text-decoration: none;
+        .collected-at {
             font-size: 13px;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .detail-link:hover {
-            color: var(--primary-dark);
-        }
-
-        .contact {
-            font-size: 12px;
             color: var(--text-muted);
-            margin-top: 4px;
         }
 
         .empty {
@@ -386,6 +424,7 @@
 
         @media (max-width: 768px) {
             body { padding: 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .search-grid { grid-template-columns: 1fr; }
             h1 { font-size: 22px; }
             table { font-size: 13px; }
@@ -395,14 +434,14 @@
 </head>
 <body>
 <div class="header">
-    <h1>청약 데이터</h1>
-    <p class="meta">DB에 저장된 청약 데이터를 검색하고 확인할 수 있습니다</p>
+    <h1>경쟁률 데이터</h1>
+    <p class="meta">청약홈 API에서 수집된 경쟁률 데이터를 조회합니다</p>
 
     <div class="nav">
         <a href="/admin/dashboard">대시보드</a>
-        <a href="/admin/subscriptions" class="active">청약 데이터</a>
+        <a href="/admin/subscriptions">청약 데이터</a>
         <a href="/admin/subscriptions/calendar">청약 캘린더</a>
-        <a href="/admin/competition-rates">경쟁률 데이터</a>
+        <a href="/admin/competition-rates" class="active">경쟁률 데이터</a>
     </div>
 </div>
 
@@ -410,16 +449,46 @@
     <div th:if="${message}" class="alert success" th:text="${message}"></div>
     <div th:if="${error}" class="alert error" th:text="${error}"></div>
 
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" th:text="${stats.totalCount}">0</div>
+            <div class="stat-label">총 데이터 건수</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${stats.avgRate != null ? #numbers.formatDecimal(stats.avgRate, 1, 2) + ':1' : '-'}">0:1</div>
+            <div class="stat-label">평균 경쟁률</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${stats.maxRate != null ? #numbers.formatDecimal(stats.maxRate, 1, 2) + ':1' : '-'}">0:1</div>
+            <div class="stat-label">최고 경쟁률</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${stats.minRate != null ? #numbers.formatDecimal(stats.minRate, 1, 2) + ':1' : '-'}">0:1</div>
+            <div class="stat-label">최저 경쟁률</div>
+        </div>
+    </div>
+
     <div class="action-bar">
-        <form th:action="@{/admin/subscriptions/sync}" method="post" style="margin: 0;">
-            <button type="submit" class="btn btn-success" onclick="return confirm('전체 청약 데이터를 동기화하시겠습니까?');">
+        <form th:action="@{/admin/competition-rates/collect}" method="post" style="margin: 0;">
+            <button type="submit" class="btn btn-success" onclick="return confirm('경쟁률 데이터를 수집하시겠습니까?');">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                     <path d="M3 3v5h5"/>
                     <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
                     <path d="M16 21h5v-5"/>
                 </svg>
-                전체 동기화
+                경쟁률 수집
+            </button>
+        </form>
+        <form th:action="@{/admin/competition-rates/delete-all}" method="post" style="margin: 0;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('모든 경쟁률 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+                전체 삭제
             </button>
         </form>
     </div>
@@ -427,39 +496,45 @@
     <div class="search-card">
         <form method="get" class="search-grid">
             <div class="form-group">
-                <label for="keyword">키워드</label>
-                <input type="text" id="keyword" name="keyword" placeholder="주택명 검색"
+                <label for="keyword">주택관리번호/공고번호</label>
+                <input type="text" id="keyword" name="keyword" placeholder="검색"
                        th:value="${search.keyword}">
             </div>
             <div class="form-group">
-                <label for="area">지역</label>
-                <select id="area" name="area">
+                <label for="houseType">주택형</label>
+                <select id="houseType" name="houseType">
                     <option value="">전체</option>
-                    <option th:each="areaVal : ${areas}"
-                            th:value="${areaVal}"
-                            th:selected="${areaVal == search.area}"
-                            th:text="${areaVal}">서울</option>
+                    <option th:each="type : ${houseTypes}"
+                            th:value="${type}"
+                            th:selected="${type == search.houseType}"
+                            th:text="${type}">084.9543T</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="source">데이터 소스</label>
-                <select id="source" name="source">
+                <label for="rank">순위</label>
+                <select id="rank" name="rank">
                     <option value="">전체</option>
-                    <option th:each="sourceVal : ${sources}"
-                            th:value="${sourceVal}"
-                            th:selected="${sourceVal == search.source}"
-                            th:text="${#strings.containsIgnoreCase(sourceVal, 'APPLYHOME') ? '청약Home' : (#strings.containsIgnoreCase(sourceVal, 'LH') ? 'LH' : sourceVal)}">APPLYHOME_API</option>
+                    <option value="1" th:selected="${search.rank == 1}">1순위</option>
+                    <option value="2" th:selected="${search.rank == 2}">2순위</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="startDate">접수 시작일 (From)</label>
-                <input type="date" id="startDate" name="startDate"
-                       th:value="${search.startDate}">
+                <label for="residenceArea">거주지역</label>
+                <select id="residenceArea" name="residenceArea">
+                    <option value="">전체</option>
+                    <option value="해당지역" th:selected="${search.residenceArea == '해당지역'}">해당지역</option>
+                    <option value="기타지역" th:selected="${search.residenceArea == '기타지역'}">기타지역</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="endDate">접수 시작일 (To)</label>
-                <input type="date" id="endDate" name="endDate"
-                       th:value="${search.endDate}">
+                <label for="minRate">최소 경쟁률</label>
+                <input type="number" id="minRate" name="minRate" step="0.01" placeholder="0.00"
+                       th:value="${search.minRate}">
+            </div>
+            <div class="form-group">
+                <label for="maxRate">최대 경쟁률</label>
+                <input type="number" id="maxRate" name="maxRate" step="0.01" placeholder="100.00"
+                       th:value="${search.maxRate}">
             </div>
             <div class="form-group">
                 <label for="size">페이지 크기</label>
@@ -468,14 +543,14 @@
             </div>
             <div class="search-actions">
                 <button type="submit" class="btn btn-primary">검색</button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='/admin/subscriptions';">초기화</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/admin/competition-rates';">초기화</button>
             </div>
         </form>
     </div>
 
     <div th:if="${resultPage.totalElements == 0}" class="table-container">
         <div class="empty">
-            조건에 맞는 데이터가 없습니다. 다른 조건으로 검색하세요.
+            조건에 맞는 데이터가 없습니다. 다른 조건으로 검색하거나 '수집 실행' 버튼을 눌러 데이터를 수집하세요.
         </div>
     </div>
 
@@ -490,45 +565,41 @@
                 <thead>
                 <tr>
                     <th>주택명</th>
-                    <th>지역 / 유형</th>
-                    <th>접수기간</th>
-                    <th>발표일</th>
-                    <th>소스</th>
-                    <th>상세</th>
+                    <th>주택형</th>
+                    <th>순위</th>
+                    <th>거주지역</th>
+                    <th>공급/접수</th>
+                    <th>경쟁률</th>
+                    <th>수집일시</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="subscription : ${resultPage.content}">
+                <tr th:each="rate : ${resultPage.content}">
                     <td>
-                        <div class="house-name" th:text="${subscription.houseName}">주택명</div>
-                        <div class="house-count" th:text="${subscription.totalSupplyCount != null ? subscription.totalSupplyCount + ' 세대' : '세대수 미정'}"></div>
+                        <div class="house-name" th:text="${rate.houseName != null ? rate.houseName : '(미연동)'}">주택명</div>
+                        <div class="house-area" th:text="${rate.area}">지역</div>
+                        <div class="house-code" th:text="${rate.houseManageNo}">주택관리번호</div>
+                    </td>
+                    <td th:text="${rate.houseType}">084.9543T</td>
+                    <td>
+                        <span class="tag tag-rank1" th:if="${rate.rank == 1}">1순위</span>
+                        <span class="tag tag-rank2" th:if="${rate.rank == 2}">2순위</span>
+                        <span th:if="${rate.rank != 1 && rate.rank != 2}" th:text="${rate.rank + '순위'}">-</span>
+                    </td>
+                    <td th:text="${rate.residenceArea}">해당지역</td>
+                    <td class="supply-info">
+                        <span th:text="${rate.supplyCount != null ? rate.supplyCount + '세대' : '-'}">100세대</span> /
+                        <span th:text="${rate.requestCount != null ? rate.requestCount + '건' : '-'}">500건</span>
                     </td>
                     <td>
-                        <div th:text="${subscription.area}" style="margin-bottom: 6px;">서울</div>
-                        <span class="tag tag-type" th:text="${subscription.houseType}">APT</span>
+                        <span th:if="${rate.competitionRate != null}"
+                              th:class="${rate.competitionRate < 5 ? 'rate low' : (rate.competitionRate < 20 ? 'rate mid' : 'rate high')}"
+                              th:text="${#numbers.formatDecimal(rate.competitionRate, 1, 2) + ':1'}">5.00:1</span>
+                        <span th:if="${rate.competitionRate == null}">-</span>
                     </td>
-                    <td>
-                        <div class="date-range">
-                            <span class="start" th:text="${subscription.receiptStartDate}"></span><br>
-                            <span class="end" th:text="${subscription.receiptEndDate}"></span>
-                        </div>
-                    </td>
-                    <td th:text="${subscription.winnerAnnounceDate}">-</td>
-                    <td>
-                        <span th:if="${#strings.containsIgnoreCase(subscription.source, 'APPLYHOME')}" class="tag tag-applyhome">청약Home</span>
-                        <span th:if="${#strings.containsIgnoreCase(subscription.source, 'LH')}" class="tag tag-lh">LH</span>
-                        <span th:if="${!#strings.containsIgnoreCase(subscription.source, 'APPLYHOME') && !#strings.containsIgnoreCase(subscription.source, 'LH')}" class="tag" th:text="${subscription.source}">기타</span>
-                    </td>
-                    <td>
-                        <a th:if="${subscription.detailUrl != null}" th:href="${subscription.detailUrl}" target="_blank" class="detail-link">
-                            상세보기
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                                <polyline points="15 3 21 3 21 9"/>
-                                <line x1="10" y1="14" x2="21" y2="3"/>
-                            </svg>
-                        </a>
-                        <div th:if="${subscription.contact}" class="contact" th:text="${subscription.contact}"></div>
+                    <td class="collected-at">
+                        <span th:text="${#temporals.format(rate.collectedAt, 'yyyy-MM-dd')}">2025-01-01</span><br>
+                        <span th:text="${#temporals.format(rate.collectedAt, 'HH:mm')}">10:00</span>
                     </td>
                 </tr>
                 </tbody>
@@ -536,7 +607,7 @@
 
             <div class="pagination">
                 <a th:if="${resultPage.hasPrevious()}"
-                   th:href="@{/admin/subscriptions(page=${resultPage.number - 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
+                   th:href="@{/admin/competition-rates(page=${resultPage.number - 1},size=${resultPage.size},keyword=${search.keyword},houseType=${search.houseType},rank=${search.rank},residenceArea=${search.residenceArea},minRate=${search.minRate},maxRate=${search.maxRate})}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
@@ -544,7 +615,7 @@
                 </a>
                 <span th:text="|${resultPage.number + 1} / ${resultPage.totalPages}|"></span>
                 <a th:if="${resultPage.hasNext()}"
-                   th:href="@{/admin/subscriptions(page=${resultPage.number + 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
+                   th:href="@{/admin/competition-rates(page=${resultPage.number + 1},size=${resultPage.size},keyword=${search.keyword},houseType=${search.houseType},rank=${search.rank},residenceArea=${search.residenceArea},minRate=${search.minRate},maxRate=${search.maxRate})}">
                     다음
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6"/>

@@ -26,6 +26,8 @@ public interface SubscriptionInfo {
     default String getHomepageUrl() { return null; }
     default String getContact() { return null; }
     default Integer getTotalSupplyCount() { return null; }
+    default String getHouseManageNo() { return null; }
+    default String getPblancNo() { return null; }
 
     // === Optional 반환 (null-safety) ===
     default Optional<LocalDate> getWinnerAnnounceDateOpt() {

@@ -41,7 +41,7 @@ public class SubscriptionManagementService implements SubscriptionManagementUseC
     @Override
     @Transactional
     public int cleanup() {
-        LocalDate cutoffDate = LocalDate.now().minusYears(1);
+        LocalDate cutoffDate = LocalDate.now().minusYears(5);
         int deletedCount = persistencePort.deleteOldSubscriptions(cutoffDate);
         log.info("Cleanup completed: deleted={}", deletedCount);
         return deletedCount;

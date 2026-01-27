@@ -30,9 +30,12 @@ feature:
     # API 어댑터 (API 다운 시 false로 변경하여 비활성화)
     applyhome-api-enabled: true   # 청약Home API (정상 작동 중)
     lh-api-enabled: true          # LH API (정상 작동 중)
+    lh-web-enabled: true          # LH Web (1순위, 캘린더 API 사용)
     # DB 어댑터 (Fallback용, API 실패 시 자동으로 DB 조회)
     applyhome-db-enabled: true    # 청약Home DB Fallback (활성화)
     lh-db-enabled: true           # LH DB Fallback (활성화)
+    # 경쟁률 수집 (당첨 발표일 이후 데이터 수집)
+    applyhome-competition-enabled: true  # 청약홈 경쟁률 API (활성화)
   notification:
     telegram-enabled: false       # 텔레그램 알림
     slack-enabled: true           # Slack 알림

@@ -94,4 +94,10 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
      */
     @Query("SELECT DISTINCT s.source FROM SubscriptionEntity s WHERE s.source IS NOT NULL ORDER BY s.source")
     List<String> findDistinctSources();
+
+    /**
+     * 특정 지역들의 house_manage_no 목록 조회
+     */
+    @Query("SELECT DISTINCT s.houseManageNo FROM SubscriptionEntity s WHERE s.area IN :areas AND s.houseManageNo IS NOT NULL")
+    List<String> findHouseManageNosByAreaIn(@Param("areas") List<String> areas);
 }

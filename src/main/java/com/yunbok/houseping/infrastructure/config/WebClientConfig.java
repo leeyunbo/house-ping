@@ -86,4 +86,16 @@ public class WebClientConfig {
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
+
+    /**
+     * 청약홈 경쟁률 API용 WebClient
+     */
+    @Bean
+    public WebClient competitionRateWebClient() {
+        return WebClient.builder()
+                .baseUrl("https://api.odcloud.kr/api/ApplyhomeInfoCmpetRtSvc/v1")
+                .defaultHeader("Content-Type", "application/json")
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
+    }
 }

@@ -41,6 +41,18 @@ public class SubscriptionEntity {
     private String source;
 
     /**
+     * 주택관리번호 (청약홈 API용)
+     */
+    @Column(name = "house_manage_no", length = 40)
+    private String houseManageNo;
+
+    /**
+     * 공고번호 (청약홈 API용)
+     */
+    @Column(name = "pblanc_no", length = 40)
+    private String pblancNo;
+
+    /**
      * 주택명
      */
     @Column(nullable = false, length = 200)
@@ -139,7 +151,9 @@ public class SubscriptionEntity {
     public boolean needsUpdate(SubscriptionEntity other) {
         if (other == null) return false;
 
-        return !equals(receiptStartDate, other.receiptStartDate)
+        return !equals(houseManageNo, other.houseManageNo)
+            || !equals(pblancNo, other.pblancNo)
+            || !equals(receiptStartDate, other.receiptStartDate)
             || !equals(receiptEndDate, other.receiptEndDate)
             || !equals(winnerAnnounceDate, other.winnerAnnounceDate)
             || !equals(detailUrl, other.detailUrl)
@@ -156,6 +170,8 @@ public class SubscriptionEntity {
      * 다른 엔티티의 값으로 업데이트
      */
     public void updateFrom(SubscriptionEntity other) {
+        this.houseManageNo = other.houseManageNo;
+        this.pblancNo = other.pblancNo;
         this.houseType = other.houseType;
         this.area = other.area;
         this.announceDate = other.announceDate;

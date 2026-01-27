@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Houseping Admin - 청약 캘린더</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --receipt: #3b82f6;
+            --receipt-light: #dbeafe;
+            --winner: #10b981;
+            --winner-light: #d1fae5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fff1f2 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .meta {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav a:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .nav a.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .calendar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 32px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .legend {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .legend-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .legend-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            padding: 4px 10px;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        .legend-divider {
+            width: 1px;
+            height: 32px;
+            background: var(--border);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .legend-color.applyhome-receipt {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        }
+
+        .legend-color.applyhome-winner {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+        }
+
+        .legend-color.lh-receipt {
+            background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+        }
+
+        .legend-color.lh-winner {
+            background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+        }
+
+        /* FullCalendar 커스텀 스타일 */
+        .fc {
+            --fc-border-color: var(--border);
+            --fc-today-bg-color: #fef3c7;
+            --fc-page-bg-color: transparent;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .fc .fc-button {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 500;
+            padding: 10px 18px;
+            border-radius: 10px;
+            text-transform: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .fc .fc-button:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .fc .fc-button-primary:not(:disabled).fc-button-active,
+        .fc .fc-button-primary:not(:disabled):active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .fc .fc-button-primary:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+
+        .fc .fc-prev-button, .fc .fc-next-button {
+            padding: 10px 14px;
+        }
+
+        .fc .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 24px;
+        }
+
+        .fc .fc-col-header-cell {
+            padding: 14px 0;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .fc .fc-col-header-cell-cushion {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .fc .fc-daygrid-day {
+            transition: background 0.2s;
+        }
+
+        .fc .fc-daygrid-day:hover {
+            background: #f8fafc;
+        }
+
+        .fc .fc-daygrid-day-top {
+            display: flex;
+            justify-content: flex-end;
+            padding: 8px;
+        }
+
+        .fc .fc-daygrid-day-number {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            text-decoration: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .fc .fc-daygrid-day-number:hover {
+            background: var(--bg);
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number:hover {
+            background: var(--primary-dark);
+        }
+
+        .fc .fc-day-today {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%) !important;
+        }
+
+        .fc .fc-daygrid-day-events {
+            padding: 0 4px 4px;
+        }
+
+        .fc .fc-daygrid-event {
+            border-radius: 6px;
+            border: none;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .fc .fc-daygrid-event:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        .fc .fc-daygrid-block-event .fc-event-title {
+            font-weight: 500;
+            padding: 2px 0;
+        }
+
+        .fc .fc-daygrid-more-link {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 4px 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 4px;
+            margin: 2px 4px;
+        }
+
+        .fc .fc-daygrid-more-link:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .fc .fc-popover {
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+        }
+
+        .fc .fc-popover-header {
+            background: var(--bg);
+            padding: 12px 16px;
+            font-weight: 600;
+            border-radius: 12px 12px 0 0;
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-content {
+            background: var(--card);
+            padding: 0;
+            border-radius: 20px;
+            max-width: 440px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .modal-close {
+            background: var(--bg);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .modal-body {
+            padding: 20px 24px 24px;
+            overflow-y: auto;
+        }
+
+        .modal-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tag.receipt {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+        }
+
+        .tag.winner {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #047857;
+        }
+
+        .tag.lh-receipt {
+            background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+            color: #c2410c;
+        }
+
+        .tag.lh-winner {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            color: #7c3aed;
+        }
+
+        .tag.source-applyhome {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+        }
+
+        .tag.source-lh {
+            background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+            color: #c2410c;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 0;
+        }
+
+        .btn-detail {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-detail:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-detail svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* 알림 토글 버튼 */
+        .notification-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            margin-top: 16px;
+            background: var(--bg);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .notification-toggle:hover {
+            background: #f1f5f9;
+        }
+
+        .notification-toggle.enabled {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        }
+
+        .notification-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .notification-toggle-label svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-muted);
+        }
+
+        .notification-toggle.enabled .notification-toggle-label svg {
+            color: #f59e0b;
+        }
+
+        .notification-toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #cbd5e1;
+            border-radius: 9999px;
+            transition: all 0.2s;
+        }
+
+        .notification-toggle.enabled .notification-toggle-switch {
+            background: #f59e0b;
+        }
+
+        .notification-toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .notification-toggle.enabled .notification-toggle-switch::after {
+            left: 22px;
+        }
+
+        .notification-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding-left: 30px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            body { padding: 20px; }
+            .calendar-container { padding: 16px; border-radius: 16px; }
+            .fc .fc-toolbar { flex-direction: column; gap: 12px; }
+            .fc .fc-toolbar-title { font-size: 18px; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>청약 캘린더</h1>
+    <p class="meta">청약 접수 기간과 당첨 발표일을 한눈에 확인하세요</p>
+
+    <div class="nav">
+        <a href="/admin/dashboard">대시보드</a>
+        <a href="/admin/subscriptions">청약 데이터</a>
+        <a href="/admin/subscriptions/calendar" class="active">청약 캘린더</a>
+        <a href="/admin/competition-rates">경쟁률 데이터</a>
+    </div>
+</div>
+
+<div class="calendar-container">
+    <div class="legend">
+        <div class="legend-group">
+            <span class="legend-title">청약Home</span>
+            <div class="legend-item">
+                <div class="legend-color applyhome-receipt"></div>
+                <span>접수</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color applyhome-winner"></div>
+                <span>발표</span>
+            </div>
+        </div>
+        <div class="legend-divider"></div>
+        <div class="legend-group">
+            <span class="legend-title">LH</span>
+            <div class="legend-item">
+                <div class="legend-color lh-receipt"></div>
+                <span>접수</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color lh-winner"></div>
+                <span>발표</span>
+            </div>
+        </div>
+    </div>
+    <div id="calendar"></div>
+</div>
+
+<!-- 상세 모달 -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">청약 상세정보</h2>
+            <button class="modal-close" onclick="closeModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- 동적으로 채워짐 -->
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'ko',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            buttonText: {
+                today: '오늘',
+                month: '월간',
+                week: '주간'
+            },
+            titleFormat: { year: 'numeric', month: 'long' },
+            events: function(info, successCallback, failureCallback) {
+                const start = info.startStr.split('T')[0];
+                const end = info.endStr.split('T')[0];
+                fetch(`/admin/subscriptions/calendar/events?start=${start}&end=${end}`)
+                    .then(response => response.json())
+                    .then(events => {
+                        // 백엔드에서 받은 색상 그대로 사용 (LH: 오렌지/보라, 청약Home: 파랑/초록)
+                        successCallback(events);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching events:', error);
+                        failureCallback(error);
+                    });
+            },
+            eventClick: function(info) {
+                showModal(info.event);
+            },
+            eventDisplay: 'block',
+            dayMaxEvents: 3,
+            moreLinkText: function(n) { return '+' + n + '개'; },
+            height: 'auto',
+            fixedWeekCount: false
+        });
+        calendar.render();
+    });
+
+    function showModal(event) {
+        const props = event.extendedProps;
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        const isLH = props.source && props.source.toUpperCase().includes('LH');
+        const eventTypeLabel = props.eventType === 'receipt' ? '접수' : '발표';
+
+        // LH/청약Home에 따라 다른 태그 클래스 적용
+        let eventTypeClass;
+        if (isLH) {
+            eventTypeClass = props.eventType === 'receipt' ? 'lh-receipt' : 'lh-winner';
+        } else {
+            eventTypeClass = props.eventType === 'receipt' ? 'receipt' : 'winner';
+        }
+
+        const sourceClass = isLH ? 'source-lh' : 'source-applyhome';
+
+        modalTitle.textContent = props.houseName || '청약 상세정보';
+
+        let html = `
+            <div class="modal-tags">
+                <span class="tag ${sourceClass}">${formatSource(props.source)}</span>
+                <span class="tag ${eventTypeClass}">${eventTypeLabel}</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-row">
+                    <div class="info-item">
+                        <span class="info-label">지역</span>
+                        <span class="info-value">${props.area || '-'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">주택유형</span>
+                        <span class="info-value">${props.houseType || '-'}</span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">공급세대수</span>
+                    <span class="info-value">${props.totalSupplyCount ? props.totalSupplyCount.toLocaleString() + '세대' : '-'}</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="info-item">
+                    <span class="info-label">공고일</span>
+                    <span class="info-value">${formatDate(props.announceDate)}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">접수기간</span>
+                    <span class="info-value">${formatDate(props.receiptStartDate)} ~ ${formatDate(props.receiptEndDate)}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">당첨자 발표일</span>
+                    <span class="info-value">${formatDate(props.winnerAnnounceDate)}</span>
+                </div>
+            </div>
+
+            <div class="notification-toggle ${props.notificationEnabled ? 'enabled' : ''}"
+                 onclick="toggleNotification(${event.id}, this)"
+                 data-subscription-id="${event.id}">
+                <div class="notification-toggle-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    알림 받기
+                </div>
+                <div class="notification-toggle-switch"></div>
+            </div>
+            <div class="notification-desc">접수 시작 1일 전, 접수 종료 당일에 Slack으로 알림을 받습니다.</div>
+        `;
+
+        if (props.detailUrl) {
+            html += `
+                <a href="${props.detailUrl}" target="_blank" class="btn-detail">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    상세 페이지 보기
+                </a>
+            `;
+        }
+
+        modalBody.innerHTML = html;
+        document.getElementById('detailModal').classList.add('active');
+    }
+
+    function toggleNotification(subscriptionId, element) {
+        fetch(`/admin/subscriptions/${subscriptionId}/notification`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.enabled) {
+                    element.classList.add('enabled');
+                } else {
+                    element.classList.remove('enabled');
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').classList.remove('active');
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function formatSource(source) {
+        if (!source) return '-';
+        if (source.toUpperCase().includes('APPLYHOME')) return '청약Home';
+        if (source.toUpperCase().includes('LH')) return 'LH';
+        return source;
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // 모달 외부 클릭 시 닫기
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+</body>
+</html>

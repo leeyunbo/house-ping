@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Houseping Admin - 통계 대시보드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fff1f2 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .meta {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav a:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .nav a.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .summary-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-title .icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chart-title .icon svg {
+            width: 14px;
+            height: 14px;
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container.tall {
+            height: 400px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .stat-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .stat-table th,
+        .stat-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--bg);
+        }
+
+        .stat-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .stat-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rate-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rate-bar-fill {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--success) 0%, var(--warning) 50%, var(--danger) 100%);
+        }
+
+        .rate-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .rate-value.low { color: var(--success); }
+        .rate-value.mid { color: var(--warning); }
+        .rate-value.high { color: var(--danger); }
+
+        .size-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--bg);
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 1200px) {
+            .summary-grid { grid-template-columns: repeat(3, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 20px; }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>통계 대시보드</h1>
+    <p class="meta">경쟁률 데이터 기반 통계 분석</p>
+
+    <div class="nav">
+        <a href="/admin/dashboard" class="active">대시보드</a>
+        <a href="/admin/subscriptions">청약 데이터</a>
+        <a href="/admin/subscriptions/calendar">청약 캘린더</a>
+        <a href="/admin/competition-rates">경쟁률 데이터</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 요약 카드 -->
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-value" th:text="${stats.summary.totalCount}">0</div>
+            <div class="summary-label">총 데이터</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" th:text="${stats.summary.avgRate != null ? #numbers.formatDecimal(stats.summary.avgRate, 1, 2) + ':1' : '-'}">0:1</div>
+            <div class="summary-label">평균 경쟁률</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" th:text="${stats.summary.maxRate != null ? #numbers.formatDecimal(stats.summary.maxRate, 1, 2) + ':1' : '-'}">0:1</div>
+            <div class="summary-label">최고 경쟁률</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" th:text="${stats.summary.minRate != null ? #numbers.formatDecimal(stats.summary.minRate, 1, 2) + ':1' : '-'}">0:1</div>
+            <div class="summary-label">최저 경쟁률</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" th:text="${stats.summary.areaCount}">0</div>
+            <div class="summary-label">지역 수</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" th:text="${stats.summary.houseTypeCount}">0</div>
+            <div class="summary-label">주택형 수</div>
+        </div>
+    </div>
+
+    <!-- 차트 영역 -->
+    <div class="charts-grid">
+        <!-- 지역별 연도별 경쟁률 추이 -->
+        <div class="chart-card full-width">
+            <div class="chart-title">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                    </svg>
+                </div>
+                지역별 연도별 평균 경쟁률 추이
+            </div>
+            <div class="chart-container tall">
+                <canvas id="areaYearlyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 거주지역별 경쟁률 -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                </div>
+                거주지역별 평균 경쟁률
+            </div>
+            <div class="chart-container">
+                <canvas id="residenceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 경쟁률 분포 -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                    </svg>
+                </div>
+                경쟁률 분포
+            </div>
+            <div class="chart-container">
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 주택형별 경쟁률 테이블 -->
+        <div class="chart-card full-width">
+            <div class="chart-title">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+                주택형별 평균 경쟁률 (상위 15개)
+            </div>
+            <table class="stat-table" th:if="${!stats.byHouseType.isEmpty()}">
+                <thead>
+                <tr>
+                    <th>주택형</th>
+                    <th>평수 분류</th>
+                    <th>데이터 수</th>
+                    <th>평균 경쟁률</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${stats.byHouseType}">
+                    <td th:text="${item.houseType}">084.9543T</td>
+                    <td><span class="size-tag" th:text="${item.sizeCategory}">중형</span></td>
+                    <td th:text="${item.count}">100</td>
+                    <td>
+                        <div class="rate-bar">
+                            <div class="rate-bar-fill" th:style="'width:' + ${item.avgRate != null ? (item.avgRate > 50 ? 100 : item.avgRate * 2) : 0} + 'px'"></div>
+                            <span th:if="${item.avgRate != null}"
+                                  th:class="${item.avgRate < 5 ? 'rate-value low' : (item.avgRate < 20 ? 'rate-value mid' : 'rate-value high')}"
+                                  th:text="${#numbers.formatDecimal(item.avgRate, 1, 2) + ':1'}">10.5:1</span>
+                            <span th:if="${item.avgRate == null}">-</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty-state" th:if="${stats.byHouseType.isEmpty()}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <span>데이터가 없습니다</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 데이터 준비
+    const areaYearlyTrend = /*[[${stats.areaYearlyTrend}]]*/ {years: [], data: []};
+    const byResidenceArea = /*[[${stats.byResidenceArea}]]*/ [];
+    const byHouseType = /*[[${stats.byHouseType}]]*/ [];
+    const distribution = /*[[${stats.distribution}]]*/ {};
+
+    // 공통 차트 옵션
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    };
+
+    // 색상 팔레트 (라인 차트용 확장)
+    const lineColors = [
+        { line: 'rgb(99, 102, 241)', fill: 'rgba(99, 102, 241, 0.1)' },   // indigo
+        { line: 'rgb(168, 85, 247)', fill: 'rgba(168, 85, 247, 0.1)' },   // purple
+        { line: 'rgb(236, 72, 153)', fill: 'rgba(236, 72, 153, 0.1)' },   // pink
+        { line: 'rgb(16, 185, 129)', fill: 'rgba(16, 185, 129, 0.1)' },   // emerald
+        { line: 'rgb(245, 158, 11)', fill: 'rgba(245, 158, 11, 0.1)' },   // amber
+        { line: 'rgb(59, 130, 246)', fill: 'rgba(59, 130, 246, 0.1)' },   // blue
+        { line: 'rgb(239, 68, 68)', fill: 'rgba(239, 68, 68, 0.1)' },     // red
+        { line: 'rgb(20, 184, 166)', fill: 'rgba(20, 184, 166, 0.1)' },   // teal
+        { line: 'rgb(249, 115, 22)', fill: 'rgba(249, 115, 22, 0.1)' },   // orange
+        { line: 'rgb(132, 204, 22)', fill: 'rgba(132, 204, 22, 0.1)' }    // lime
+    ];
+
+    const colors = {
+        primary: 'rgba(99, 102, 241, 0.8)',
+        primaryLight: 'rgba(99, 102, 241, 0.2)',
+        purple: 'rgba(168, 85, 247, 0.8)',
+        purpleLight: 'rgba(168, 85, 247, 0.2)',
+        success: 'rgba(16, 185, 129, 0.8)',
+        successLight: 'rgba(16, 185, 129, 0.2)',
+        warning: 'rgba(245, 158, 11, 0.8)',
+        warningLight: 'rgba(245, 158, 11, 0.2)',
+        danger: 'rgba(239, 68, 68, 0.8)',
+        dangerLight: 'rgba(239, 68, 68, 0.2)'
+    };
+
+    // 지역별 연도별 경쟁률 추이 차트
+    if (areaYearlyTrend.years && areaYearlyTrend.years.length > 0 && areaYearlyTrend.data && areaYearlyTrend.data.length > 0) {
+        const datasets = areaYearlyTrend.data.map((areaData, index) => ({
+            label: areaData.area,
+            data: areaData.rates,
+            borderColor: lineColors[index % lineColors.length].line,
+            backgroundColor: lineColors[index % lineColors.length].fill,
+            fill: false,
+            tension: 0.3,
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: lineColors[index % lineColors.length].line,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        }));
+
+        new Chart(document.getElementById('areaYearlyChart'), {
+            type: 'line',
+            data: {
+                labels: areaYearlyTrend.years.map(y => y + '년'),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: {
+                            callback: (value) => value + ':1'
+                        },
+                        title: {
+                            display: true,
+                            text: '평균 경쟁률',
+                            color: '#64748b',
+                            font: { weight: 500 }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        title: {
+                            display: true,
+                            text: '연도',
+                            color: '#64748b',
+                            font: { weight: 500 }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ctx.raw != null ? `${ctx.dataset.label}: ${ctx.raw.toFixed(2)}:1` : `${ctx.dataset.label}: 데이터 없음`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 거주지역별 차트
+    if (byResidenceArea.length > 0) {
+        new Chart(document.getElementById('residenceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: byResidenceArea.map(d => d.residenceArea),
+                datasets: [{
+                    data: byResidenceArea.map(d => d.avgRate),
+                    backgroundColor: [colors.primary, colors.purple, colors.success],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                ...commonOptions,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.raw?.toFixed(2)}:1`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 경쟁률 분포 차트 (서버에서 계산된 데이터 사용)
+    const distributionLabels = ['5:1 이하', '5~10:1', '10~20:1', '20~50:1', '50:1 이상'];
+    const distributionValues = [
+        distribution.under5 || 0,
+        distribution.from5to10 || 0,
+        distribution.from10to20 || 0,
+        distribution.from20to50 || 0,
+        distribution.over50 || 0
+    ];
+
+    new Chart(document.getElementById('distributionChart'), {
+        type: 'pie',
+        data: {
+            labels: distributionLabels,
+            datasets: [{
+                data: distributionValues,
+                backgroundColor: [
+                    colors.success,
+                    'rgba(34, 197, 94, 0.8)',
+                    colors.warning,
+                    'rgba(249, 115, 22, 0.8)',
+                    colors.danger
+                ],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.label}: ${ctx.raw}건`
+                    }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
