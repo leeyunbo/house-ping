@@ -1,14 +1,17 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.domain.model.AreaNormalizer;
+
 import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionRepository;
+import com.yunbok.houseping.infrastructure.persistence.QSubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
+import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -16,10 +19,10 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -28,20 +31,29 @@ public class AdminSubscriptionQueryService {
     private final SubscriptionRepository subscriptionRepository;
     private final NotificationSubscriptionRepository notificationSubscriptionRepository;
 
+    private static final QSubscriptionEntity subscription = QSubscriptionEntity.subscriptionEntity;
+
     public Page<AdminSubscriptionDto> search(AdminSubscriptionSearchCriteria criteria) {
-        Specification<SubscriptionEntity> spec = alwaysTrue();
+        BooleanBuilder builder = new BooleanBuilder();
 
         if (StringUtils.hasText(criteria.keyword())) {
-            spec = spec.and(houseNameLike(criteria.keyword()));
+            builder.and(subscription.houseName.containsIgnoreCase(criteria.keyword().trim()));
         }
         if (StringUtils.hasText(criteria.area())) {
-            spec = spec.and(equalsIgnoreCase("area", criteria.area()));
+            builder.and(subscription.area.in(AreaNormalizer.expand(criteria.area().trim())));
+        }
+        if (StringUtils.hasText(criteria.houseType())) {
+            builder.and(subscription.houseType.equalsIgnoreCase(criteria.houseType().trim()));
         }
         if (StringUtils.hasText(criteria.source())) {
-            spec = spec.and(equalsIgnoreCase("source", criteria.source()));
+            builder.and(subscription.source.equalsIgnoreCase(criteria.source().trim()));
         }
-        if (criteria.startDate() != null || criteria.endDate() != null) {
-            spec = spec.and(receiptBetween(criteria.startDate(), criteria.endDate()));
+        if (criteria.startDate() != null && criteria.endDate() != null) {
+            builder.and(subscription.receiptStartDate.between(criteria.startDate(), criteria.endDate()));
+        } else if (criteria.startDate() != null) {
+            builder.and(subscription.receiptStartDate.goe(criteria.startDate()));
+        } else if (criteria.endDate() != null) {
+            builder.and(subscription.receiptStartDate.loe(criteria.endDate()));
         }
 
         Sort sort = Sort.by(
@@ -50,7 +62,7 @@ public class AdminSubscriptionQueryService {
         );
         PageRequest pageRequest = PageRequest.of(criteria.page(), criteria.size(), sort);
 
-        return subscriptionRepository.findAll(spec, pageRequest).map(this::toDto);
+        return subscriptionRepository.findAll(builder, pageRequest).map(this::toDto);
     }
 
     private AdminSubscriptionDto toDto(SubscriptionEntity entity) {
@@ -73,69 +85,50 @@ public class AdminSubscriptionQueryService {
         );
     }
 
-    private Specification<SubscriptionEntity> alwaysTrue() {
-        return (root, query, cb) -> cb.conjunction();
+    public List<String> availableAreas() {
+        return subscriptionRepository.findDistinctAreas().stream()
+                .map(AreaNormalizer::normalize)
+                .distinct()
+                .sorted()
+                .toList();
     }
 
-    public List<String> availableAreas() {
-        return subscriptionRepository.findDistinctAreas();
+    public List<String> availableHouseTypes() {
+        return subscriptionRepository.findDistinctHouseTypes();
     }
 
     public List<String> availableSources() {
         return subscriptionRepository.findDistinctSources();
     }
 
-    private Specification<SubscriptionEntity> houseNameLike(String keyword) {
-        String likeKeyword = "%" + keyword.trim().toLowerCase() + "%";
-        return (root, query, cb) ->
-                cb.like(cb.lower(root.get("houseName")), likeKeyword);
-    }
-
-    private Specification<SubscriptionEntity> equalsIgnoreCase(String field, String value) {
-        return (root, query, cb) ->
-                cb.equal(cb.lower(root.get(field)), value.trim().toLowerCase());
-    }
-
-    private Specification<SubscriptionEntity> receiptBetween(LocalDate start, LocalDate end) {
-        return (root, query, cb) -> {
-            if (start != null && end != null) {
-                return cb.between(root.get("receiptStartDate"), start, end);
-            } else if (start != null) {
-                return cb.greaterThanOrEqualTo(root.get("receiptStartDate"), start);
-            } else if (end != null) {
-                return cb.lessThanOrEqualTo(root.get("receiptStartDate"), end);
-            }
-            return cb.conjunction();
-        };
-    }
-
     public List<CalendarEventDto> getCalendarEvents(LocalDate start, LocalDate end) {
         // 캘린더 범위 내에 있는 청약 조회 (접수 기간 또는 당첨 발표일이 범위 내에 있는 경우)
-        Specification<SubscriptionEntity> spec = (root, query, cb) -> cb.or(
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.or(
                 // 접수 시작일이 범위 내
-                cb.and(
-                        cb.greaterThanOrEqualTo(root.get("receiptStartDate"), start),
-                        cb.lessThanOrEqualTo(root.get("receiptStartDate"), end)
-                ),
+                subscription.receiptStartDate.goe(start)
+                        .and(subscription.receiptStartDate.loe(end))
+        );
+        builder.or(
                 // 접수 종료일이 범위 내
-                cb.and(
-                        cb.greaterThanOrEqualTo(root.get("receiptEndDate"), start),
-                        cb.lessThanOrEqualTo(root.get("receiptEndDate"), end)
-                ),
+                subscription.receiptEndDate.goe(start)
+                        .and(subscription.receiptEndDate.loe(end))
+        );
+        builder.or(
                 // 당첨 발표일이 범위 내
-                cb.and(
-                        cb.isNotNull(root.get("winnerAnnounceDate")),
-                        cb.greaterThanOrEqualTo(root.get("winnerAnnounceDate"), start),
-                        cb.lessThanOrEqualTo(root.get("winnerAnnounceDate"), end)
-                ),
+                subscription.winnerAnnounceDate.isNotNull()
+                        .and(subscription.winnerAnnounceDate.goe(start))
+                        .and(subscription.winnerAnnounceDate.loe(end))
+        );
+        builder.or(
                 // 접수 기간이 범위를 포함
-                cb.and(
-                        cb.lessThanOrEqualTo(root.get("receiptStartDate"), start),
-                        cb.greaterThanOrEqualTo(root.get("receiptEndDate"), end)
-                )
+                subscription.receiptStartDate.loe(start)
+                        .and(subscription.receiptEndDate.goe(end))
         );
 
-        List<SubscriptionEntity> entities = subscriptionRepository.findAll(spec);
+        List<SubscriptionEntity> entities = StreamSupport
+                .stream(subscriptionRepository.findAll(builder).spliterator(), false)
+                .toList();
 
         // detailUrl 기준 중복 제거 (같은 청약이 여러 source로 저장된 경우)
         entities = entities.stream()

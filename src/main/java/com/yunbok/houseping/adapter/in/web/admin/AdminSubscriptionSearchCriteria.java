@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public record AdminSubscriptionSearchCriteria(
         String keyword,
         String area,
+        String houseType,
         String source,
         LocalDate startDate,
         LocalDate endDate,

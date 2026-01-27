@@ -496,6 +496,21 @@
     <div class="search-card">
         <form method="get" class="search-grid">
             <div class="form-group">
+                <label for="houseName">주택명</label>
+                <input type="text" id="houseName" name="houseName" placeholder="주택명 검색"
+                       th:value="${search.houseName}">
+            </div>
+            <div class="form-group">
+                <label for="area">위치</label>
+                <select id="area" name="area">
+                    <option value="">전체</option>
+                    <option th:each="a : ${areas}"
+                            th:value="${a}"
+                            th:selected="${a == search.area}"
+                            th:text="${a}">서울</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="keyword">주택관리번호/공고번호</label>
                 <input type="text" id="keyword" name="keyword" placeholder="검색"
                        th:value="${search.keyword}">
@@ -607,7 +622,7 @@
 
             <div class="pagination">
                 <a th:if="${resultPage.hasPrevious()}"
-                   th:href="@{/admin/competition-rates(page=${resultPage.number - 1},size=${resultPage.size},keyword=${search.keyword},houseType=${search.houseType},rank=${search.rank},residenceArea=${search.residenceArea},minRate=${search.minRate},maxRate=${search.maxRate})}">
+                   th:href="@{/admin/competition-rates(page=${resultPage.number - 1},size=${resultPage.size},houseName=${search.houseName},area=${search.area},keyword=${search.keyword},houseType=${search.houseType},rank=${search.rank},residenceArea=${search.residenceArea},minRate=${search.minRate},maxRate=${search.maxRate})}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
@@ -615,7 +630,7 @@
                 </a>
                 <span th:text="|${resultPage.number + 1} / ${resultPage.totalPages}|"></span>
                 <a th:if="${resultPage.hasNext()}"
-                   th:href="@{/admin/competition-rates(page=${resultPage.number + 1},size=${resultPage.size},keyword=${search.keyword},houseType=${search.houseType},rank=${search.rank},residenceArea=${search.residenceArea},minRate=${search.minRate},maxRate=${search.maxRate})}">
+                   th:href="@{/admin/competition-rates(page=${resultPage.number + 1},size=${resultPage.size},houseName=${search.houseName},area=${search.area},keyword=${search.keyword},houseType=${search.houseType},rank=${search.rank},residenceArea=${search.residenceArea},minRate=${search.minRate},maxRate=${search.maxRate})}">
                     다음
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6"/>

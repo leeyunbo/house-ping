@@ -442,6 +442,16 @@
                 </select>
             </div>
             <div class="form-group">
+                <label for="houseType">유형</label>
+                <select id="houseType" name="houseType">
+                    <option value="">전체</option>
+                    <option th:each="type : ${houseTypes}"
+                            th:value="${type}"
+                            th:selected="${type == search.houseType}"
+                            th:text="${type}">APT</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="source">데이터 소스</label>
                 <select id="source" name="source">
                     <option value="">전체</option>
@@ -536,7 +546,7 @@
 
             <div class="pagination">
                 <a th:if="${resultPage.hasPrevious()}"
-                   th:href="@{/admin/subscriptions(page=${resultPage.number - 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
+                   th:href="@{/admin/subscriptions(page=${resultPage.number - 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},houseType=${search.houseType},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
@@ -544,7 +554,7 @@
                 </a>
                 <span th:text="|${resultPage.number + 1} / ${resultPage.totalPages}|"></span>
                 <a th:if="${resultPage.hasNext()}"
-                   th:href="@{/admin/subscriptions(page=${resultPage.number + 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
+                   th:href="@{/admin/subscriptions(page=${resultPage.number + 1},size=${resultPage.size},keyword=${search.keyword},area=${search.area},houseType=${search.houseType},source=${search.source},startDate=${search.startDate},endDate=${search.endDate})}">
                     다음
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6"/>

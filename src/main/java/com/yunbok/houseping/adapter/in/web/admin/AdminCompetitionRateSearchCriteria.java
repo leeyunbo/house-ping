@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 public record AdminCompetitionRateSearchCriteria(
         String keyword,
+        String houseName,
+        String area,
         String houseType,
         Integer rank,
         String residenceArea,

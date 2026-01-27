@@ -1,5 +1,6 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,13 +29,16 @@ class AdminSubscriptionControllerTest {
     private AdminSubscriptionQueryService queryService;
 
     @Mock
+    private SubscriptionManagementUseCase managementUseCase;
+
+    @Mock
     private Model model;
 
     private AdminSubscriptionController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new AdminSubscriptionController(queryService);
+        controller = new AdminSubscriptionController(queryService, managementUseCase);
     }
 
     @Nested
@@ -47,7 +51,7 @@ class AdminSubscriptionControllerTest {
             // given
             mockQueryServiceDefaults();
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null, 0, 20
             );
 
             // when
@@ -63,7 +67,7 @@ class AdminSubscriptionControllerTest {
             // given
             mockQueryServiceDefaults();
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    "힐스테이트", "서울", "APPLYHOME_API",
+                    "힐스테이트", "서울", null, "ApplyHome",
                     LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31),
                     2, 50
             );
@@ -82,10 +86,11 @@ class AdminSubscriptionControllerTest {
             Page<AdminSubscriptionDto> resultPage = new PageImpl<>(List.of(createDto()));
             when(queryService.search(any())).thenReturn(resultPage);
             when(queryService.availableAreas()).thenReturn(List.of());
+            when(queryService.availableHouseTypes()).thenReturn(List.of());
             when(queryService.availableSources()).thenReturn(List.of());
 
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null, 0, 20
             );
 
             // when
@@ -101,7 +106,7 @@ class AdminSubscriptionControllerTest {
             // given
             mockQueryServiceDefaults();
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    "test", "서울", "LH_API", null, null, 0, 20
+                    "test", "서울", null, "LH", null, null, 0, 20
             );
 
             // when
@@ -118,10 +123,11 @@ class AdminSubscriptionControllerTest {
             List<String> areas = List.of("서울", "경기", "인천");
             when(queryService.search(any())).thenReturn(Page.empty());
             when(queryService.availableAreas()).thenReturn(areas);
+            when(queryService.availableHouseTypes()).thenReturn(List.of());
             when(queryService.availableSources()).thenReturn(List.of());
 
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null, 0, 20
             );
 
             // when
@@ -135,13 +141,14 @@ class AdminSubscriptionControllerTest {
         @DisplayName("사용 가능한 소스 목록을 모델에 추가한다")
         void addsAvailableSourcesToModel() {
             // given
-            List<String> sources = List.of("APPLYHOME_API", "LH_API");
+            List<String> sources = List.of("ApplyHome", "LH");
             when(queryService.search(any())).thenReturn(Page.empty());
             when(queryService.availableAreas()).thenReturn(List.of());
+            when(queryService.availableHouseTypes()).thenReturn(List.of());
             when(queryService.availableSources()).thenReturn(sources);
 
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null, 0, 20
             );
 
             // when
@@ -155,13 +162,14 @@ class AdminSubscriptionControllerTest {
     private void mockQueryServiceDefaults() {
         when(queryService.search(any())).thenReturn(Page.empty());
         when(queryService.availableAreas()).thenReturn(List.of());
+        when(queryService.availableHouseTypes()).thenReturn(List.of());
         when(queryService.availableSources()).thenReturn(List.of());
     }
 
     private AdminSubscriptionDto createDto() {
         return new AdminSubscriptionDto(
                 1L,
-                "APPLYHOME_API",
+                "ApplyHome",
                 "테스트 아파트",
                 "APT",
                 "서울",

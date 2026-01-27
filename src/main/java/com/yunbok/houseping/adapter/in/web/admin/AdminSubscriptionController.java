@@ -33,6 +33,7 @@ public class AdminSubscriptionController {
         model.addAttribute("resultPage", queryService.search(criteria));
         model.addAttribute("search", criteria);
         model.addAttribute("areas", queryService.availableAreas());
+        model.addAttribute("houseTypes", queryService.availableHouseTypes());
         model.addAttribute("sources", queryService.availableSources());
         return "admin/subscriptions/list";
     }

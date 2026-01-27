@@ -22,7 +22,7 @@ class AdminSubscriptionSearchCriteriaTest {
         void normalizesNegativePageToZero() {
             // when
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, -5, 20
+                    null, null, null, null, null, null,-5, 20
             );
 
             // then
@@ -34,7 +34,7 @@ class AdminSubscriptionSearchCriteriaTest {
         void keepsPositivePageNumber() {
             // when
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 3, 20
+                    null, null, null, null, null, null,3, 20
             );
 
             // then
@@ -46,7 +46,7 @@ class AdminSubscriptionSearchCriteriaTest {
         void keepsZeroPageNumber() {
             // when
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null,0, 20
             );
 
             // then
@@ -63,10 +63,10 @@ class AdminSubscriptionSearchCriteriaTest {
         void normalizesZeroOrNegativeSizeToDefault() {
             // when
             AdminSubscriptionSearchCriteria criteriaZero = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 0
+                    null, null, null, null, null, null,0, 0
             );
             AdminSubscriptionSearchCriteria criteriaNegative = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, -10
+                    null, null, null, null, null, null,0, -10
             );
 
             // then
@@ -79,7 +79,7 @@ class AdminSubscriptionSearchCriteriaTest {
         void limitsExcessiveSizeToMax() {
             // when
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 500
+                    null, null, null, null, null, null,0, 500
             );
 
             // then
@@ -92,7 +92,7 @@ class AdminSubscriptionSearchCriteriaTest {
         void keepsValidSize(int size) {
             // when
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, size
+                    null, null, null, null, null, null,0, size
             );
 
             // then
@@ -110,13 +110,13 @@ class AdminSubscriptionSearchCriteriaTest {
             // given
             String keyword = "힐스테이트";
             String area = "서울";
-            String source = "APPLYHOME_API";
+            String source = "ApplyHome";
             LocalDate startDate = LocalDate.of(2025, 1, 1);
             LocalDate endDate = LocalDate.of(2025, 12, 31);
 
             // when
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    keyword, area, source, startDate, endDate, 0, 20
+                    keyword, area, null, source, startDate, endDate, 0, 20
             );
 
             // then
@@ -132,7 +132,7 @@ class AdminSubscriptionSearchCriteriaTest {
         void allowsNullValues() {
             // when
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null,0, 20
             );
 
             // then

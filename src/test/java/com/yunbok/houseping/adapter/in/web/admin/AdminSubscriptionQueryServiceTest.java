@@ -1,7 +1,9 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionRepository;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
+import com.querydsl.core.types.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,11 +30,14 @@ class AdminSubscriptionQueryServiceTest {
     @Mock
     private SubscriptionRepository subscriptionRepository;
 
+    @Mock
+    private NotificationSubscriptionRepository notificationSubscriptionRepository;
+
     private AdminSubscriptionQueryService service;
 
     @BeforeEach
     void setUp() {
-        service = new AdminSubscriptionQueryService(subscriptionRepository);
+        service = new AdminSubscriptionQueryService(subscriptionRepository, notificationSubscriptionRepository);
     }
 
     @Nested
@@ -45,13 +49,13 @@ class AdminSubscriptionQueryServiceTest {
         void returnsPagedResultsWithoutConditions() {
             // given
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null, 0, 20
             );
 
             List<SubscriptionEntity> entities = List.of(createEntity("테스트 아파트"));
             Page<SubscriptionEntity> page = new PageImpl<>(entities);
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(page);
 
             // when
@@ -59,7 +63,7 @@ class AdminSubscriptionQueryServiceTest {
 
             // then
             assertThat(result.getContent()).hasSize(1);
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -67,17 +71,17 @@ class AdminSubscriptionQueryServiceTest {
         void appliesKeywordCondition() {
             // given
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    "힐스테이트", null, null, null, null, 0, 20
+                    "힐스테이트", null, null, null, null, null, 0, 20
             );
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -85,17 +89,17 @@ class AdminSubscriptionQueryServiceTest {
         void appliesAreaCondition() {
             // given
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, "서울", null, null, null, 0, 20
+                    null, "서울", null, null, null, null, 0, 20
             );
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -103,17 +107,17 @@ class AdminSubscriptionQueryServiceTest {
         void appliesSourceCondition() {
             // given
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, "APPLYHOME_API", null, null, 0, 20
+                    null, null, null, "ApplyHome", null, null, 0, 20
             );
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -124,17 +128,17 @@ class AdminSubscriptionQueryServiceTest {
             LocalDate endDate = LocalDate.of(2025, 12, 31);
 
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, startDate, endDate, 0, 20
+                    null, null, null, null, startDate, endDate, 0, 20
             );
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -142,17 +146,17 @@ class AdminSubscriptionQueryServiceTest {
         void appliesStartDateOnlyCondition() {
             // given
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, LocalDate.of(2025, 1, 1), null, 0, 20
+                    null, null, null, null, LocalDate.of(2025, 1, 1), null, 0, 20
             );
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -160,17 +164,17 @@ class AdminSubscriptionQueryServiceTest {
         void appliesEndDateOnlyCondition() {
             // given
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, LocalDate.of(2025, 12, 31), 0, 20
+                    null, null, null, null, null, LocalDate.of(2025, 12, 31), 0, 20
             );
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -180,21 +184,22 @@ class AdminSubscriptionQueryServiceTest {
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
                     "힐스테이트",
                     "서울",
-                    "APPLYHOME_API",
+                    null,
+                    "ApplyHome",
                     LocalDate.of(2025, 1, 1),
                     LocalDate.of(2025, 12, 31),
                     0,
                     20
             );
 
-            when(subscriptionRepository.findAll(any(Specification.class), any(Pageable.class)))
+            when(subscriptionRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findAll(any(Specification.class), any(Pageable.class));
+            verify(subscriptionRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -202,12 +207,12 @@ class AdminSubscriptionQueryServiceTest {
         void sortsResultsByDateDesc() {
             // given
             AdminSubscriptionSearchCriteria criteria = new AdminSubscriptionSearchCriteria(
-                    null, null, null, null, null, 0, 20
+                    null, null, null, null, null, null, 0, 20
             );
 
             ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
-            when(subscriptionRepository.findAll(any(Specification.class), pageableCaptor.capture()))
+            when(subscriptionRepository.findAll(any(Predicate.class), pageableCaptor.capture()))
                     .thenReturn(Page.empty());
 
             // when
@@ -228,14 +233,14 @@ class AdminSubscriptionQueryServiceTest {
         @DisplayName("저장된 지역 목록을 반환한다")
         void returnsDistinctAreas() {
             // given
-            List<String> areas = List.of("서울", "경기", "인천");
+            List<String> areas = List.of("서울", "서울특별시", "경기", "경기도", "인천");
             when(subscriptionRepository.findDistinctAreas()).thenReturn(areas);
 
             // when
             List<String> result = service.availableAreas();
 
             // then
-            assertThat(result).containsExactly("서울", "경기", "인천");
+            assertThat(result).containsExactly("경기", "서울", "인천");
         }
     }
 
@@ -247,14 +252,14 @@ class AdminSubscriptionQueryServiceTest {
         @DisplayName("저장된 소스 목록을 반환한다")
         void returnsDistinctSources() {
             // given
-            List<String> sources = List.of("APPLYHOME_API", "LH_API");
+            List<String> sources = List.of("ApplyHome", "LH");
             when(subscriptionRepository.findDistinctSources()).thenReturn(sources);
 
             // when
             List<String> result = service.availableSources();
 
             // then
-            assertThat(result).containsExactly("APPLYHOME_API", "LH_API");
+            assertThat(result).containsExactly("ApplyHome", "LH");
         }
     }
 
@@ -262,7 +267,7 @@ class AdminSubscriptionQueryServiceTest {
         return SubscriptionEntity.builder()
                 .houseName(houseName)
                 .area("서울")
-                .source("APPLYHOME_API")
+                .source("ApplyHome")
                 .receiptStartDate(LocalDate.now())
                 .build();
     }

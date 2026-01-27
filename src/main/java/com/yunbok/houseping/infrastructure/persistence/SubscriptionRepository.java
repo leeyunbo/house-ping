@@ -2,7 +2,7 @@ package com.yunbok.houseping.infrastructure.persistence;
 
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,7 +18,7 @@ import java.util.Optional;
  */
 @Repository
 public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity, Long>,
-        JpaSpecificationExecutor<SubscriptionEntity> {
+        QuerydslPredicateExecutor<SubscriptionEntity> {
 
     /**
      * 특정 날짜에 접수 시작하는 청약 조회
@@ -96,8 +96,20 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     List<String> findDistinctSources();
 
     /**
+     * 주택 유형 목록
+     */
+    @Query("SELECT DISTINCT s.houseType FROM SubscriptionEntity s WHERE s.houseType IS NOT NULL ORDER BY s.houseType")
+    List<String> findDistinctHouseTypes();
+
+    /**
      * 특정 지역들의 house_manage_no 목록 조회
      */
     @Query("SELECT DISTINCT s.houseManageNo FROM SubscriptionEntity s WHERE s.area IN :areas AND s.houseManageNo IS NOT NULL")
     List<String> findHouseManageNosByAreaIn(@Param("areas") List<String> areas);
+
+    /**
+     * 주택명 키워드로 house_manage_no 목록 조회
+     */
+    @Query("SELECT DISTINCT s.houseManageNo FROM SubscriptionEntity s WHERE LOWER(s.houseName) LIKE LOWER(CONCAT('%', :keyword, '%')) AND s.houseManageNo IS NOT NULL")
+    List<String> findHouseManageNosByHouseNameContaining(@Param("keyword") String keyword);
 }
