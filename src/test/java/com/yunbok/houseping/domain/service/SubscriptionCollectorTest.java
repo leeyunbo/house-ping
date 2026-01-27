@@ -25,18 +25,18 @@ import static org.mockito.Mockito.when;
 class SubscriptionCollectorTest {
 
     @Mock
-    private SubscriptionProviderOrchestrator mockProvider1;
+    private SubscriptionProviderChain mockProvider1;
 
     @Mock
-    private SubscriptionProviderOrchestrator mockProvider2;
+    private SubscriptionProviderChain mockProvider2;
 
     private SubscriptionCollector collector;
 
     @BeforeEach
     void setUp() {
-        List<SubscriptionProviderOrchestrator> orchestrators = List.of(mockProvider1, mockProvider2);
+        List<SubscriptionProviderChain> chains = List.of(mockProvider1, mockProvider2);
         SubscriptionConfig config = new SubscriptionConfig(List.of("서울", "경기"));
-        collector = new SubscriptionCollector(orchestrators, config);
+        collector = new SubscriptionCollector(chains, config);
     }
 
     @Nested
@@ -49,13 +49,13 @@ class SubscriptionCollectorTest {
             // given
             LocalDate targetDate = LocalDate.of(2025, 1, 15);
 
-            when(mockProvider1.orchestrate(eq("서울"), any()))
+            when(mockProvider1.execute(eq("서울"), any()))
                     .thenReturn(List.of(createSubscription("서울 아파트1")));
-            when(mockProvider1.orchestrate(eq("경기"), any()))
+            when(mockProvider1.execute(eq("경기"), any()))
                     .thenReturn(List.of(createSubscription("경기 아파트1")));
-            when(mockProvider2.orchestrate(eq("서울"), any()))
+            when(mockProvider2.execute(eq("서울"), any()))
                     .thenReturn(List.of(createSubscription("서울 아파트2")));
-            when(mockProvider2.orchestrate(eq("경기"), any()))
+            when(mockProvider2.execute(eq("경기"), any()))
                     .thenReturn(List.of(createSubscription("경기 아파트2")));
 
             // when
@@ -73,8 +73,8 @@ class SubscriptionCollectorTest {
             // given
             LocalDate targetDate = LocalDate.of(2025, 1, 15);
 
-            when(mockProvider1.orchestrate(any(), any())).thenReturn(List.of());
-            when(mockProvider2.orchestrate(any(), any())).thenReturn(List.of());
+            when(mockProvider1.execute(any(), any())).thenReturn(List.of());
+            when(mockProvider2.execute(any(), any())).thenReturn(List.of());
 
             // when
             List<SubscriptionInfo> results = collector.collectFromAllAreas(targetDate);
@@ -88,17 +88,17 @@ class SubscriptionCollectorTest {
         void callsProvidersForEachArea() {
             // given
             LocalDate targetDate = LocalDate.of(2025, 1, 15);
-            when(mockProvider1.orchestrate(any(), any())).thenReturn(List.of());
-            when(mockProvider2.orchestrate(any(), any())).thenReturn(List.of());
+            when(mockProvider1.execute(any(), any())).thenReturn(List.of());
+            when(mockProvider2.execute(any(), any())).thenReturn(List.of());
 
             // when
             collector.collectFromAllAreas(targetDate);
 
             // then
-            verify(mockProvider1).orchestrate("서울", targetDate);
-            verify(mockProvider1).orchestrate("경기", targetDate);
-            verify(mockProvider2).orchestrate("서울", targetDate);
-            verify(mockProvider2).orchestrate("경기", targetDate);
+            verify(mockProvider1).execute("서울", targetDate);
+            verify(mockProvider1).execute("경기", targetDate);
+            verify(mockProvider2).execute("서울", targetDate);
+            verify(mockProvider2).execute("경기", targetDate);
         }
     }
 
@@ -112,9 +112,9 @@ class SubscriptionCollectorTest {
             // given
             LocalDate targetDate = LocalDate.of(2025, 1, 15);
 
-            when(mockProvider1.orchestrate("서울", targetDate))
+            when(mockProvider1.execute("서울", targetDate))
                     .thenReturn(List.of(createSubscription("아파트1")));
-            when(mockProvider2.orchestrate("서울", targetDate))
+            when(mockProvider2.execute("서울", targetDate))
                     .thenReturn(List.of(createSubscription("아파트2")));
 
             // when

@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +31,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class SubscriptionEntity {
 
     @Id
@@ -35,7 +39,7 @@ public class SubscriptionEntity {
     private Long id;
 
     /**
-     * 데이터 소스 (LH_API, APPLYHOME_API)
+     * 데이터 소스 (LH, ApplyHome)
      */
     @Column(nullable = false, length = 50)
     private String source;
@@ -123,17 +127,18 @@ public class SubscriptionEntity {
     /**
      * 생성 일시
      */
+    @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     /**
      * 수정 일시
      */
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         if (collectedAt == null) {
             collectedAt = LocalDateTime.now();
         }
@@ -141,7 +146,6 @@ public class SubscriptionEntity {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
         collectedAt = LocalDateTime.now();
     }
 

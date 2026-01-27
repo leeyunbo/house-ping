@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionCollector {
 
-    private final List<SubscriptionProviderOrchestrator> orchestrators;
+    private final List<SubscriptionProviderChain> chains;
     private final SubscriptionConfig config;
 
     public List<SubscriptionInfo> collectFromAllAreas(LocalDate targetDate) {
@@ -29,8 +29,8 @@ public class SubscriptionCollector {
 
     public List<SubscriptionInfo> collectFromArea(String area, LocalDate targetDate) {
         List<SubscriptionInfo> areaSubscriptions = new ArrayList<>();
-        for (SubscriptionProviderOrchestrator orchestrator : orchestrators) {
-            areaSubscriptions.addAll(orchestrator.orchestrate(area, targetDate));
+        for (SubscriptionProviderChain chain : chains) {
+            areaSubscriptions.addAll(chain.execute(area, targetDate));
         }
         return areaSubscriptions;
     }

@@ -5,7 +5,7 @@ import com.yunbok.houseping.domain.model.SubscriptionInfo;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface SubscriptionProviderOrchestrator {
+public interface SubscriptionProviderChain {
 
-    List<SubscriptionInfo> orchestrate(String areaName, LocalDate targetDate);
+    List<SubscriptionInfo> execute(String areaName, LocalDate targetDate);
 }

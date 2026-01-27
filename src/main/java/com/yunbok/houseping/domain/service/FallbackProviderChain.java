@@ -10,21 +10,21 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * 여러 Provider를 순차적으로 시도하여 첫 번째 성공 결과를 반환하는 Fallback Orchestrator
+ * 여러 Provider를 순차적으로 시도하여 첫 번째 성공 결과를 반환하는 Fallback Chain
  */
 @Slf4j
-public class FallbackOrchestrator implements SubscriptionProviderOrchestrator {
+public class FallbackProviderChain implements SubscriptionProviderChain {
 
     private final List<SubscriptionProvider> providers;
     private final String name;
 
-    public FallbackOrchestrator(List<SubscriptionProvider> providers, String name) {
+    public FallbackProviderChain(List<SubscriptionProvider> providers, String name) {
         this.providers = providers;
         this.name = name;
     }
 
     @Override
-    public List<SubscriptionInfo> orchestrate(String areaName, LocalDate targetDate) {
+    public List<SubscriptionInfo> execute(String areaName, LocalDate targetDate) {
         for (SubscriptionProvider provider : providers) {
             Optional<List<SubscriptionInfo>> result = tryFetch(
                     () -> provider.fetch(areaName, targetDate),
