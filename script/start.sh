@@ -8,6 +8,14 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
+# .env 파일 로드
+if [ -f "$PROJECT_DIR/.env" ]; then
+    echo "📁 환경변수 로드: $PROJECT_DIR/.env"
+    set -a
+    source "$PROJECT_DIR/.env"
+    set +a
+fi
+
 # 설정
 APP_NAME="houseping"
 JAR_NAME="${APP_NAME}-0.0.1-SNAPSHOT.jar"
