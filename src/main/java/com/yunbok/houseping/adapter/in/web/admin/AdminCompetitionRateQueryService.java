@@ -15,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -136,41 +135,7 @@ public class AdminCompetitionRateQueryService {
                 .toList();
     }
 
-    public CompetitionRateStats getStats() {
-        List<CompetitionRateEntity> all = competitionRateRepository.findAll();
-
-        if (all.isEmpty()) {
-            return new CompetitionRateStats(0, null, null, null);
-        }
-
-        BigDecimal sum = BigDecimal.ZERO;
-        BigDecimal max = null;
-        BigDecimal min = null;
-        int count = 0;
-
-        for (CompetitionRateEntity entity : all) {
-            BigDecimal rate = entity.getCompetitionRate();
-            if (rate != null) {
-                sum = sum.add(rate);
-                count++;
-                if (max == null || rate.compareTo(max) > 0) max = rate;
-                if (min == null || rate.compareTo(min) < 0) min = rate;
-            }
-        }
-
-        BigDecimal avg = count > 0 ? sum.divide(BigDecimal.valueOf(count), 2, java.math.RoundingMode.HALF_UP) : null;
-
-        return new CompetitionRateStats(all.size(), avg, max, min);
-    }
-
     public void deleteAll() {
         competitionRateRepository.deleteAll();
     }
-
-    public record CompetitionRateStats(
-            int totalCount,
-            BigDecimal avgRate,
-            BigDecimal maxRate,
-            BigDecimal minRate
-    ) {}
 }

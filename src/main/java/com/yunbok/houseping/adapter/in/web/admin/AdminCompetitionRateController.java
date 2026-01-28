@@ -23,7 +23,6 @@ public class AdminCompetitionRateController {
         model.addAttribute("search", criteria);
         model.addAttribute("houseTypes", queryService.availableHouseTypes());
         model.addAttribute("areas", queryService.availableAreas());
-        model.addAttribute("stats", queryService.getStats());
         return "admin/competition-rates/list";
     }
 

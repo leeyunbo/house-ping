@@ -112,37 +112,6 @@
             color: #991b1b;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 6px;
-            font-weight: 500;
-        }
-
         .action-bar {
             display: flex;
             gap: 12px;
@@ -448,25 +417,6 @@
 <div class="container">
     <div th:if="${message}" class="alert success" th:text="${message}"></div>
     <div th:if="${error}" class="alert error" th:text="${error}"></div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value" th:text="${stats.totalCount}">0</div>
-            <div class="stat-label">총 데이터 건수</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" th:text="${stats.avgRate != null ? #numbers.formatDecimal(stats.avgRate, 1, 2) + ':1' : '-'}">0:1</div>
-            <div class="stat-label">평균 경쟁률</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" th:text="${stats.maxRate != null ? #numbers.formatDecimal(stats.maxRate, 1, 2) + ':1' : '-'}">0:1</div>
-            <div class="stat-label">최고 경쟁률</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" th:text="${stats.minRate != null ? #numbers.formatDecimal(stats.minRate, 1, 2) + ':1' : '-'}">0:1</div>
-            <div class="stat-label">최저 경쟁률</div>
-        </div>
-    </div>
 
     <div class="action-bar">
         <form th:action="@{/admin/competition-rates/collect}" method="post" style="margin: 0;">
