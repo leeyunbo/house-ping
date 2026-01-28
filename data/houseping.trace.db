@@ -1,3 +1,0 @@
-2025-10-26 20:27:20.363349+09:00 jdbc[4]: exception
-org.h2.jdbc.JdbcSQLTimeoutException: Timeout trying to lock table {0}; SQL statement:
-/* insert for com.yunbok.houseping.infrastructure.persistence.entity.SubscriptionEntity */insert into subscription_info (announce_date,area,collected_at,contact,created_at,detail_url,homepage_url,house_name,house_type,receipt_end_date,receipt_start_date,source,total_suppl [50200-232]
