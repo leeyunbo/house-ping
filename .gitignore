@@ -35,11 +35,13 @@ data/
 # Environment & Local config
 .env
 .env.*
+!.env.example
 application-local.yml
 application-local.properties
 
 # Claude Code
 .claude/
+claude
 
 # OS
 .DS_Store

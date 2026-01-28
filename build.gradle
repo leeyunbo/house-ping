@@ -51,6 +51,9 @@ dependencies {
     // Database
     runtimeOnly 'com.h2database:h2' // H2 Database
 
+    // Environment
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
     // Monitoring
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 

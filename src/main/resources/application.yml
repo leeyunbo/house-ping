@@ -58,29 +58,29 @@ subscription:
 applyhome:
   api:
     base-url: https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1
-    key: ***REDACTED_API_KEY***
+    key: ${APPLYHOME_API_KEY}
   web:
     base-url: https://www.applyhome.co.kr
 
 lh:
   api:
     base-url: http://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1
-    key: ***REDACTED_API_KEY***
+    key: ${LH_API_KEY}
   web:
     base-url: https://apply.lh.or.kr
 
 # 텔레그램 설정
 telegram:
   bot:
-    token: ***REDACTED_TELEGRAM_TOKEN***
+    token: ${TELEGRAM_BOT_TOKEN:}
   admin:
     chat:
-      id: ***REDACTED_CHAT_IDS***
+      id: ${TELEGRAM_CHAT_IDS:}
 
 # Slack 설정
 slack:
   webhook:
-    url: ***REDACTED_SLACK_WEBHOOK***
+    url: ${SLACK_WEBHOOK_URL}
 
 # 로깅 설정 (상세 설정은 logback-spring.xml 참조)
 logging:
