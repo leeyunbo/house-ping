@@ -2,7 +2,9 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Houseping Admin - 청약 캘린더</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Houseping - 청약 캘린더</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <style>
@@ -36,6 +38,37 @@
         .header {
             max-width: 1400px;
             margin: 0 auto 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
         }
 
         h1 {
@@ -55,6 +88,8 @@
         }
 
         .nav {
+            max-width: 1400px;
+            margin: 0 auto 32px;
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
@@ -94,6 +129,48 @@
             padding: 32px;
             border-radius: 20px;
             box-shadow: var(--shadow-lg);
+            position: relative;
+            min-height: 600px;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay p {
+            margin-top: 16px;
+            color: var(--text-muted);
+            font-size: 14px;
         }
 
         .legend {
@@ -236,17 +313,19 @@
         }
 
         .fc .fc-daygrid-day-number {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--text);
             text-decoration: none;
-            width: 32px;
-            height: 32px;
+            min-width: 32px;
+            height: 28px;
+            padding: 0 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            border-radius: 14px;
             transition: background 0.2s;
+            white-space: nowrap;
         }
 
         .fc .fc-daygrid-day-number:hover {
@@ -254,17 +333,38 @@
         }
 
         .fc .fc-day-today .fc-daygrid-day-number {
-            background: var(--primary);
+            background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
             color: white;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 14px;
+            min-width: 36px;
+            height: 32px;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            animation: pulse-today 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-today {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .fc .fc-day-today .fc-daygrid-day-number:hover {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
         }
 
         .fc .fc-day-today {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%) !important;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(249, 115, 22, 0.08) 100%) !important;
+            border: 2px solid rgba(239, 68, 68, 0.3) !important;
+        }
+
+        /* 만료된 이벤트 스타일 */
+        .fc .fc-daygrid-event.expired-event {
+            background: #94a3b8 !important;
+            opacity: 0.7;
+        }
+
+        .fc .fc-daygrid-event.expired-event:hover {
+            opacity: 0.85;
         }
 
         .fc .fc-daygrid-day-events {
@@ -597,19 +697,29 @@
 </head>
 <body>
 <div class="header">
-    <h1>청약 캘린더</h1>
-    <p class="meta">청약 접수 기간과 당첨 발표일을 한눈에 확인하세요</p>
-
-    <div class="nav">
-        <a href="/admin/dashboard">대시보드</a>
-        <a href="/admin/subscriptions">청약 데이터</a>
-        <a href="/admin/subscriptions/calendar" class="active">청약 캘린더</a>
-        <a href="/admin/competition-rates">경쟁률 데이터</a>
-        <a href="/admin/users" sec:authorize="hasRole('MASTER')">회원 관리</a>
+    <div>
+        <h1>청약 캘린더</h1>
+        <p class="meta">청약 접수 기간과 당첨 발표일을 한눈에 확인하세요</p>
+    </div>
+    <div class="user-info">
+        <span class="user-name" sec:authentication="name">관리자</span>
+        <a href="/auth/logout" class="logout-btn">로그아웃</a>
     </div>
 </div>
 
+<div class="nav">
+    <a href="/admin/dashboard">대시보드</a>
+    <a href="/admin/subscriptions">청약 데이터</a>
+    <a href="/admin/subscriptions/calendar" class="active">청약 캘린더</a>
+    <a href="/admin/competition-rates">경쟁률 데이터</a>
+    <a href="/admin/users" sec:authorize="hasRole('MASTER')">회원 관리</a>
+</div>
+
 <div class="calendar-container">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>캘린더 로딩 중...</p>
+    </div>
     <div class="legend">
         <div class="legend-group">
             <span class="legend-title">청약Home</span>
@@ -672,22 +782,36 @@
                 week: '주간'
             },
             titleFormat: { year: 'numeric', month: 'long' },
+            loading: function(isLoading) {
+                const overlay = document.getElementById('loadingOverlay');
+                if (isLoading) {
+                    overlay.classList.remove('hidden');
+                } else {
+                    overlay.classList.add('hidden');
+                }
+            },
             events: function(info, successCallback, failureCallback) {
                 const start = info.startStr.split('T')[0];
                 const end = info.endStr.split('T')[0];
                 fetch(`/admin/subscriptions/calendar/events?start=${start}&end=${end}`)
                     .then(response => response.json())
                     .then(events => {
-                        // 백엔드에서 받은 색상 그대로 사용 (LH: 오렌지/보라, 청약Home: 파랑/초록)
                         successCallback(events);
                     })
                     .catch(error => {
                         console.error('Error fetching events:', error);
                         failureCallback(error);
+                        document.getElementById('loadingOverlay').classList.add('hidden');
                     });
             },
             eventClick: function(info) {
                 showModal(info.event);
+            },
+            eventDidMount: function(info) {
+                // 만료된 이벤트에 회색 스타일 적용
+                if (info.event.extendedProps.expired) {
+                    info.el.classList.add('expired-event');
+                }
             },
             eventDisplay: 'block',
             dayMaxEvents: 3,
@@ -789,9 +913,15 @@
     }
 
     function toggleNotification(subscriptionId, element) {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
         fetch(`/admin/subscriptions/${subscriptionId}/notification`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            }
         })
         .then(response => response.json())
         .then(data => {

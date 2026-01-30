@@ -26,6 +26,7 @@ public record CalendarEventDto(
             Integer totalSupplyCount,
             String detailUrl,
             String eventType,
-            boolean notificationEnabled
+            boolean notificationEnabled,
+            boolean expired
     ) {}
 }

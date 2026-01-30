@@ -20,6 +20,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.RequestBody;
+
 @Controller
 @RequestMapping("/admin/subscriptions")
 @RequiredArgsConstructor
@@ -98,4 +100,20 @@ public class AdminSubscriptionController {
                 "message", "알림이 해제되었습니다."
         ));
     }
+
+    /**
+     * 일괄 알림 설정
+     */
+    @PostMapping("/notifications/bulk")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> bulkEnableNotifications(@RequestBody BulkNotificationRequest request) {
+        int count = queryService.enableNotifications(request.ids());
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "count", count,
+                "message", count + "개 청약에 알림이 설정되었습니다."
+        ));
+    }
+
+    public record BulkNotificationRequest(List<Long> ids) {}
 }

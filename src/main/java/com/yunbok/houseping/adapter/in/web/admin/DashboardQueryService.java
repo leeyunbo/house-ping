@@ -212,13 +212,15 @@ public class DashboardQueryService {
     }
 
     private List<DashboardStatisticsDto.HouseTypeStat> calculateByHouseType(List<CompetitionRateEntity> rates) {
-        Map<String, List<CompetitionRateEntity>> byType = rates.stream()
+        // 주택형을 주요 평수(84, 59 등)로 그룹핑
+        Map<Integer, List<CompetitionRateEntity>> byMainSize = rates.stream()
                 .filter(r -> r.getHouseType() != null && !r.getHouseType().isBlank())
-                .collect(Collectors.groupingBy(CompetitionRateEntity::getHouseType));
+                .filter(r -> extractMainSize(r.getHouseType()) != null)
+                .collect(Collectors.groupingBy(r -> extractMainSize(r.getHouseType())));
 
-        return byType.entrySet().stream()
+        return byMainSize.entrySet().stream()
                 .map(entry -> {
-                    String houseType = entry.getKey();
+                    Integer mainSize = entry.getKey();
                     List<CompetitionRateEntity> typeRates = entry.getValue();
                     List<BigDecimal> validRates = typeRates.stream()
                             .map(CompetitionRateEntity::getCompetitionRate)
@@ -226,16 +228,38 @@ public class DashboardQueryService {
                             .toList();
 
                     BigDecimal avg = calculateAverage(validRates);
-                    String sizeCategory = categorizeSqm(houseType);
+                    String houseType = mainSize + "㎡";
+                    String sizeCategory = categorizeSqmBySize(mainSize);
 
                     return new DashboardStatisticsDto.HouseTypeStat(houseType, sizeCategory, typeRates.size(), avg);
                 })
+                .filter(stat -> stat.count() >= 100) // 100개 이상만
                 .sorted(Comparator.comparing(
                         DashboardStatisticsDto.HouseTypeStat::avgRate,
                         Comparator.nullsLast(Comparator.reverseOrder())
                 ))
-                .limit(15) // 상위 15개만
                 .toList();
+    }
+
+    /**
+     * 주택형에서 주요 평수 추출 (예: "084.9543T" -> 84)
+     */
+    private Integer extractMainSize(String houseType) {
+        try {
+            String numPart = houseType.replaceAll("[^0-9.]", "");
+            if (numPart.isEmpty()) return null;
+            return (int) Double.parseDouble(numPart.split("\\.")[0]);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String categorizeSqmBySize(int sqm) {
+        if (sqm < 60) return "소형 (60㎡ 미만)";
+        if (sqm < 85) return "중소형 (60~85㎡)";
+        if (sqm < 102) return "중형 (85~102㎡)";
+        if (sqm < 135) return "중대형 (102~135㎡)";
+        return "대형 (135㎡ 이상)";
     }
 
     private DashboardStatisticsDto.RateDistribution calculateDistribution(List<CompetitionRateEntity> rates) {

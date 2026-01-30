@@ -46,6 +46,7 @@ master:
 
 server:
   port: 10030
+  forward-headers-strategy: framework
 
 # 기능 토글 설정
 feature:

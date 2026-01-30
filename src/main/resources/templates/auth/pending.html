@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Houseping - 승인 대기</title>
@@ -30,6 +30,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+            }
         }
 
         .pending-container {
@@ -37,66 +52,93 @@
             border-radius: 16px;
             box-shadow: var(--shadow-lg);
             padding: 48px;
-            max-width: 480px;
+            max-width: 520px;
             width: 100%;
             text-align: center;
+            position: relative;
+            z-index: 10;
+            animation: bounce-in 0.6s ease-out;
         }
 
-        .icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 24px;
-            background: #fef3c7;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        @keyframes bounce-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        .icon svg {
-            width: 40px;
-            height: 40px;
-            color: var(--warning);
+        .party-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: shake 0.5s ease-in-out 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        .welcome-text {
+            font-size: 16px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+            animation: fade-in 0.5s ease-out 0.2s both;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
             color: var(--text);
+            animation: fade-in 0.5s ease-out 0.3s both;
+        }
+
+        .master-name {
+            display: inline-block;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            font-size: 1.1em;
         }
 
         .description {
             color: var(--text-muted);
-            font-size: 15px;
-            line-height: 1.6;
+            font-size: 16px;
+            line-height: 1.8;
             margin-bottom: 32px;
+            animation: fade-in 0.5s ease-out 0.4s both;
         }
 
-        .info-box {
-            background: #f8fafc;
-            border: 1px solid var(--border);
+        .tip-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 24px;
             text-align: left;
+            animation: fade-in 0.5s ease-out 0.5s both;
         }
 
-        .info-box h4 {
-            margin: 0 0 12px;
+        .tip-box .tip-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 12px;
+        }
+
+        .tip-box .tip-content {
             font-size: 14px;
-            color: var(--text);
-        }
-
-        .info-box ul {
-            margin: 0;
-            padding-left: 20px;
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .info-box li {
-            margin-bottom: 8px;
+            color: #78350f;
+            line-height: 1.6;
         }
 
         .logout-btn {
@@ -104,45 +146,72 @@
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 14px 32px;
+            border-radius: 9999px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            animation: fade-in 0.5s ease-out 0.6s both;
         }
 
         .logout-btn:hover {
             background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
     </style>
 </head>
 <body>
     <div class="pending-container">
-        <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </div>
+        <div class="party-icon">🎉</div>
 
-        <h1 class="title">승인 대기 중</h1>
+        <p class="welcome-text">회원가입을 축하합니다!</p>
+
+        <h1 class="title">잠깐, 아직이야!</h1>
 
         <p class="description">
-            가입이 완료되었습니다.<br>
-            관리자의 승인 후 서비스를 이용하실 수 있습니다.
+            전지전능한 <span class="master-name">이 윤 복</span> 님의<br>
+            승인이 있어야 입장이 가능해요.
         </p>
 
-        <div class="info-box">
-            <h4>안내 사항</h4>
-            <ul>
-                <li>관리자가 가입 요청을 검토합니다.</li>
-                <li>승인 완료 후 다시 로그인해 주세요.</li>
-                <li>문의사항은 관리자에게 연락해 주세요.</li>
-            </ul>
+        <div class="tip-box">
+            <div class="tip-title">
+                <span>💡</span>
+                <span>TIP</span>
+            </div>
+            <div class="tip-content">
+                커피 한 잔 사드리면 승인이 빨라진다는 소문이...☕️
+            </div>
         </div>
 
-        <a href="/auth/logout" class="logout-btn">로그아웃</a>
+        <a href="/auth/logout" class="logout-btn">알겠어요, 기다릴게요</a>
     </div>
+
+    <script>
+        // 빵빠레 효과
+        const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#1dd1a1'];
+
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 30);
+            }
+        }
+
+        createConfetti();
+    </script>
 </body>
 </html>

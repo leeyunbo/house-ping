@@ -62,10 +62,26 @@ public class AdminSubscriptionQueryService {
         );
         PageRequest pageRequest = PageRequest.of(criteria.page(), criteria.size(), sort);
 
-        return subscriptionRepository.findAll(builder, pageRequest).map(this::toDto);
+        Page<SubscriptionEntity> page = subscriptionRepository.findAll(builder, pageRequest);
+
+        // 알림 설정된 청약 ID 조회
+        List<Long> subscriptionIds = page.getContent().stream().map(SubscriptionEntity::getId).toList();
+        Set<Long> notificationEnabledIds = notificationSubscriptionRepository
+                .findBySubscriptionIdInAndEnabledTrue(subscriptionIds)
+                .stream()
+                .map(NotificationSubscriptionEntity::getSubscriptionId)
+                .collect(Collectors.toSet());
+
+        return page.map(entity -> toDto(entity, notificationEnabledIds.contains(entity.getId())));
     }
 
     private AdminSubscriptionDto toDto(SubscriptionEntity entity) {
+        return toDto(entity, false);
+    }
+
+    private AdminSubscriptionDto toDto(SubscriptionEntity entity, boolean notificationEnabled) {
+        boolean expired = entity.getReceiptEndDate() != null
+                && entity.getReceiptEndDate().isBefore(LocalDate.now());
         return new AdminSubscriptionDto(
                 entity.getId(),
                 entity.getSource(),
@@ -81,7 +97,9 @@ public class AdminSubscriptionQueryService {
                 entity.getContact(),
                 entity.getTotalSupplyCount(),
                 entity.getCollectedAt(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                notificationEnabled,
+                expired
         );
     }
 
@@ -176,6 +194,10 @@ public class AdminSubscriptionQueryService {
         boolean isLH = entity.getSource() != null && entity.getSource().toUpperCase().contains("LH");
         String sourceTag = isLH ? "[LH]" : "[청약]";
 
+        // 접수 종료일이 오늘 이전이면 만료
+        boolean expired = entity.getReceiptEndDate() != null
+                && entity.getReceiptEndDate().isBefore(LocalDate.now());
+
         if ("receipt".equals(eventType)) {
             title = sourceTag + " " + entity.getHouseName();
             start = entity.getReceiptStartDate();
@@ -208,7 +230,8 @@ public class AdminSubscriptionQueryService {
                         entity.getTotalSupplyCount(),
                         entity.getDetailUrl(),
                         eventType,
-                        notificationEnabled
+                        notificationEnabled,
+                        expired
                 )
         );
     }
@@ -246,5 +269,33 @@ public class AdminSubscriptionQueryService {
     @Transactional
     public void removeNotification(Long subscriptionId) {
         notificationSubscriptionRepository.deleteBySubscriptionId(subscriptionId);
+    }
+
+    /**
+     * 일괄 알림 설정
+     */
+    @Transactional
+    public int enableNotifications(List<Long> subscriptionIds) {
+        int count = 0;
+        for (Long subscriptionId : subscriptionIds) {
+            Optional<NotificationSubscriptionEntity> existing =
+                    notificationSubscriptionRepository.findBySubscriptionId(subscriptionId);
+
+            if (existing.isPresent()) {
+                NotificationSubscriptionEntity entity = existing.get();
+                if (!entity.isEnabled()) {
+                    entity.toggleEnabled();
+                    count++;
+                }
+            } else {
+                NotificationSubscriptionEntity newEntity = NotificationSubscriptionEntity.builder()
+                        .subscriptionId(subscriptionId)
+                        .enabled(true)
+                        .build();
+                notificationSubscriptionRepository.save(newEntity);
+                count++;
+            }
+        }
+        return count;
     }
 }

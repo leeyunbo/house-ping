@@ -31,6 +31,8 @@ public class SecurityConfig {
                 .frameOptions(frame -> frame.sameOrigin()) // H2 console
             )
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/admin").permitAll()
+                .requestMatchers("/favicon.ico", "/favicon.svg").permitAll()
                 .requestMatchers("/auth/**", "/oauth/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
@@ -53,6 +55,7 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/auth/logout")
                 .logoutSuccessUrl("/auth/login?logout")
+                .logoutRequestMatcher(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/auth/logout", "GET"))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
             );

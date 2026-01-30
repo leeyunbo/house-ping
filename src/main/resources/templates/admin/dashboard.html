@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Houseping Admin - 통계 대시보드</title>
+    <title>Houseping - 통계 대시보드</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
@@ -35,6 +35,37 @@
         .header {
             max-width: 1400px;
             margin: 0 auto 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
         }
 
         h1 {
@@ -54,6 +85,8 @@
         }
 
         .nav {
+            max-width: 1400px;
+            margin: 0 auto 32px;
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
@@ -93,7 +126,7 @@
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 16px;
             margin-bottom: 32px;
         }
@@ -121,6 +154,13 @@
             margin-top: 6px;
             font-weight: 500;
             text-transform: uppercase;
+        }
+
+        .summary-note {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            opacity: 0.7;
             letter-spacing: 0.05em;
         }
 
@@ -267,10 +307,17 @@
 </head>
 <body>
 <div class="header">
-    <h1>통계 대시보드</h1>
-    <p class="meta">경쟁률 데이터 기반 통계 분석</p>
+    <div>
+        <h1>통계 대시보드</h1>
+        <p class="meta">경쟁률 데이터 기반 통계 분석</p>
+    </div>
+    <div class="user-info">
+        <span class="user-name" sec:authentication="name">관리자</span>
+        <a href="/auth/logout" class="logout-btn">로그아웃</a>
+    </div>
+</div>
 
-    <div class="nav">
+<div class="nav">
         <a href="/admin/dashboard" class="active">대시보드</a>
         <a href="/admin/subscriptions">청약 데이터</a>
         <a href="/admin/subscriptions/calendar">청약 캘린더</a>
@@ -286,25 +333,24 @@
             <div class="summary-value" th:text="${stats.summary.totalCount}">0</div>
             <div class="summary-label">총 데이터</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" title="20세대 이상 공급 기준">
             <div class="summary-value" th:text="${stats.summary.avgRate != null ? #numbers.formatDecimal(stats.summary.avgRate, 1, 2) + ':1' : '-'}">0:1</div>
             <div class="summary-label">평균 경쟁률</div>
+            <div class="summary-note">20세대 이상</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" title="20세대 이상 공급 기준">
             <div class="summary-value" th:text="${stats.summary.maxRate != null ? #numbers.formatDecimal(stats.summary.maxRate, 1, 2) + ':1' : '-'}">0:1</div>
             <div class="summary-label">최고 경쟁률</div>
+            <div class="summary-note">20세대 이상</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" title="20세대 이상 공급 기준">
             <div class="summary-value" th:text="${stats.summary.minRate != null ? #numbers.formatDecimal(stats.summary.minRate, 1, 2) + ':1' : '-'}">0:1</div>
             <div class="summary-label">최저 경쟁률</div>
+            <div class="summary-note">20세대 이상</div>
         </div>
         <div class="summary-card">
             <div class="summary-value" th:text="${stats.summary.areaCount}">0</div>
             <div class="summary-label">지역 수</div>
-        </div>
-        <div class="summary-card">
-            <div class="summary-value" th:text="${stats.summary.houseTypeCount}">0</div>
-            <div class="summary-label">주택형 수</div>
         </div>
     </div>
 
@@ -364,7 +410,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
-                주택형별 평균 경쟁률 (상위 15개)
+                평수별 평균 경쟁률
             </div>
             <table class="stat-table" th:if="${!stats.byHouseType.isEmpty()}">
                 <thead>
