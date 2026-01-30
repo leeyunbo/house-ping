@@ -177,8 +177,11 @@ class AdminSubscriptionControllerTest {
         @Test
         @DisplayName("템플릿 경로 admin/subscriptions/calendar를 반환한다")
         void returnsCorrectViewName() {
+            // given
+            Model model = mock(Model.class);
+
             // when
-            String viewName = controller.calendar();
+            String viewName = controller.calendar(model);
 
             // then
             assertThat(viewName).isEqualTo("admin/subscriptions/calendar");
@@ -198,7 +201,8 @@ class AdminSubscriptionControllerTest {
             CalendarEventDto.ExtendedProps extendedProps = new CalendarEventDto.ExtendedProps(
                     "테스트 아파트", "서울", "ApplyHome", "APT",
                     start, start, end, end.plusMonths(1), 100,
-                    "http://detail.url", "receipt", false
+                    "http://detail.url", "receipt", false, false,
+                    "서울특별시 강남구 테헤란로 123", "06134"
             );
             List<CalendarEventDto> events = List.of(
                     new CalendarEventDto(1L, "테스트 아파트", start, end, "#3498db", "#ffffff", extendedProps)
@@ -373,7 +377,9 @@ class AdminSubscriptionControllerTest {
                 "02-1234-5678",
                 100,
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                "서울특별시 강남구 테헤란로 123",
+                "06134"
         );
     }
 }

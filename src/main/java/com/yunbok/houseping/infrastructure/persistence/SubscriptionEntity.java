@@ -119,6 +119,18 @@ public class SubscriptionEntity {
     private Integer totalSupplyCount;
 
     /**
+     * 공급 위치 주소
+     */
+    @Column(length = 500)
+    private String address;
+
+    /**
+     * 우편번호
+     */
+    @Column(length = 10)
+    private String zipCode;
+
+    /**
      * 수집 일시
      */
     @Column(nullable = false)
@@ -161,7 +173,9 @@ public class SubscriptionEntity {
             || !equals(receiptEndDate, other.receiptEndDate)
             || !equals(winnerAnnounceDate, other.winnerAnnounceDate)
             || !equals(detailUrl, other.detailUrl)
-            || !equals(totalSupplyCount, other.totalSupplyCount);
+            || !equals(totalSupplyCount, other.totalSupplyCount)
+            || !equals(address, other.address)
+            || !equals(zipCode, other.zipCode);
     }
 
     private boolean equals(Object a, Object b) {
@@ -186,5 +200,7 @@ public class SubscriptionEntity {
         this.homepageUrl = other.homepageUrl;
         this.contact = other.contact;
         this.totalSupplyCount = other.totalSupplyCount;
+        this.address = other.address;
+        this.zipCode = other.zipCode;
     }
 }

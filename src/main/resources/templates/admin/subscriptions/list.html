@@ -6,6 +6,8 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Houseping - 청약 데이터 조회</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script th:if="${kakaoMapAppKey != null and kakaoMapAppKey != ''}"
+            th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapAppKey} + '&amp;libraries=services'"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -497,6 +499,295 @@
             table { font-size: 13px; }
             th, td { padding: 12px; }
         }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 4px;
+            line-height: 1.3;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: 8px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 20px 24px 24px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .notification-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .notification-toggle:hover {
+            background: #e2e8f0;
+        }
+
+        .notification-toggle.enabled {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        }
+
+        .notification-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .notification-toggle-label svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-muted);
+        }
+
+        .notification-toggle.enabled .notification-toggle-label svg {
+            color: #f59e0b;
+        }
+
+        .notification-toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #cbd5e1;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .notification-toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .notification-toggle.enabled .notification-toggle-switch {
+            background: #f59e0b;
+        }
+
+        .notification-toggle.enabled .notification-toggle-switch::after {
+            left: 22px;
+        }
+
+        .notification-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding-left: 30px;
+        }
+
+        /* 카카오맵 컨테이너 */
+        .map-container {
+            margin-top: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .map-container.hidden {
+            display: none;
+        }
+
+        .map-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--bg);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .map-header svg {
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+        }
+
+        #kakaoMap {
+            width: 100%;
+            height: 200px;
+        }
+
+        .map-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 13px;
+            gap: 8px;
+        }
+
+        .map-loading .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .address-text {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-detail {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 16px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-detail:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-detail svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* 테이블 행 클릭 가능하게 */
+        tbody tr {
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background: #f1f5f9;
+        }
     </style>
 </head>
 <body>
@@ -634,8 +925,24 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="subscription : ${resultPage.content}" th:classappend="${subscription.expired} ? 'expired' : ''">
-                    <td class="checkbox-cell">
+                <tr th:each="subscription : ${resultPage.content}"
+                    th:classappend="${subscription.expired} ? 'expired' : ''"
+                    th:data-id="${subscription.id}"
+                    th:data-housename="${subscription.houseName}"
+                    th:data-area="${subscription.area}"
+                    th:data-housetype="${subscription.houseType}"
+                    th:data-source="${subscription.source}"
+                    th:data-announcedate="${subscription.announceDate}"
+                    th:data-receiptstartdate="${subscription.receiptStartDate}"
+                    th:data-receiptenddate="${subscription.receiptEndDate}"
+                    th:data-winnerannouncedate="${subscription.winnerAnnounceDate}"
+                    th:data-totalsupplycount="${subscription.totalSupplyCount}"
+                    th:data-detailurl="${subscription.detailUrl}"
+                    th:data-address="${subscription.address}"
+                    th:data-zipcode="${subscription.zipCode}"
+                    th:data-notificationenabled="${subscription.notificationEnabled}"
+                    onclick="showModal(this)">
+                    <td class="checkbox-cell" onclick="event.stopPropagation();">
                         <div class="checkbox-wrapper">
                             <input type="checkbox" class="subscription-checkbox" th:data-id="${subscription.id}" onchange="updateSelectedCount()">
                         </div>
@@ -704,6 +1011,25 @@
     </div>
 </div>
 
+<!-- 모달 -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title" id="modalTitle">주택명</h3>
+                <div class="modal-subtitle" id="modalSubtitle">지역 · 유형</div>
+            </div>
+            <button class="modal-close" onclick="document.getElementById('detailModal').classList.remove('active')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+        </div>
+    </div>
+</div>
+
 <script>
     function toggleSelectAll(checkbox) {
         const checkboxes = document.querySelectorAll('.subscription-checkbox');
@@ -768,6 +1094,254 @@
             alert('오류가 발생했습니다.');
         });
     }
+
+    function showModal(row) {
+        const data = row.dataset;
+        const id = data.id;
+        const houseName = data.housename;
+        const area = data.area;
+        const houseType = data.housetype;
+        const source = data.source;
+        const announceDate = data.announcedate;
+        const receiptStartDate = data.receiptstartdate;
+        const receiptEndDate = data.receiptenddate;
+        const winnerAnnounceDate = data.winnerannouncedate;
+        const totalSupplyCount = data.totalsupplycount;
+        const detailUrl = data.detailurl;
+        const address = data.address;
+        const notificationEnabled = data.notificationenabled === 'true';
+
+        document.getElementById('modalTitle').textContent = houseName;
+        document.getElementById('modalSubtitle').textContent = `${area} · ${houseType}`;
+
+        const sourceUpper = source.toUpperCase();
+        const sourceName = sourceUpper.includes('APPLYHOME') ? '청약Home' : (sourceUpper.includes('LH') ? 'LH' : source);
+
+        let html = `
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">데이터 소스</span>
+                    <span class="info-value">${sourceName}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">공급 세대수</span>
+                    <span class="info-value">${totalSupplyCount ? totalSupplyCount + '세대' : '-'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">공고일</span>
+                    <span class="info-value">${formatDate(announceDate)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">접수 시작</span>
+                    <span class="info-value">${formatDate(receiptStartDate)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">접수 마감</span>
+                    <span class="info-value">${formatDate(receiptEndDate)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">당첨자 발표</span>
+                    <span class="info-value">${formatDate(winnerAnnounceDate)}</span>
+                </div>
+            </div>
+
+            <div class="notification-toggle ${notificationEnabled ? 'enabled' : ''}"
+                 onclick="toggleNotification(${id}, this)"
+                 data-subscription-id="${id}">
+                <div class="notification-toggle-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    알림 받기
+                </div>
+                <div class="notification-toggle-switch"></div>
+            </div>
+            <div class="notification-desc">접수 시작 1일 전, 접수 종료 당일에 Slack으로 알림을 받습니다.</div>
+        `;
+
+        // 카카오맵 영역 추가 (주소가 있는 경우에만)
+        const hasAddress = address && address.trim() !== '' && address !== 'null';
+        const hasKakao = typeof kakao !== 'undefined';
+
+        if (hasAddress) {
+            if (hasKakao) {
+                html += `
+                    <div class="map-container" id="mapContainer">
+                        <div class="map-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            위치
+                        </div>
+                        <div class="map-loading" id="mapLoading">
+                            <div class="spinner"></div>
+                            <span>지도 로딩 중...</span>
+                        </div>
+                        <div id="kakaoMap" style="display:none;"></div>
+                        <div class="address-text">${address}</div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="map-container" id="mapContainer">
+                        <div class="map-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            위치
+                        </div>
+                        <div class="address-text">${address}</div>
+                    </div>
+                `;
+            }
+        }
+
+        if (detailUrl && detailUrl !== 'null') {
+            html += `
+                <a href="${detailUrl}" target="_blank" class="btn-detail">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    상세 페이지 보기
+                </a>
+            `;
+        }
+
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('detailModal').classList.add('active');
+
+        // 카카오맵 초기화
+        if (hasAddress && hasKakao) {
+            initKakaoMap(address, houseName);
+        }
+    }
+
+    function closeModal(event) {
+        if (event.target === event.currentTarget) {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr || dateStr === 'null') return '-';
+        return dateStr;
+    }
+
+    // 카카오맵 초기화 함수
+    function initKakaoMap(address, houseName) {
+        const mapContainer = document.getElementById('kakaoMap');
+        if (!mapContainer) return;
+
+        const options = {
+            center: new kakao.maps.LatLng(37.566826, 126.9786567),
+            level: 3
+        };
+
+        const map = new kakao.maps.Map(mapContainer, options);
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        // 주소 검색 (실패 시 뒤에서부터 단어 제거하며 재시도)
+        searchAddressWithRetry(geocoder, map, mapContainer, address, houseName, 0);
+    }
+
+    // 주소 검색 재시도 함수 (최대 3회)
+    function searchAddressWithRetry(geocoder, map, mapContainer, address, houseName, attempt) {
+        const maxAttempts = 3;
+        const mapLoading = document.getElementById('mapLoading');
+
+        geocoder.addressSearch(address, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                const marker = new kakao.maps.Marker({
+                    map: map,
+                    position: coords
+                });
+                const infowindow = new kakao.maps.InfoWindow({
+                    content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
+                });
+                infowindow.open(map, marker);
+                // 로딩 숨기고 지도 표시
+                if (mapLoading) mapLoading.style.display = 'none';
+                if (mapContainer) mapContainer.style.display = 'block';
+
+                // 지도 크기 재계산 후 중심 이동
+                map.relayout();
+                map.setCenter(coords);
+            } else {
+                // 재시도 가능한 경우
+                if (attempt < maxAttempts - 1) {
+                    const shorterAddress = removeLastWord(address);
+                    if (shorterAddress && shorterAddress !== address) {
+                        searchAddressWithRetry(geocoder, map, mapContainer, shorterAddress, houseName, attempt + 1);
+                        return;
+                    }
+                }
+                // 모든 시도 실패 시 지도만 숨기고 주소는 표시
+                if (mapLoading) mapLoading.style.display = 'none';
+                if (mapContainer) {
+                    mapContainer.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // 주소에서 마지막 단어 제거 (괄호 안 공백은 무시)
+    function removeLastWord(address) {
+        if (!address) return null;
+
+        const words = [];
+        let current = '';
+        let parenDepth = 0;
+
+        for (const char of address.trim()) {
+            if (char === '(') parenDepth++;
+            else if (char === ')') parenDepth--;
+
+            if (char === ' ' && parenDepth === 0) {
+                if (current) words.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        if (current) words.push(current);
+
+        if (words.length <= 1) return null;
+        words.pop();
+        return words.join(' ');
+    }
+
+    function toggleNotification(subscriptionId, element) {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        fetch(`/admin/subscriptions/${subscriptionId}/notification`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                element.classList.toggle('enabled', data.enabled);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('오류가 발생했습니다.');
+        });
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+    });
 </script>
 </body>
 </html>

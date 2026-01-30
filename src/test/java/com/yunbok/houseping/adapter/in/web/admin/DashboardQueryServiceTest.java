@@ -157,13 +157,16 @@ class DashboardQueryServiceTest {
         }
 
         @Test
-        @DisplayName("주택형별 통계를 계산한다")
+        @DisplayName("주택형별 통계를 계산한다 (100개 이상인 경우만 포함)")
         void calculatesHouseTypeStats() {
-            // given
-            List<CompetitionRateEntity> rates = List.of(
-                    createRateEntity("H001", "084.9543T", "해당지역", new BigDecimal("10.0"), 50),
-                    createRateEntity("H002", "059.9721A", "해당지역", new BigDecimal("20.0"), 50)
-            );
+            // given - 100개 이상이어야 byHouseType에 포함됨
+            List<CompetitionRateEntity> rates = new java.util.ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                rates.add(createRateEntity("H" + i, "084.9543T", "해당지역", new BigDecimal("10.0"), 50));
+            }
+            for (int i = 100; i < 200; i++) {
+                rates.add(createRateEntity("H" + i, "059.9721A", "해당지역", new BigDecimal("20.0"), 50));
+            }
             when(competitionRateRepository.findAll()).thenReturn(rates);
             when(subscriptionRepository.findAll(any(Predicate.class))).thenReturn(List.of());
 

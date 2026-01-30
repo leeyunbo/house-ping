@@ -3,6 +3,7 @@ package com.yunbok.houseping.adapter.in.web.admin;
 import com.yunbok.houseping.domain.model.SyncResult;
 import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,6 +31,9 @@ public class AdminSubscriptionController {
     private final AdminSubscriptionQueryService queryService;
     private final SubscriptionManagementUseCase managementUseCase;
 
+    @Value("${kakao.map.app-key:}")
+    private String kakaoMapAppKey;
+
     @GetMapping
     public String list(AdminSubscriptionSearchCriteria criteria, Model model) {
         model.addAttribute("resultPage", queryService.search(criteria));
@@ -37,11 +41,13 @@ public class AdminSubscriptionController {
         model.addAttribute("areas", queryService.availableAreas());
         model.addAttribute("houseTypes", queryService.availableHouseTypes());
         model.addAttribute("sources", queryService.availableSources());
+        model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);
         return "admin/subscriptions/list";
     }
 
     @GetMapping("/calendar")
-    public String calendar() {
+    public String calendar(Model model) {
+        model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);
         return "admin/subscriptions/calendar";
     }
 

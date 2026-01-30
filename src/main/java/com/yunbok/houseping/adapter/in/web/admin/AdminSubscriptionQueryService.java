@@ -99,7 +99,9 @@ public class AdminSubscriptionQueryService {
                 entity.getCollectedAt(),
                 entity.getCreatedAt(),
                 notificationEnabled,
-                expired
+                expired,
+                entity.getAddress(),
+                entity.getZipCode()
         );
     }
 
@@ -231,7 +233,9 @@ public class AdminSubscriptionQueryService {
                         entity.getDetailUrl(),
                         eventType,
                         notificationEnabled,
-                        expired
+                        expired,
+                        entity.getAddress(),
+                        entity.getZipCode()
                 )
         );
     }

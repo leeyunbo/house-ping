@@ -28,6 +28,8 @@ public interface SubscriptionInfo {
     default Integer getTotalSupplyCount() { return null; }
     default String getHouseManageNo() { return null; }
     default String getPblancNo() { return null; }
+    default String getAddress() { return null; }
+    default String getZipCode() { return null; }
 
     // === Optional 반환 (null-safety) ===
     default Optional<LocalDate> getWinnerAnnounceDateOpt() {

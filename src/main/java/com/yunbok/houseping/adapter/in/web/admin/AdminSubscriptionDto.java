@@ -20,15 +20,19 @@ public record AdminSubscriptionDto(
         LocalDateTime collectedAt,
         LocalDateTime createdAt,
         boolean notificationEnabled,
-        boolean expired
+        boolean expired,
+        String address,
+        String zipCode
 ) {
     public AdminSubscriptionDto(
             Long id, String source, String houseName, String houseType, String area,
             LocalDate announceDate, LocalDate receiptStartDate, LocalDate receiptEndDate,
             LocalDate winnerAnnounceDate, String detailUrl, String homepageUrl, String contact,
-            Integer totalSupplyCount, LocalDateTime collectedAt, LocalDateTime createdAt) {
+            Integer totalSupplyCount, LocalDateTime collectedAt, LocalDateTime createdAt,
+            String address, String zipCode) {
         this(id, source, houseName, houseType, area, announceDate, receiptStartDate, receiptEndDate,
              winnerAnnounceDate, detailUrl, homepageUrl, contact, totalSupplyCount, collectedAt, createdAt,
-             false, receiptEndDate != null && receiptEndDate.isBefore(LocalDate.now()));
+             false, receiptEndDate != null && receiptEndDate.isBefore(LocalDate.now()),
+             address, zipCode);
     }
 }

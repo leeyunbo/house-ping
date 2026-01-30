@@ -7,6 +7,8 @@
     <title>Houseping - 청약 캘린더</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script th:if="${kakaoMapAppKey != null and kakaoMapAppKey != ''}"
+            th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapAppKey} + '&amp;libraries=services'"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -685,6 +687,72 @@
             padding-left: 30px;
         }
 
+        /* 카카오맵 컨테이너 */
+        .map-container {
+            margin-top: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .map-container.hidden {
+            display: none;
+        }
+
+        .map-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--bg);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .map-header svg {
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+        }
+
+        #kakaoMap {
+            width: 100%;
+            height: 200px;
+        }
+
+        .map-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 13px;
+            gap: 8px;
+        }
+
+        .map-loading .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .address-text {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+        }
+
         /* 반응형 */
         @media (max-width: 768px) {
             body { padding: 20px; }
@@ -897,6 +965,46 @@
             <div class="notification-desc">접수 시작 1일 전, 접수 종료 당일에 Slack으로 알림을 받습니다.</div>
         `;
 
+        // 카카오맵 영역 추가 (주소가 있는 경우에만)
+        const hasAddress = props.address && props.address.trim() !== '';
+        const hasKakao = typeof kakao !== 'undefined';
+
+        if (hasAddress) {
+            if (hasKakao) {
+                html += `
+                    <div class="map-container" id="mapContainer">
+                        <div class="map-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            위치
+                        </div>
+                        <div class="map-loading" id="mapLoading">
+                            <div class="spinner"></div>
+                            <span>지도 로딩 중...</span>
+                        </div>
+                        <div id="kakaoMap" style="display:none;"></div>
+                        <div class="address-text">${props.address}</div>
+                    </div>
+                `;
+            } else {
+                // 카카오맵 SDK가 없으면 주소만 표시
+                html += `
+                    <div class="map-container" id="mapContainer">
+                        <div class="map-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            위치
+                        </div>
+                        <div class="address-text">${props.address}</div>
+                    </div>
+                `;
+            }
+        }
+
         if (props.detailUrl) {
             html += `
                 <a href="${props.detailUrl}" target="_blank" class="btn-detail">
@@ -910,6 +1018,99 @@
 
         modalBody.innerHTML = html;
         document.getElementById('detailModal').classList.add('active');
+
+        // 카카오맵 초기화
+        if (hasAddress && hasKakao) {
+            initKakaoMap(props.address, props.houseName);
+        }
+    }
+
+    // 카카오맵 초기화 함수
+    function initKakaoMap(address, houseName) {
+        const mapContainer = document.getElementById('kakaoMap');
+        if (!mapContainer) return;
+
+        // 지도 기본 옵션 (서울 시청 좌표)
+        const options = {
+            center: new kakao.maps.LatLng(37.566826, 126.9786567),
+            level: 3
+        };
+
+        const map = new kakao.maps.Map(mapContainer, options);
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        // 주소 검색 (실패 시 뒤에서부터 단어 제거하며 재시도)
+        searchAddressWithRetry(geocoder, map, mapContainer, address, houseName, 0);
+    }
+
+    // 주소 검색 재시도 함수 (최대 3회)
+    function searchAddressWithRetry(geocoder, map, mapContainer, address, houseName, attempt) {
+        const maxAttempts = 3;
+        const mapLoading = document.getElementById('mapLoading');
+
+        geocoder.addressSearch(address, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                // 마커 생성
+                const marker = new kakao.maps.Marker({
+                    map: map,
+                    position: coords
+                });
+
+                // 인포윈도우 생성
+                const infowindow = new kakao.maps.InfoWindow({
+                    content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
+                });
+                infowindow.open(map, marker);
+
+                // 로딩 숨기고 지도 표시
+                if (mapLoading) mapLoading.style.display = 'none';
+                if (mapContainer) mapContainer.style.display = 'block';
+
+                // 지도 크기 재계산 후 중심 이동
+                map.relayout();
+                map.setCenter(coords);
+            } else {
+                // 재시도 가능한 경우
+                if (attempt < maxAttempts - 1) {
+                    const shorterAddress = removeLastWord(address);
+                    if (shorterAddress && shorterAddress !== address) {
+                        searchAddressWithRetry(geocoder, map, mapContainer, shorterAddress, houseName, attempt + 1);
+                        return;
+                    }
+                }
+                // 모든 시도 실패 시 로딩과 지도 숨기기
+                if (mapLoading) mapLoading.style.display = 'none';
+                if (mapContainer) mapContainer.style.display = 'none';
+            }
+        });
+    }
+
+    // 주소에서 마지막 단어 제거 (괄호 안 공백은 무시)
+    function removeLastWord(address) {
+        if (!address) return null;
+
+        const words = [];
+        let current = '';
+        let parenDepth = 0;
+
+        for (const char of address.trim()) {
+            if (char === '(') parenDepth++;
+            else if (char === ')') parenDepth--;
+
+            if (char === ' ' && parenDepth === 0) {
+                if (current) words.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        if (current) words.push(current);
+
+        if (words.length <= 1) return null;
+        words.pop();
+        return words.join(' ');
     }
 
     function toggleNotification(subscriptionId, element) {

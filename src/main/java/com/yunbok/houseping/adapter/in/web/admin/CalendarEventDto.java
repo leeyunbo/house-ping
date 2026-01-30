@@ -27,6 +27,8 @@ public record CalendarEventDto(
             String detailUrl,
             String eventType,
             boolean notificationEnabled,
-            boolean expired
+            boolean expired,
+            String address,
+            String zipCode
     ) {}
 }

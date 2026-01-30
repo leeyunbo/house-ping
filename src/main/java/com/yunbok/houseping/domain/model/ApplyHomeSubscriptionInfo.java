@@ -24,6 +24,8 @@ public class ApplyHomeSubscriptionInfo implements SubscriptionInfo {
     private String detailUrl;
     private String contact;
     private Integer totalSupplyCount;
+    private String address;
+    private String zipCode;
 
     @Override
     public String getDisplayMessage() {
