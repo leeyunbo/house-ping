@@ -24,7 +24,7 @@ public class SubscriptionService implements SubscriptionUseCase {
 
         if (notify) {
             if (subscriptions.isEmpty()) {
-                notificationSender.sendNotification("No new subscriptions for " + targetDate);
+                notificationSender.sendNoDataNotification();
             } else {
                 notificationSender.sendNewSubscriptions(subscriptions);
             }

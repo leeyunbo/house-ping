@@ -72,7 +72,7 @@ class SubscriptionServiceTest {
 
             // then
             assertThat(result).isEmpty();
-            verify(notificationSender).sendNotification("No new subscriptions for " + targetDate);
+            verify(notificationSender).sendNoDataNotification();
             verify(notificationSender, never()).sendNewSubscriptions(any());
         }
 
