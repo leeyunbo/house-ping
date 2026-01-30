@@ -1,5 +1,6 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.domain.model.SyncResult;
 import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,14 +12,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @DisplayName("AdminSubscriptionController - 관리자 UI 컨트롤러")
@@ -33,6 +41,9 @@ class AdminSubscriptionControllerTest {
 
     @Mock
     private Model model;
+
+    @Mock
+    private RedirectAttributes redirectAttributes;
 
     private AdminSubscriptionController controller;
 
@@ -156,6 +167,186 @@ class AdminSubscriptionControllerTest {
 
             // then
             verify(model).addAttribute("sources", sources);
+        }
+    }
+
+    @Nested
+    @DisplayName("calendar() - 캘린더 페이지")
+    class CalendarPage {
+
+        @Test
+        @DisplayName("템플릿 경로 admin/subscriptions/calendar를 반환한다")
+        void returnsCorrectViewName() {
+            // when
+            String viewName = controller.calendar();
+
+            // then
+            assertThat(viewName).isEqualTo("admin/subscriptions/calendar");
+        }
+    }
+
+    @Nested
+    @DisplayName("calendarEvents() - 캘린더 이벤트 조회")
+    class CalendarEvents {
+
+        @Test
+        @DisplayName("이벤트 목록을 반환한다")
+        void returnsEvents() {
+            // given
+            LocalDate start = LocalDate.of(2025, 1, 1);
+            LocalDate end = LocalDate.of(2025, 1, 31);
+            CalendarEventDto.ExtendedProps extendedProps = new CalendarEventDto.ExtendedProps(
+                    "테스트 아파트", "서울", "ApplyHome", "APT",
+                    start, start, end, end.plusMonths(1), 100,
+                    "http://detail.url", "receipt", false
+            );
+            List<CalendarEventDto> events = List.of(
+                    new CalendarEventDto(1L, "테스트 아파트", start, end, "#3498db", "#ffffff", extendedProps)
+            );
+            when(queryService.getCalendarEvents(start, end)).thenReturn(events);
+
+            // when
+            ResponseEntity<List<CalendarEventDto>> response = controller.calendarEvents(start, end);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("getById() - ID로 조회")
+    class GetById {
+
+        @Test
+        @DisplayName("존재하는 ID면 데이터를 반환한다")
+        void returnsDataWhenFound() {
+            // given
+            AdminSubscriptionDto dto = createDto();
+            when(queryService.findById(1L)).thenReturn(Optional.of(dto));
+
+            // when
+            ResponseEntity<AdminSubscriptionDto> response = controller.getById(1L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 ID면 404를 반환한다")
+        void returnsNotFoundWhenMissing() {
+            // given
+            when(queryService.findById(999L)).thenReturn(Optional.empty());
+
+            // when
+            ResponseEntity<AdminSubscriptionDto> response = controller.getById(999L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("sync() - 동기화")
+    class Sync {
+
+        @Test
+        @DisplayName("동기화 성공 시 리다이렉트한다")
+        void redirectsAfterSync() {
+            // given
+            when(managementUseCase.sync()).thenReturn(new SyncResult(5, 3, 0));
+
+            // when
+            String result = controller.sync(redirectAttributes);
+
+            // then
+            assertThat(result).isEqualTo("redirect:/admin/subscriptions");
+        }
+
+        @Test
+        @DisplayName("동기화 성공 시 메시지를 추가한다")
+        void addsSuccessMessage() {
+            // given
+            when(managementUseCase.sync()).thenReturn(new SyncResult(5, 3, 0));
+
+            // when
+            controller.sync(redirectAttributes);
+
+            // then
+            verify(redirectAttributes).addFlashAttribute(eq("message"), contains("신규 5건"));
+        }
+
+        @Test
+        @DisplayName("동기화 실패 시 에러 메시지를 추가한다")
+        void addsErrorMessageOnFailure() {
+            // given
+            when(managementUseCase.sync()).thenThrow(new RuntimeException("API 오류"));
+
+            // when
+            controller.sync(redirectAttributes);
+
+            // then
+            verify(redirectAttributes).addFlashAttribute(eq("error"), contains("동기화 실패"));
+        }
+    }
+
+    @Nested
+    @DisplayName("toggleNotification() - 알림 토글")
+    class ToggleNotification {
+
+        @Test
+        @DisplayName("알림 설정 시 enabled true를 반환한다")
+        void returnsEnabledTrue() {
+            // given
+            when(queryService.toggleNotification(1L)).thenReturn(true);
+
+            // when
+            ResponseEntity<Map<String, Object>> response = controller.toggleNotification(1L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).containsEntry("enabled", true);
+            assertThat(response.getBody()).containsEntry("success", true);
+        }
+
+        @Test
+        @DisplayName("알림 해제 시 enabled false를 반환한다")
+        void returnsEnabledFalse() {
+            // given
+            when(queryService.toggleNotification(1L)).thenReturn(false);
+
+            // when
+            ResponseEntity<Map<String, Object>> response = controller.toggleNotification(1L);
+
+            // then
+            assertThat(response.getBody()).containsEntry("enabled", false);
+        }
+    }
+
+    @Nested
+    @DisplayName("removeNotification() - 알림 제거")
+    class RemoveNotification {
+
+        @Test
+        @DisplayName("성공 응답을 반환한다")
+        void returnsSuccessResponse() {
+            // when
+            ResponseEntity<Map<String, Object>> response = controller.removeNotification(1L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).containsEntry("success", true);
+        }
+
+        @Test
+        @DisplayName("queryService.removeNotification을 호출한다")
+        void callsRemoveNotification() {
+            // when
+            controller.removeNotification(1L);
+
+            // then
+            verify(queryService).removeNotification(1L);
         }
     }
 

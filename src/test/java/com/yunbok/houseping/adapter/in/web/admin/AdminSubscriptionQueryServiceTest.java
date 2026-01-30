@@ -1,5 +1,6 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionRepository;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
@@ -17,7 +18,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -263,12 +266,219 @@ class AdminSubscriptionQueryServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("availableHouseTypes() - 사용 가능한 주택형 목록")
+    class AvailableHouseTypes {
+
+        @Test
+        @DisplayName("저장된 주택형 목록을 반환한다")
+        void returnsDistinctHouseTypes() {
+            // given
+            List<String> houseTypes = List.of("084T", "059A", "074B");
+            when(subscriptionRepository.findDistinctHouseTypes()).thenReturn(houseTypes);
+
+            // when
+            List<String> result = service.availableHouseTypes();
+
+            // then
+            assertThat(result).containsExactly("084T", "059A", "074B");
+        }
+    }
+
+    @Nested
+    @DisplayName("getCalendarEvents() - 캘린더 이벤트 조회")
+    class GetCalendarEvents {
+
+        @Test
+        @DisplayName("범위 내 청약을 이벤트로 변환한다")
+        void returnsEventsInRange() {
+            // given
+            LocalDate start = LocalDate.of(2025, 1, 1);
+            LocalDate end = LocalDate.of(2025, 1, 31);
+
+            SubscriptionEntity entity = createEntityWithDates(
+                    "테스트 아파트", LocalDate.of(2025, 1, 10), LocalDate.of(2025, 1, 20));
+
+            when(subscriptionRepository.findAll(any(Predicate.class)))
+                    .thenReturn(List.of(entity));
+            when(notificationSubscriptionRepository.findBySubscriptionIdInAndEnabledTrue(any()))
+                    .thenReturn(List.of());
+
+            // when
+            List<CalendarEventDto> events = service.getCalendarEvents(start, end);
+
+            // then
+            assertThat(events).isNotEmpty();
+        }
+
+        @Test
+        @DisplayName("LH 소스는 다른 색상을 사용한다")
+        void usesLHColorForLHSource() {
+            // given
+            LocalDate start = LocalDate.of(2025, 1, 1);
+            LocalDate end = LocalDate.of(2025, 1, 31);
+
+            SubscriptionEntity entity = SubscriptionEntity.builder()
+                    .id(1L)
+                    .houseName("LH 아파트")
+                    .area("서울")
+                    .source("LH")
+                    .receiptStartDate(LocalDate.of(2025, 1, 10))
+                    .receiptEndDate(LocalDate.of(2025, 1, 20))
+                    .collectedAt(LocalDateTime.now())
+                    .build();
+
+            when(subscriptionRepository.findAll(any(Predicate.class)))
+                    .thenReturn(List.of(entity));
+            when(notificationSubscriptionRepository.findBySubscriptionIdInAndEnabledTrue(any()))
+                    .thenReturn(List.of());
+
+            // when
+            List<CalendarEventDto> events = service.getCalendarEvents(start, end);
+
+            // then
+            assertThat(events).isNotEmpty();
+            assertThat(events.get(0).color()).isEqualTo("#f97316"); // LH 오렌지색
+        }
+
+        @Test
+        @DisplayName("당첨 발표일 이벤트도 생성한다")
+        void createsWinnerAnnounceEvent() {
+            // given
+            LocalDate start = LocalDate.of(2025, 1, 1);
+            LocalDate end = LocalDate.of(2025, 1, 31);
+
+            SubscriptionEntity entity = SubscriptionEntity.builder()
+                    .id(1L)
+                    .houseName("테스트 아파트")
+                    .area("서울")
+                    .source("ApplyHome")
+                    .receiptStartDate(LocalDate.of(2025, 1, 10))
+                    .receiptEndDate(LocalDate.of(2025, 1, 20))
+                    .winnerAnnounceDate(LocalDate.of(2025, 1, 25))
+                    .collectedAt(LocalDateTime.now())
+                    .build();
+
+            when(subscriptionRepository.findAll(any(Predicate.class)))
+                    .thenReturn(List.of(entity));
+            when(notificationSubscriptionRepository.findBySubscriptionIdInAndEnabledTrue(any()))
+                    .thenReturn(List.of());
+
+            // when
+            List<CalendarEventDto> events = service.getCalendarEvents(start, end);
+
+            // then
+            assertThat(events).hasSize(2); // 접수 기간 + 당첨 발표일
+        }
+    }
+
+    @Nested
+    @DisplayName("findById() - ID로 조회")
+    class FindById {
+
+        @Test
+        @DisplayName("존재하면 DTO로 변환하여 반환한다")
+        void returnsDtoWhenFound() {
+            // given
+            SubscriptionEntity entity = createEntityWithDates(
+                    "테스트 아파트", LocalDate.of(2025, 1, 10), LocalDate.of(2025, 1, 20));
+            when(subscriptionRepository.findById(1L)).thenReturn(Optional.of(entity));
+
+            // when
+            Optional<AdminSubscriptionDto> result = service.findById(1L);
+
+            // then
+            assertThat(result).isPresent();
+            assertThat(result.get().houseName()).isEqualTo("테스트 아파트");
+        }
+
+        @Test
+        @DisplayName("존재하지 않으면 빈 Optional을 반환한다")
+        void returnsEmptyWhenNotFound() {
+            // given
+            when(subscriptionRepository.findById(999L)).thenReturn(Optional.empty());
+
+            // when
+            Optional<AdminSubscriptionDto> result = service.findById(999L);
+
+            // then
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("toggleNotification() - 알림 토글")
+    class ToggleNotification {
+
+        @Test
+        @DisplayName("기존 구독이 있으면 토글한다")
+        void togglesExisting() {
+            // given
+            NotificationSubscriptionEntity entity = NotificationSubscriptionEntity.builder()
+                    .id(1L)
+                    .subscriptionId(100L)
+                    .enabled(true)
+                    .build();
+            when(notificationSubscriptionRepository.findBySubscriptionId(100L))
+                    .thenReturn(Optional.of(entity));
+
+            // when
+            boolean result = service.toggleNotification(100L);
+
+            // then
+            assertThat(result).isFalse(); // true -> false
+        }
+
+        @Test
+        @DisplayName("기존 구독이 없으면 새로 생성한다")
+        void createsNewWhenNotExists() {
+            // given
+            when(notificationSubscriptionRepository.findBySubscriptionId(100L))
+                    .thenReturn(Optional.empty());
+
+            // when
+            boolean result = service.toggleNotification(100L);
+
+            // then
+            assertThat(result).isTrue();
+            verify(notificationSubscriptionRepository).save(any(NotificationSubscriptionEntity.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("removeNotification() - 알림 제거")
+    class RemoveNotification {
+
+        @Test
+        @DisplayName("해당 청약의 알림 구독을 삭제한다")
+        void removesNotificationSubscription() {
+            // when
+            service.removeNotification(100L);
+
+            // then
+            verify(notificationSubscriptionRepository).deleteBySubscriptionId(100L);
+        }
+    }
+
     private SubscriptionEntity createEntity(String houseName) {
         return SubscriptionEntity.builder()
                 .houseName(houseName)
                 .area("서울")
                 .source("ApplyHome")
                 .receiptStartDate(LocalDate.now())
+                .collectedAt(LocalDateTime.now())
+                .build();
+    }
+
+    private SubscriptionEntity createEntityWithDates(String houseName, LocalDate receiptStart, LocalDate receiptEnd) {
+        return SubscriptionEntity.builder()
+                .id(1L)
+                .houseName(houseName)
+                .area("서울")
+                .source("ApplyHome")
+                .receiptStartDate(receiptStart)
+                .receiptEndDate(receiptEnd)
+                .collectedAt(LocalDateTime.now())
                 .build();
     }
 }
