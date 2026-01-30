@@ -9,6 +9,7 @@
 [![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-green?logo=springboot)](https://spring.io/projects/spring-boot)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
+[![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-blueviolet?logo=anthropic)](https://claude.ai)
 
 </div>
 
