@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Houseping Admin - 경쟁률 데이터 조회</title>
@@ -411,6 +411,7 @@
         <a href="/admin/subscriptions">청약 데이터</a>
         <a href="/admin/subscriptions/calendar">청약 캘린더</a>
         <a href="/admin/competition-rates" class="active">경쟁률 데이터</a>
+        <a href="/admin/users" sec:authorize="hasRole('MASTER')">회원 관리</a>
     </div>
 </div>
 

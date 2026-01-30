@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Houseping Admin - 회원 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --success-dark: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fff1f2 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+            display: flex;
+            gap: 8px;
+        }
+        .nav a {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .nav a:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .nav a.active {
+            color: white;
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--danger);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-master {
+            background: #ddd6fe;
+            color: #7c3aed;
+        }
+
+        .badge-user {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .badge-active {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-approve {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: var(--success-dark);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-dark);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/admin/dashboard">대시보드</a>
+        <a href="/admin/subscriptions">청약 데이터</a>
+        <a href="/admin/subscriptions/calendar">청약 캘린더</a>
+        <a href="/admin/competition-rates">경쟁률 데이터</a>
+        <a href="/admin/users" class="active">회원 관리</a>
+    </div>
+
+    <div class="header">
+        <h1>회원 관리</h1>
+        <div class="user-info">
+            <span class="user-name" sec:authentication="name">관리자</span>
+            <a href="/auth/logout" class="logout-btn">로그아웃</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <table th:if="${!users.isEmpty()}">
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>이메일</th>
+                        <th>네이버 ID</th>
+                        <th>역할</th>
+                        <th>상태</th>
+                        <th>마지막 로그인</th>
+                        <th>가입일</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.name}">홍길동</td>
+                        <td th:text="${user.email}">email@example.com</td>
+                        <td th:text="${user.naverId}">naverId</td>
+                        <td>
+                            <span th:if="${user.role.name() == 'MASTER'}" class="badge badge-master">MASTER</span>
+                            <span th:if="${user.role.name() == 'USER'}" class="badge badge-user">USER</span>
+                        </td>
+                        <td>
+                            <span th:if="${user.status.name() == 'ACTIVE'}" class="badge badge-active">활성</span>
+                            <span th:if="${user.status.name() == 'PENDING'}" class="badge badge-pending">대기</span>
+                        </td>
+                        <td th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm') : '-'}">2024-01-01 12:00</td>
+                        <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">2024-01-01 12:00</td>
+                        <td>
+                            <div class="actions">
+                                <form th:if="${user.status.name() == 'PENDING'}" th:action="@{/admin/users/{id}/approve(id=${user.id})}" method="post" style="margin: 0;">
+                                    <button type="submit" class="btn btn-approve">승인</button>
+                                </form>
+                                <form th:if="${user.role.name() != 'MASTER'}" th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" style="margin: 0;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                    <button type="submit" class="btn btn-delete">삭제</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${users.isEmpty()}" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p>등록된 회원이 없습니다.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
