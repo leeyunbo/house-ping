@@ -101,7 +101,8 @@ public class AdminSubscriptionQueryService {
                 notificationEnabled,
                 expired,
                 entity.getAddress(),
-                entity.getZipCode()
+                entity.getZipCode(),
+                entity.getHouseManageNo()
         );
     }
 

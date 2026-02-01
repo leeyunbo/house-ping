@@ -2,6 +2,8 @@ package com.yunbok.houseping.adapter.in.web.admin;
 
 import com.yunbok.houseping.domain.model.SyncResult;
 import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceEntity;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,6 +43,9 @@ class AdminSubscriptionControllerTest {
     private SubscriptionManagementUseCase managementUseCase;
 
     @Mock
+    private SubscriptionPriceRepository priceRepository;
+
+    @Mock
     private Model model;
 
     @Mock
@@ -49,7 +55,7 @@ class AdminSubscriptionControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new AdminSubscriptionController(queryService, managementUseCase);
+        controller = new AdminSubscriptionController(queryService, managementUseCase, priceRepository);
     }
 
     @Nested
@@ -354,6 +360,85 @@ class AdminSubscriptionControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("getPrices() - 분양가 조회")
+    class GetPrices {
+
+        @Test
+        @DisplayName("청약이 존재하고 분양가가 있으면 목록을 반환한다")
+        void returnsPricesWhenExist() {
+            // given
+            AdminSubscriptionDto dto = createDtoWithHouseManageNo("2024000001");
+            when(queryService.findById(1L)).thenReturn(Optional.of(dto));
+
+            SubscriptionPriceEntity priceEntity = SubscriptionPriceEntity.builder()
+                    .houseManageNo("2024000001")
+                    .pblancNo("2024000001")
+                    .modelNo("001")
+                    .houseType("59A")
+                    .supplyArea(BigDecimal.valueOf(84.12))
+                    .supplyCount(100)
+                    .specialSupplyCount(20)
+                    .topAmount(52300L)
+                    .pricePerPyeong(2100L)
+                    .build();
+            when(priceRepository.findByHouseManageNo("2024000001")).thenReturn(List.of(priceEntity));
+
+            // when
+            ResponseEntity<List<AdminSubscriptionController.PriceDto>> response = controller.getPrices(1L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).hasSize(1);
+            assertThat(response.getBody().get(0).houseType()).isEqualTo("59A");
+            assertThat(response.getBody().get(0).topAmount()).isEqualTo(52300L);
+        }
+
+        @Test
+        @DisplayName("청약이 존재하지만 분양가가 없으면 빈 목록을 반환한다")
+        void returnsEmptyWhenNoPrices() {
+            // given
+            AdminSubscriptionDto dto = createDtoWithHouseManageNo("2024000001");
+            when(queryService.findById(1L)).thenReturn(Optional.of(dto));
+            when(priceRepository.findByHouseManageNo("2024000001")).thenReturn(List.of());
+
+            // when
+            ResponseEntity<List<AdminSubscriptionController.PriceDto>> response = controller.getPrices(1L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("houseManageNo가 없으면 빈 목록을 반환한다")
+        void returnsEmptyWhenNoHouseManageNo() {
+            // given
+            AdminSubscriptionDto dto = createDtoWithHouseManageNo(null);
+            when(queryService.findById(1L)).thenReturn(Optional.of(dto));
+
+            // when
+            ResponseEntity<List<AdminSubscriptionController.PriceDto>> response = controller.getPrices(1L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("청약이 존재하지 않으면 404를 반환한다")
+        void returnsNotFoundWhenNoSubscription() {
+            // given
+            when(queryService.findById(999L)).thenReturn(Optional.empty());
+
+            // when
+            ResponseEntity<List<AdminSubscriptionController.PriceDto>> response = controller.getPrices(999L);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
     private void mockQueryServiceDefaults() {
         when(queryService.search(any())).thenReturn(Page.empty());
         when(queryService.availableAreas()).thenReturn(List.of());
@@ -362,6 +447,10 @@ class AdminSubscriptionControllerTest {
     }
 
     private AdminSubscriptionDto createDto() {
+        return createDtoWithHouseManageNo(null);
+    }
+
+    private AdminSubscriptionDto createDtoWithHouseManageNo(String houseManageNo) {
         return new AdminSubscriptionDto(
                 1L,
                 "ApplyHome",
@@ -379,7 +468,8 @@ class AdminSubscriptionControllerTest {
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 "서울특별시 강남구 테헤란로 123",
-                "06134"
+                "06134",
+                houseManageNo
         );
     }
 }

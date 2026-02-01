@@ -780,6 +780,88 @@
             height: 18px;
         }
 
+        /* 분양가 섹션 */
+        .price-section {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .price-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .price-section-title svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .price-table th,
+        .price-table td {
+            padding: 10px 8px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .price-table th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .price-table th:first-child,
+        .price-table td:first-child {
+            text-align: left;
+        }
+
+        .price-table td {
+            color: var(--text);
+        }
+
+        .price-table .price-amount {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .price-table .price-pyeong {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .price-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+            gap: 8px;
+        }
+
+        .price-empty {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 13px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
         /* 테이블 행 클릭 가능하게 */
         tbody tr {
             cursor: pointer;
@@ -1158,6 +1240,20 @@
                 <div class="notification-toggle-switch"></div>
             </div>
             <div class="notification-desc">접수 시작 1일 전, 접수 종료 당일에 Slack으로 알림을 받습니다.</div>
+
+            <div class="price-section" id="priceSection">
+                <div class="price-section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    분양가 정보
+                </div>
+                <div class="price-loading" id="priceLoading">
+                    <div class="spinner"></div>
+                    <span>분양가 조회 중...</span>
+                </div>
+                <div id="priceContent"></div>
+            </div>
         `;
 
         // 카카오맵 영역 추가 (주소가 있는 경우에만)
@@ -1217,6 +1313,72 @@
         if (hasAddress && hasKakao) {
             initKakaoMap(address, houseName);
         }
+
+        // 분양가 데이터 로드
+        loadPriceData(id);
+    }
+
+    function loadPriceData(subscriptionId) {
+        const priceLoading = document.getElementById('priceLoading');
+        const priceContent = document.getElementById('priceContent');
+
+        fetch(`/admin/subscriptions/${subscriptionId}/prices`)
+            .then(response => response.json())
+            .then(prices => {
+                priceLoading.style.display = 'none';
+
+                if (!prices || prices.length === 0) {
+                    priceContent.innerHTML = '<div class="price-empty">분양가 정보가 없습니다</div>';
+                    return;
+                }
+
+                let html = `
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>주택형</th>
+                                <th>공급면적</th>
+                                <th>세대수</th>
+                                <th>분양가</th>
+                                <th>평당가</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                prices.forEach(p => {
+                    const supplyCount = (p.supplyCount || 0) + (p.specialSupplyCount || 0);
+                    html += `
+                        <tr>
+                            <td>${p.houseType || '-'}</td>
+                            <td>${p.supplyArea ? p.supplyArea.toFixed(2) + '㎡' : '-'}</td>
+                            <td>${supplyCount > 0 ? supplyCount + '세대' : '-'}</td>
+                            <td class="price-amount">${p.topAmount ? formatPrice(p.topAmount) : '-'}</td>
+                            <td class="price-pyeong">${p.pricePerPyeong ? formatPrice(p.pricePerPyeong) + '/평' : '-'}</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                priceContent.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading price data:', error);
+                priceLoading.style.display = 'none';
+                priceContent.innerHTML = '<div class="price-empty">분양가 정보를 불러올 수 없습니다</div>';
+            });
+    }
+
+    function formatPrice(amount) {
+        if (amount >= 10000) {
+            const uk = Math.floor(amount / 10000);
+            const rest = amount % 10000;
+            if (rest === 0) {
+                return uk + '억';
+            }
+            return uk + '억 ' + rest.toLocaleString() + '만';
+        }
+        return amount.toLocaleString() + '만';
     }
 
     function closeModal(event) {

@@ -23,6 +23,9 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceEntity;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
+
 @Controller
 @RequestMapping("/admin/subscriptions")
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class AdminSubscriptionController {
 
     private final AdminSubscriptionQueryService queryService;
     private final SubscriptionManagementUseCase managementUseCase;
+    private final SubscriptionPriceRepository priceRepository;
 
     @Value("${kakao.map.app-key:}")
     private String kakaoMapAppKey;
@@ -122,4 +126,44 @@ public class AdminSubscriptionController {
     }
 
     public record BulkNotificationRequest(List<Long> ids) {}
+
+    /**
+     * 분양가 상세 조회
+     */
+    @GetMapping("/{id}/prices")
+    @ResponseBody
+    public ResponseEntity<List<PriceDto>> getPrices(@PathVariable Long id) {
+        return queryService.findById(id)
+                .map(sub -> {
+                    if (sub.houseManageNo() == null || sub.houseManageNo().isEmpty()) {
+                        return ResponseEntity.ok(List.<PriceDto>of());
+                    }
+                    List<PriceDto> prices = priceRepository.findByHouseManageNo(sub.houseManageNo())
+                            .stream()
+                            .map(PriceDto::from)
+                            .toList();
+                    return ResponseEntity.ok(prices);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    public record PriceDto(
+            String houseType,
+            Double supplyArea,
+            Integer supplyCount,
+            Integer specialSupplyCount,
+            Long topAmount,
+            Long pricePerPyeong
+    ) {
+        public static PriceDto from(SubscriptionPriceEntity entity) {
+            return new PriceDto(
+                    entity.getHouseType(),
+                    entity.getSupplyArea() != null ? entity.getSupplyArea().doubleValue() : null,
+                    entity.getSupplyCount(),
+                    entity.getSpecialSupplyCount(),
+                    entity.getTopAmount(),
+                    entity.getPricePerPyeong()
+            );
+        }
+    }
 }
