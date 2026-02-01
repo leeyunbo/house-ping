@@ -4,11 +4,12 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:h2:file:~/Project/data/houseping
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:houseping}
+    username: ${DB_USER:houseping}
+    password: ${DB_PASSWORD:houseping123}
+    driver-class-name: org.postgresql.Driver
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: false
@@ -16,10 +17,6 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
 
   security:
     oauth2:
@@ -110,6 +107,11 @@ slack:
 kakao:
   map:
     app-key: ${KAKAO_MAP_APP_KEY:}
+
+# 국토교통부 실거래가 API 설정
+realtransaction:
+  api:
+    key: ${REAL_TRANSACTION_API_KEY:}
 
 # 로깅 설정 (상세 설정은 logback-spring.xml 참조)
 logging:

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- 프로퍼티 정의 -->
-    <property name="LOG_PATH" value="~/Project/houseping/logs"/>
+    <property name="LOG_PATH" value="./logs"/>
     <property name="LOG_FILE_NAME" value="houseping"/>
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
     <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %cyan([%thread]) %yellow(%logger{36}) - %msg%n"/>

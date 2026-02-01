@@ -98,4 +98,15 @@ public class WebClientConfig {
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
+
+    /**
+     * 국토교통부 실거래가 API용 WebClient
+     */
+    @Bean
+    public WebClient realTransactionWebClient() {
+        return WebClient.builder()
+                .baseUrl("https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev")
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
+    }
 }
