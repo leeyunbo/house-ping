@@ -1,8 +1,11 @@
 package com.yunbok.houseping.adapter.in.scheduler;
 
+import com.yunbok.houseping.adapter.out.api.ApplyhomeApiAdapter;
 import com.yunbok.houseping.domain.model.SyncResult;
 import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
 import com.yunbok.houseping.domain.port.in.SubscriptionUseCase;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,11 +31,26 @@ class SubscriptionSchedulerTest {
     @Mock
     private SubscriptionManagementUseCase managementUseCase;
 
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
+
+    @Mock
+    private SubscriptionPriceRepository priceRepository;
+
+    @Mock
+    private ApplyhomeApiAdapter applyhomeApiAdapter;
+
     private SubscriptionScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        scheduler = new SubscriptionScheduler(subscriptionUseCase, managementUseCase);
+        scheduler = new SubscriptionScheduler(
+                subscriptionUseCase,
+                managementUseCase,
+                subscriptionRepository,
+                priceRepository,
+                applyhomeApiAdapter
+        );
     }
 
     @Nested

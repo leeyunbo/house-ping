@@ -384,6 +384,33 @@
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
         <div class="section-grid">
+            <!-- 분양가 수집 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    분양가 데이터 수집
+                </h2>
+                <p class="card-description">
+                    2025년 이후 ApplyHome 청약의 분양가 상세 정보를 수집합니다.<br>
+                    주택형별 분양최고금액, 공급면적, 평당가격 등을 저장합니다.
+                </p>
+                <div class="btn-group">
+                    <form th:action="@{/admin/system/collect-price-data}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-primary" onclick="return confirm('분양가 데이터 수집을 시작합니다. 시간이 걸릴 수 있습니다. 계속하시겠습니까?');">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            분양가 수집 시작
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <!-- 알림 테스트 -->
             <div class="card">
                 <h2 class="card-title">

@@ -14,6 +14,7 @@ public enum HouseType {
     PRIVATE_PRE_SUBSCRIPTION("09", "민간사전청약"),
     NEWLYWED_TOWN("10", "신혼희망타운"),
     REMAINING("", "무순위"),
+    ARBITRARY("", "임의공급"),
     OTHER("", "기타");
 
     private final String houseSecd;    // 청약Home API 주택구분코드

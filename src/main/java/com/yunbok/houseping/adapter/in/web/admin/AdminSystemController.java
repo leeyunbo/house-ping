@@ -1,11 +1,14 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.adapter.out.api.ApplyhomeApiAdapter;
 import com.yunbok.houseping.adapter.out.notification.SlackMessageFormatter;
 import com.yunbok.houseping.adapter.out.notification.TelegramMessageFormatter;
 import com.yunbok.houseping.domain.model.DailyNotificationReport;
 import com.yunbok.houseping.domain.service.DailyNotificationService;
 import com.yunbok.houseping.infrastructure.persistence.NotificationHistoryEntity;
 import com.yunbok.houseping.infrastructure.persistence.NotificationHistoryRepository;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 시스템 관리 컨트롤러 (MASTER 전용)
@@ -34,6 +39,8 @@ public class AdminSystemController {
     private final com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionRepository notificationSubscriptionRepository;
     private final com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository subscriptionRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ApplyhomeApiAdapter applyhomeApiAdapter;
+    private final SubscriptionPriceRepository subscriptionPriceRepository;
 
     @GetMapping
     public String systemPage(Model model) {
@@ -178,6 +185,56 @@ public class AdminSystemController {
         } catch (Exception e) {
             log.error("[시스템 관리] 전체 알림 리셋 실패", e);
             redirectAttributes.addFlashAttribute("error", "리셋 실패: " + e.getMessage());
+        }
+        return "redirect:/admin/system";
+    }
+
+    /**
+     * 2025-2026 ApplyHome 청약 분양가 수집
+     */
+    @PostMapping("/collect-price-data")
+    public String collectPriceData(RedirectAttributes redirectAttributes) {
+        try {
+            log.info("[시스템 관리] 분양가 데이터 수집 시작");
+
+            // 2025-01-01 이후 ApplyHome 청약 조회
+            LocalDate startDate = LocalDate.of(2025, 1, 1);
+            List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll().stream()
+                    .filter(s -> "ApplyHome".equals(s.getSource()))
+                    .filter(s -> s.getHouseManageNo() != null && !s.getHouseManageNo().isEmpty())
+                    .filter(s -> s.getReceiptStartDate() != null && !s.getReceiptStartDate().isBefore(startDate))
+                    .filter(s -> !subscriptionPriceRepository.existsByHouseManageNo(s.getHouseManageNo()))
+                    .toList();
+
+            log.info("[시스템 관리] 분양가 수집 대상: {}건", subscriptions.size());
+
+            AtomicInteger successCount = new AtomicInteger(0);
+            AtomicInteger failCount = new AtomicInteger(0);
+
+            for (SubscriptionEntity subscription : subscriptions) {
+                try {
+                    applyhomeApiAdapter.fetchAndSavePriceDetails(
+                            subscription.getHouseManageNo(),
+                            subscription.getPblancNo(),
+                            subscription.getHouseType()
+                    );
+                    successCount.incrementAndGet();
+
+                    // API 과부하 방지
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    failCount.incrementAndGet();
+                    log.warn("[분양가] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
+                }
+            }
+
+            String message = String.format("분양가 수집 완료 - 성공: %d건, 실패: %d건", successCount.get(), failCount.get());
+            log.info("[시스템 관리] {}", message);
+            redirectAttributes.addFlashAttribute("message", message);
+
+        } catch (Exception e) {
+            log.error("[시스템 관리] 분양가 수집 실패", e);
+            redirectAttributes.addFlashAttribute("error", "분양가 수집 실패: " + e.getMessage());
         }
         return "redirect:/admin/system";
     }

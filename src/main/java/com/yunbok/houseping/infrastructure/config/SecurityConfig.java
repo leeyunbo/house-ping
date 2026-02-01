@@ -25,17 +25,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**", "/h2-console/**")
-            )
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin()) // H2 console
+                .ignoringRequestMatchers("/api/**")
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/admin").permitAll()
+                .requestMatchers("/").permitAll()
+                .requestMatchers("/home", "/home/**").hasRole("MASTER")
                 .requestMatchers("/favicon.ico", "/favicon.svg").permitAll()
                 .requestMatchers("/auth/**", "/oauth/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/admin/users/**").hasRole("MASTER")
                 .requestMatchers("/admin/system/**").hasRole("MASTER")
                 .requestMatchers("/admin/**").authenticated()
