@@ -30,15 +30,15 @@ Houseping은 **청약 분양가와 주변 실거래가를 비교 분석**하여,
 
 ## 주요 기능
 
-### 공개 페이지 (비로그인)
+### 공개 페이지
 
 | 기능 | 설명 |
 |------|------|
-| **청약 목록** | 서울/경기 청약 정보 확인 |
+| **청약 목록** | 서울/경기 임박한 청약 정보 확인 |
 | **시세 비교 분석** | 평형별 분양가 vs 주변 실거래가 비교, 예상 차익 계산 |
 | **실거래가 조회** | 동 단위 최근 3개월 실거래 데이터 |
 
-### 관리자 페이지 (로그인 필요)
+### 관리자 페이지 (권한 필요)
 
 | 기능 | 설명 |
 |------|------|
@@ -58,13 +58,13 @@ Houseping은 **청약 분양가와 주변 실거래가를 비교 분석**하여,
 | **Frontend** | Thymeleaf, FullCalendar.js |
 | **Auth** | OAuth2 (Naver) |
 
-## 데이터 범위
+## 공개 데이터 범위
 
 | 항목 | 범위 |
 |------|------|
 | **지역** | 서울, 경기 (현재) |
 | **청약 유형** | 민영/공공 아파트 (청약Home) |
-| **실거래가** | 국토교통부 아파트 매매 실거래 상세 API |
+| **실거래가** | 임박한 청약 주변 실거래가 |
 | **비교 기준** | 동일 동, 유사 면적(±5㎡) 최근 3개월 거래 |
 
 
@@ -135,6 +135,7 @@ TELEGRAM_CHAT_IDS="chat_id1,chat_id2"
 NAVER_CLIENT_ID=your_client_id
 NAVER_CLIENT_SECRET=your_client_secret
 ```
+- 활용되는 모든 API에 대한 권한신청이 필요합니다.
 
 ### 3. 실행
 
@@ -153,23 +154,6 @@ NAVER_CLIENT_SECRET=your_client_secret
 | 청약 목록 | http://localhost:10030/home | 불필요 |
 | 청약 분석 | http://localhost:10030/home/analysis/{id} | 불필요 |
 | 관리자 대시보드 | http://localhost:10030/admin | 필요 |
-
-## 설정
-
-`application.yml`에서 데이터 소스 및 대상 지역을 설정합니다.
-
-```yaml
-feature:
-  subscription:
-    applyhome-api-enabled: true
-    lh-web-enabled: true
-    lh-api-enabled: true
-
-subscription:
-  target-areas:
-    - 서울
-    - 경기
-```
 
 ## 아키텍처
 
