@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('청약 분석')}"></head>
+<head>
+    <style>
+        .hero {
+            text-align: center;
+            padding: 80px 24px 60px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .hero .service-notice {
+            font-size: 14px;
+            color: var(--text-muted);
+            opacity: 0.7;
+            margin-bottom: 32px;
+        }
+
+        .filters {
+            max-width: 1200px;
+            margin: 0 auto 32px;
+            padding: 0 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title .badge {
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-primary {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .subscription-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
+        .subscription-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .subscription-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .card-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-upcoming {
+            background: var(--primary);
+            color: white;
+        }
+
+        .status-closed {
+            background: var(--text-muted);
+            color: white;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .card-area {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .card-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 16px; }
+            .subscription-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar}"></nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>이 청약, 넣을만할까?</h1>
+        <p>청약 정보와 주변 실거래가를 한눈에 비교 분석하세요</p>
+        <p class="service-notice">현재 서울·경기 지역만 제공됩니다</p>
+    </section>
+
+    <!-- Filters -->
+    <div class="filters">
+        <a th:href="@{/home}" class="filter-btn" th:classappend="${selectedArea == null} ? 'active' : ''">전체</a>
+        <a th:each="area : ${areas}" th:href="@{/home(area=${area})}" class="filter-btn"
+           th:classappend="${selectedArea == area} ? 'active' : ''" th:text="${area}">서울</a>
+    </div>
+
+    <div class="container">
+        <!-- 접수중 청약 -->
+        <section th:if="${!activeSubscriptions.isEmpty()}">
+            <h2 class="section-title">
+                접수중 <span class="badge badge-success" th:text="${#lists.size(activeSubscriptions)} + '건'">0건</span>
+            </h2>
+            <div class="subscription-grid">
+                <a th:each="s : ${activeSubscriptions}" th:href="@{/home/analysis/{id}(id=${s.id})}" class="subscription-card">
+                    <div class="card-header">
+                        <span class="card-status status-active">접수중</span>
+                    </div>
+                    <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
+                    <p class="card-area" th:text="${s.area}">서울</p>
+                    <div class="card-info">
+                        <span th:if="${s.receiptStartDate != null}">
+                            <span th:text="${#temporals.format(s.receiptStartDate, 'M/d')}">1/1</span>
+                            <span th:if="${s.receiptEndDate != null}">
+                                ~ <span th:text="${#temporals.format(s.receiptEndDate, 'M/d')}">1/5</span>
+                            </span>
+                        </span>
+                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}"
+                              th:text="${s.totalSupplyCount} + '세대'">100세대</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 접수예정 청약 -->
+        <section th:if="${!upcomingSubscriptions.isEmpty()}">
+            <h2 class="section-title">
+                접수예정 <span class="badge badge-primary" th:text="${#lists.size(upcomingSubscriptions)} + '건'">0건</span>
+            </h2>
+            <div class="subscription-grid">
+                <a th:each="s : ${upcomingSubscriptions}" th:href="@{/home/analysis/{id}(id=${s.id})}" class="subscription-card">
+                    <div class="card-header">
+                        <span class="card-status status-upcoming">접수예정</span>
+                    </div>
+                    <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
+                    <p class="card-area" th:text="${s.area}">서울</p>
+                    <div class="card-info">
+                        <span th:if="${s.receiptStartDate != null}">
+                            접수일: <span th:text="${#temporals.format(s.receiptStartDate, 'M/d')}">1/1</span>
+                        </span>
+                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}"
+                              th:text="${s.totalSupplyCount} + '세대'">100세대</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 청약 없음 -->
+        <div th:if="${activeSubscriptions.isEmpty() and upcomingSubscriptions.isEmpty()}" class="empty-state">
+            <p>현재 접수중이거나 예정된 청약이 없습니다.</p>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+</body>
+</html>

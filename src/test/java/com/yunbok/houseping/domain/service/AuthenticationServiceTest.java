@@ -99,8 +99,8 @@ class AuthenticationServiceTest {
         }
 
         @Test
-        @DisplayName("신규 일반 사용자는 USER 역할과 PENDING 상태로 생성된다")
-        void createsNewRegularUserWithPendingStatus() {
+        @DisplayName("신규 일반 사용자는 USER 역할과 ACTIVE 상태로 생성된다 (자동 회원가입)")
+        void createsNewRegularUserWithActiveStatus() {
             // given
             ReflectionTestUtils.setField(service, "masterNaverId", "master-naver-id");
 
@@ -123,11 +123,11 @@ class AuthenticationServiceTest {
 
             User savedUser = userCaptor.getValue();
             assertThat(savedUser.getRole()).isEqualTo(UserRole.USER);
-            assertThat(savedUser.getStatus()).isEqualTo(UserStatus.PENDING);
+            assertThat(savedUser.getStatus()).isEqualTo(UserStatus.ACTIVE);
         }
 
         @Test
-        @DisplayName("마스터 ID가 비어있으면 일반 사용자로 생성된다")
+        @DisplayName("마스터 ID가 비어있으면 일반 사용자로 생성된다 (자동 ACTIVE)")
         void createsRegularUserWhenMasterIdIsEmpty() {
             // given
             ReflectionTestUtils.setField(service, "masterNaverId", "");
@@ -151,11 +151,11 @@ class AuthenticationServiceTest {
 
             User savedUser = userCaptor.getValue();
             assertThat(savedUser.getRole()).isEqualTo(UserRole.USER);
-            assertThat(savedUser.getStatus()).isEqualTo(UserStatus.PENDING);
+            assertThat(savedUser.getStatus()).isEqualTo(UserStatus.ACTIVE);
         }
 
         @Test
-        @DisplayName("마스터 ID가 null이면 일반 사용자로 생성된다")
+        @DisplayName("마스터 ID가 null이면 일반 사용자로 생성된다 (자동 ACTIVE)")
         void createsRegularUserWhenMasterIdIsNull() {
             // given
             ReflectionTestUtils.setField(service, "masterNaverId", null);
@@ -179,7 +179,7 @@ class AuthenticationServiceTest {
 
             User savedUser = userCaptor.getValue();
             assertThat(savedUser.getRole()).isEqualTo(UserRole.USER);
-            assertThat(savedUser.getStatus()).isEqualTo(UserStatus.PENDING);
+            assertThat(savedUser.getStatus()).isEqualTo(UserStatus.ACTIVE);
         }
 
         @Test

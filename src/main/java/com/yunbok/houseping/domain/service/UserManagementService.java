@@ -36,4 +36,22 @@ public class UserManagementService implements UserManagementUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
         userPersistencePort.deleteById(userId);
     }
+
+    @Override
+    @Transactional
+    public void promoteToAdmin(Long userId) {
+        User user = userPersistencePort.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+        user.promoteToAdmin();
+        userPersistencePort.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void demoteToUser(Long userId) {
+        User user = userPersistencePort.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+        user.demoteToUser();
+        userPersistencePort.save(user);
+    }
 }

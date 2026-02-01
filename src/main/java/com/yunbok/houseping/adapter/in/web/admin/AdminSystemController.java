@@ -1,5 +1,6 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.adapter.in.scheduler.RealTransactionScheduler;
 import com.yunbok.houseping.adapter.out.api.ApplyhomeApiAdapter;
 import com.yunbok.houseping.adapter.out.notification.SlackMessageFormatter;
 import com.yunbok.houseping.adapter.out.notification.TelegramMessageFormatter;
@@ -11,7 +12,6 @@ import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Controller
 @RequestMapping("/admin/system")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('MASTER')")
+// SecurityConfig에서 /admin/system/** → hasRole('MASTER') 설정됨
 public class AdminSystemController {
 
     private final DailyNotificationService dailyNotificationService;
@@ -41,6 +41,7 @@ public class AdminSystemController {
     private final NotificationHistoryRepository notificationHistoryRepository;
     private final ApplyhomeApiAdapter applyhomeApiAdapter;
     private final SubscriptionPriceRepository subscriptionPriceRepository;
+    private final RealTransactionScheduler realTransactionScheduler;
 
     @GetMapping
     public String systemPage(Model model) {
@@ -235,6 +236,22 @@ public class AdminSystemController {
         } catch (Exception e) {
             log.error("[시스템 관리] 분양가 수집 실패", e);
             redirectAttributes.addFlashAttribute("error", "분양가 수집 실패: " + e.getMessage());
+        }
+        return "redirect:/admin/system";
+    }
+
+    /**
+     * 실거래가 데이터 수집 (접수예정 청약 지역)
+     */
+    @PostMapping("/collect-real-transactions")
+    public String collectRealTransactions(RedirectAttributes redirectAttributes) {
+        try {
+            log.info("[시스템 관리] 실거래가 수집 시작");
+            realTransactionScheduler.collectRealTransactions();
+            redirectAttributes.addFlashAttribute("message", "실거래가 수집이 완료되었습니다.");
+        } catch (Exception e) {
+            log.error("[시스템 관리] 실거래가 수집 실패", e);
+            redirectAttributes.addFlashAttribute("error", "실거래가 수집 실패: " + e.getMessage());
         }
         return "redirect:/admin/system";
     }

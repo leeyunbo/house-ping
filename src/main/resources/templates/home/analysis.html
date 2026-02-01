@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('청약 분석')}"></head>
+<head>
+    <style>
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--primary); }
+
+        .analysis-header {
+            margin-bottom: 32px;
+        }
+
+        .analysis-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-active { background: var(--success); color: white; }
+        .status-upcoming { background: var(--primary); color: white; }
+        .status-closed { background: var(--text-muted); color: white; }
+
+        .header-info {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .analysis-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .market-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .transaction-item:last-child { border-bottom: none; }
+
+        .transaction-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .transaction-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .transaction-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .empty-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .price-table th,
+        .price-table td {
+            padding: 12px 8px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .price-table th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .price-table th:first-child,
+        .price-table td:first-child {
+            text-align: left;
+        }
+
+        .price-table .price-amount {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* 시세 비교 분석 */
+        .comparison-summary {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .comparison-summary.negative {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #fca5a5;
+        }
+
+        .comparison-summary.neutral {
+            background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+            border-color: #fde047;
+        }
+
+        .summary-profit {
+            font-size: 32px;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 4px;
+        }
+
+        .comparison-summary.negative .summary-profit { color: #dc2626; }
+        .comparison-summary.neutral .summary-profit { color: #ca8a04; }
+
+        .summary-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 14px 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .comparison-table th:first-child,
+        .comparison-table td:first-child {
+            text-align: left;
+        }
+
+        .comparison-table .profit-positive {
+            color: #16a34a;
+            font-weight: 700;
+        }
+
+        .comparison-table .profit-negative {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .comparison-table .profit-neutral {
+            color: #ca8a04;
+            font-weight: 700;
+        }
+
+        .comparison-table .market-price {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .comparison-note {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .comparison-note ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .comparison-note li {
+            margin-bottom: 4px;
+        }
+
+        .comparison-note li:last-child {
+            margin-bottom: 0;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            color: white;
+            margin-top: 32px;
+        }
+
+        .cta-section h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .cta-section p {
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .map-container {
+            margin-bottom: 24px;
+        }
+
+        #kakaoMap {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+        }
+
+        .map-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background: var(--bg);
+            border-radius: 12px;
+            color: var(--text-muted);
+        }
+
+        .map-address {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .analysis-header h1 { font-size: 24px; }
+            .analysis-grid { grid-template-columns: 1fr; }
+            .market-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar}"></nav>
+
+    <div class="container" style="padding-top: 32px; padding-bottom: 60px;">
+        <a href="/home" class="back-link">&larr; 목록으로</a>
+
+        <!-- Header -->
+        <div class="analysis-header">
+            <h1 th:text="${subscription.houseName}">청약 아파트명</h1>
+            <div class="header-meta">
+                <span class="status-badge"
+                      th:classappend="${statusLabel == '접수중'} ? 'status-active' : (${statusLabel == '접수예정'} ? 'status-upcoming' : 'status-closed')"
+                      th:text="${statusLabel}">접수중</span>
+                <span class="header-info" th:text="${subscription.area}">서울</span>
+                <span class="header-info" th:if="${subscription.totalSupplyCount != null}"
+                      th:text="${subscription.totalSupplyCount} + '세대'">100세대</span>
+            </div>
+        </div>
+
+        <div class="analysis-grid">
+            <!-- 기본 정보 -->
+            <div class="analysis-card">
+                <h3 class="card-title">기본 정보</h3>
+                <div class="info-row">
+                    <span class="info-label">주택명</span>
+                    <span class="info-value" th:text="${subscription.houseName}">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">주택유형</span>
+                    <span class="info-value" th:text="${subscription.houseType} ?: '-'">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">지역</span>
+                    <span class="info-value" th:text="${subscription.area}">-</span>
+                </div>
+                <div class="info-row" th:if="${subscription.address}">
+                    <span class="info-label">주소</span>
+                    <span class="info-value" th:text="${subscription.address}">-</span>
+                </div>
+                <div class="info-row" th:if="${subscription.totalSupplyCount}">
+                    <span class="info-label">공급세대</span>
+                    <span class="info-value" th:text="${subscription.totalSupplyCount} + '세대'">-</span>
+                </div>
+            </div>
+
+            <!-- 일정 정보 -->
+            <div class="analysis-card">
+                <h3 class="card-title">일정 정보</h3>
+                <div class="info-row" th:if="${subscription.announceDate}">
+                    <span class="info-label">공고일</span>
+                    <span class="info-value" th:text="${#temporals.format(subscription.announceDate, 'yyyy-MM-dd')}">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">접수기간</span>
+                    <span class="info-value">
+                        <span th:text="${#temporals.format(subscription.receiptStartDate, 'yyyy-MM-dd')}">-</span>
+                        <span th:if="${subscription.receiptEndDate}">
+                            ~ <span th:text="${#temporals.format(subscription.receiptEndDate, 'yyyy-MM-dd')}">-</span>
+                        </span>
+                    </span>
+                </div>
+                <div class="info-row" th:if="${subscription.winnerAnnounceDate}">
+                    <span class="info-label">당첨자 발표</span>
+                    <span class="info-value" th:text="${#temporals.format(subscription.winnerAnnounceDate, 'yyyy-MM-dd')}">-</span>
+                </div>
+                <div class="info-row" th:if="${subscription.detailUrl}">
+                    <span class="info-label">상세정보</span>
+                    <span class="info-value">
+                        <a th:href="${subscription.detailUrl}" target="_blank" style="color: var(--primary);">바로가기</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 위치 정보 -->
+        <div class="analysis-card map-container" th:if="${subscription.address != null and subscription.address != ''}">
+            <h3 class="card-title">위치</h3>
+            <div class="map-loading" id="mapLoading">
+                <span>지도 로딩 중...</span>
+            </div>
+            <div id="kakaoMap" style="display:none;"></div>
+            <p class="map-address" th:text="${subscription.address}">주소</p>
+        </div>
+
+        <!-- 분양가 정보 -->
+        <div class="analysis-card" style="margin-bottom: 24px;">
+            <h3 class="card-title">분양가 정보</h3>
+
+            <div th:if="${prices != null and !prices.isEmpty()}">
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>주택형</th>
+                            <th>공급면적</th>
+                            <th>세대수</th>
+                            <th>분양가</th>
+                            <th>평당가</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${prices}">
+                            <td th:text="${p.houseType} ?: '-'">59A</td>
+                            <td th:text="${p.supplyArea != null} ? ${#numbers.formatDecimal(p.supplyArea, 1, 2)} + '㎡' : '-'">84.12㎡</td>
+                            <td th:text="${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0) > 0} ? ${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0)} + '세대' : '-'">100세대</td>
+                            <td class="price-amount">
+                                <span th:if="${p.topAmount != null and p.topAmount >= 10000}"
+                                      th:text="${#numbers.formatDecimal(p.topAmount / 10000.0, 1, 1)} + '억'">5.2억</span>
+                                <span th:if="${p.topAmount != null and p.topAmount < 10000}"
+                                      th:text="${#numbers.formatInteger(p.topAmount, 0, 'COMMA')} + '만'">5,000만</span>
+                                <span th:if="${p.topAmount == null}">-</span>
+                            </td>
+                            <td>
+                                <span th:if="${p.pricePerPyeong != null}"
+                                      th:text="${#numbers.formatInteger(p.pricePerPyeong, 0, 'COMMA')} + '만/평'">2,100만/평</span>
+                                <span th:if="${p.pricePerPyeong == null}">-</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${prices == null or prices.isEmpty()}" class="empty-data">
+                <p>분양가 정보가 없습니다.</p>
+            </div>
+        </div>
+
+        <!-- 시세 대비 분석 (핵심!) -->
+        <div class="analysis-card" style="margin-bottom: 24px;" th:if="${houseTypeComparisons != null and !houseTypeComparisons.isEmpty()}">
+            <h3 class="card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
+                </svg>
+                시세 대비 분석
+                <span th:if="${dongName}" th:text="'(' + ${dongName} + ')'" style="font-weight: 400; color: var(--text-muted);"></span>
+            </h3>
+
+            <!-- 평형별 비교 테이블 -->
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>평형</th>
+                        <th>분양가</th>
+                        <th>주변시세</th>
+                        <th>예상차익</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${houseTypeComparisons}">
+                        <td>
+                            <div th:text="${c.houseType}" style="font-weight: 600;">59A</div>
+                            <div th:text="${c.supplyArea != null ? #numbers.formatDecimal(c.supplyArea, 1, 0) + '㎡' : ''}" style="font-size: 12px; color: var(--text-muted);">84㎡</div>
+                        </td>
+                        <td th:text="${c.supplyPriceFormatted}">5.5억</td>
+                        <td class="market-price" th:text="${c.marketPriceFormatted}">7.2억</td>
+                        <td th:classappend="${c.estimatedProfit != null and c.estimatedProfit >= 10000} ? 'profit-positive' : (${c.estimatedProfit != null and c.estimatedProfit > 0} ? 'profit-neutral' : 'profit-negative')"
+                            th:text="${c.estimatedProfitFormatted}">+1.7억</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 주의사항 -->
+            <div class="comparison-note">
+                <ul>
+                    <li>동일 동 내 유사 면적(±10㎡) 최근 실거래가 기준</li>
+                    <li><strong>신축 프리미엄 미반영</strong> - 실제 신축 시세는 더 높을 수 있음</li>
+                    <li>실거래가 데이터가 부족한 경우 가장 유사한 면적 거래 참고</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 주변 시세 분석 -->
+        <div class="analysis-card" style="margin-bottom: 24px;">
+            <h3 class="card-title">주변 시세 분석 (최근 3개월)</h3>
+
+            <div th:if="${marketAnalysis != null}">
+                <div class="market-stats" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-box">
+                        <div class="stat-value" th:text="${#numbers.formatInteger(marketAnalysis.averagePricePerPyeong, 0, 'COMMA')} + '만'">0만</div>
+                        <div class="stat-label">평균 평당가</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" th:text="${marketAnalysis.maxAmountFormatted}">0억</div>
+                        <div class="stat-label">최고가</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" th:text="${marketAnalysis.transactionCount} + '건'">0건</div>
+                        <div class="stat-label">거래 건수</div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${marketAnalysis == null}" class="empty-data">
+                <p>주변 실거래 데이터가 존재하지 않습니다.</p>
+            </div>
+        </div>
+
+        <!-- 최근 거래 내역 -->
+        <div class="analysis-card" th:if="${recentTransactions != null and !recentTransactions.isEmpty()}">
+            <h3 class="card-title">최근 거래 내역</h3>
+            <div class="transaction-list">
+                <div th:each="tx : ${recentTransactions}" class="transaction-item">
+                    <div>
+                        <div class="transaction-name" th:text="${tx.aptName}">아파트명</div>
+                        <div class="transaction-meta">
+                            <span th:text="${tx.exclusiveArea} + '㎡'">84㎡</span>
+                            <span th:if="${tx.floor}"> · <span th:text="${tx.floor} + '층'">10층</span></span>
+                            <span th:if="${tx.dealDate}"> · <span th:text="${#temporals.format(tx.dealDate, 'yyyy-MM-dd')}">2025-01-01</span></span>
+                        </div>
+                    </div>
+                    <div class="transaction-price">
+                        <span th:if="${tx.dealAmount >= 10000}"
+                              th:text="${#numbers.formatDecimal(tx.dealAmount / 10000.0, 1, 1)} + '억'">10억</span>
+                        <span th:if="${tx.dealAmount < 10000}"
+                              th:text="${#numbers.formatInteger(tx.dealAmount, 0, 'COMMA')} + '만'">5,000만</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3>청약 알림을 받아보세요</h3>
+            <p>관심있는 청약의 접수일 알림을 받아보세요</p>
+            <a href="/auth/login" class="cta-btn">로그인하고 알림 설정</a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script th:if="${kakaoMapAppKey != null and kakaoMapAppKey != ''}"
+            th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapAppKey} + '&amp;libraries=services'"></script>
+
+    <script th:inline="javascript" th:if="${subscription.address != null and subscription.address != '' and kakaoMapAppKey != null and kakaoMapAppKey != ''}">
+        window.addEventListener('load', function() {
+            if (typeof kakao === 'undefined' || typeof kakao.maps === 'undefined') {
+                document.getElementById('mapLoading').innerHTML = '<span>지도를 불러올 수 없습니다</span>';
+                return;
+            }
+
+            const mapContainer = document.getElementById('kakaoMap');
+            const mapLoading = document.getElementById('mapLoading');
+            if (!mapContainer) return;
+
+            const address = /*[[${subscription.address}]]*/ '';
+            const houseName = /*[[${subscription.houseName}]]*/ '';
+
+            const options = {
+                center: new kakao.maps.LatLng(37.566826, 126.9786567),
+                level: 3
+            };
+
+            const map = new kakao.maps.Map(mapContainer, options);
+            const geocoder = new kakao.maps.services.Geocoder();
+
+            searchAddress(address, 0);
+
+            function searchAddress(addr, retry) {
+                if (retry > 3) {
+                    mapLoading.innerHTML = '<span>위치를 찾을 수 없습니다</span>';
+                    return;
+                }
+
+                geocoder.addressSearch(addr, function(result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                        mapLoading.style.display = 'none';
+                        mapContainer.style.display = 'block';
+
+                        // 컨테이너 표시 후 relayout 호출
+                        setTimeout(function() {
+                            map.relayout();
+                            map.setCenter(coords);
+
+                            const marker = new kakao.maps.Marker({
+                                map: map,
+                                position: coords
+                            });
+                            const infowindow = new kakao.maps.InfoWindow({
+                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
+                            });
+                            infowindow.open(map, marker);
+                        }, 100);
+                    } else {
+                        const parts = addr.split(' ');
+                        if (parts.length > 2) {
+                            parts.pop();
+                            searchAddress(parts.join(' '), retry + 1);
+                        } else {
+                            mapLoading.innerHTML = '<span>위치를 찾을 수 없습니다</span>';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -8,4 +8,6 @@ public interface UserManagementUseCase {
     List<User> getAllUsers();
     void approveUser(Long userId);
     void deleteUser(Long userId);
+    void promoteToAdmin(Long userId);
+    void demoteToUser(Long userId);
 }

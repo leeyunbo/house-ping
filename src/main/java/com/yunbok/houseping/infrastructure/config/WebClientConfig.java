@@ -1,9 +1,13 @@
 package com.yunbok.houseping.infrastructure.config;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -101,12 +105,26 @@ public class WebClientConfig {
 
     /**
      * 국토교통부 실거래가 API용 WebClient
+     * XML 응답을 Jackson으로 파싱
      */
     @Bean
     public WebClient realTransactionWebClient() {
+        // Jackson XmlMapper로 XML 처리
+        XmlMapper xmlMapper = new XmlMapper();
+
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(configurer -> {
+                    configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024);
+                    // XML 지원 추가 (application/xml, text/xml 등)
+                    configurer.defaultCodecs().jackson2JsonDecoder(
+                            new Jackson2JsonDecoder(xmlMapper, MediaType.APPLICATION_XML, MediaType.TEXT_XML)
+                    );
+                })
+                .build();
+
         return WebClient.builder()
                 .baseUrl("https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .exchangeStrategies(strategies)
                 .build();
     }
 }

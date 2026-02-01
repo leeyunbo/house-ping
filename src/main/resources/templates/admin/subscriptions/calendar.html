@@ -456,6 +456,8 @@
             width: 100%;
             max-height: 85vh;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             animation: slideUp 0.3s ease;
         }
@@ -497,6 +499,7 @@
         .modal-body {
             padding: 20px 24px 24px;
             overflow-y: auto;
+            flex: 1;
         }
 
         .modal-tags {
@@ -964,6 +967,15 @@
                 <div class="notification-toggle-switch"></div>
             </div>
             <div class="notification-desc">접수 시작 1일 전, 접수 종료 당일에 Slack으로 알림을 받습니다.</div>
+
+            <div class="divider" style="margin: 16px 0;"></div>
+
+            <div class="market-analysis-section" id="marketAnalysis-${event.id}">
+                <div class="info-label" style="margin-bottom: 12px;">주변 시세</div>
+                <div class="market-loading" style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 13px;">
+                    <span>시세 정보 조회 중...</span>
+                </div>
+            </div>
         `;
 
         // 카카오맵 영역 추가 (주소가 있는 경우에만)
@@ -1024,6 +1036,109 @@
         if (hasAddress && hasKakao) {
             initKakaoMap(props.address, props.houseName);
         }
+
+        // 실거래가 정보 조회
+        loadMarketAnalysis(event.id);
+    }
+
+    // 실거래가 정보 조회
+    function loadMarketAnalysis(subscriptionId) {
+        const container = document.getElementById(`marketAnalysis-${subscriptionId}`);
+        if (!container) return;
+
+        fetch(`/admin/subscriptions/${subscriptionId}/market-analysis`)
+            .then(response => response.json())
+            .then(data => {
+                const dongLabel = data.dongName ? ` (${data.dongName})` : '';
+
+                // 주택형별 비교가 있으면 우선 표시
+                if (data.houseTypeComparisons && data.houseTypeComparisons.length > 0) {
+                    const comparisonsHtml = data.houseTypeComparisons.map(c => `
+                        <div style="background: var(--bg); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-weight: 700; color: var(--text);">${c.houseType}</span>
+                                <span style="font-size: 12px; color: var(--text-muted);">${c.supplyArea}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; font-size: 12px;">
+                                <div>
+                                    <div style="color: var(--text-muted); margin-bottom: 2px;">분양가</div>
+                                    <div style="font-weight: 600;">${c.supplyPrice}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-muted); margin-bottom: 2px;">주변시세</div>
+                                    <div style="font-weight: 600; color: var(--primary);">${c.marketPrice}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-muted); margin-bottom: 2px;">예상차익</div>
+                                    <div style="font-weight: 700; color: ${c.hasProfit ? '#10b981' : '#ef4444'};">${c.estimatedProfit}</div>
+                                </div>
+                            </div>
+                            ${c.transactionInfo ? `<div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center;">※ ${c.transactionInfo}</div>` : ''}
+                        </div>
+                    `).join('');
+
+                    container.innerHTML = `
+                        <div class="info-label" style="margin-bottom: 12px;">주택형별 시세 비교${dongLabel}</div>
+                        ${comparisonsHtml}
+                        <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px;">
+                            ※ 구축 포함 시세, 신축 프리미엄 미반영
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 주택형별 비교가 없으면 기존 평균 시세 표시
+                if (data.transactionCount === 0) {
+                    container.innerHTML = `
+                        <div class="info-label" style="margin-bottom: 8px;">주변 시세${dongLabel}</div>
+                        <div style="text-align: center; padding: 12px; color: var(--text-muted); font-size: 13px; background: var(--bg); border-radius: 8px;">
+                            시세 정보가 없습니다
+                        </div>
+                    `;
+                    return;
+                }
+
+                let transactionHtml = '';
+                if (data.recentTransactions && data.recentTransactions.length > 0) {
+                    transactionHtml = `
+                        <div style="margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+                            <div style="font-weight: 600; margin-bottom: 8px;">최근 거래</div>
+                            ${data.recentTransactions.map(tx => `
+                                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
+                                    <span>${tx.aptName.substring(0, 12)}${tx.aptName.length > 12 ? '...' : ''}</span>
+                                    <span style="font-weight: 600; color: var(--primary);">${tx.amount}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = `
+                    <div class="info-label" style="margin-bottom: 12px;">주변 시세${dongLabel} (${data.transactionCount}건)</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div style="background: var(--bg); padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 18px; font-weight: 700; color: var(--primary);">${data.averageAmount || '-'}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">평균</div>
+                        </div>
+                        <div style="background: var(--bg); padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 18px; font-weight: 700; color: var(--text);">${data.pricePerPyeong || '-'}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">평당가</div>
+                        </div>
+                    </div>
+                    ${transactionHtml}
+                    <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px;">
+                        ※ 구축 포함 시세, 신축 프리미엄 미반영
+                    </div>
+                `;
+            })
+            .catch(error => {
+                container.innerHTML = `
+                    <div class="info-label" style="margin-bottom: 8px;">주변 시세</div>
+                    <div style="text-align: center; padding: 12px; color: var(--text-muted); font-size: 13px; background: var(--bg); border-radius: 8px;">
+                        시세 정보를 불러올 수 없습니다
+                    </div>
+                `;
+            });
     }
 
     // 카카오맵 초기화 함수

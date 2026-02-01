@@ -2,6 +2,7 @@ package com.yunbok.houseping.adapter.in.web.admin;
 
 import com.yunbok.houseping.domain.model.SyncResult;
 import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
+import com.yunbok.houseping.domain.service.SubscriptionAnalysisService;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceEntity;
 import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,9 @@ class AdminSubscriptionControllerTest {
     private SubscriptionPriceRepository priceRepository;
 
     @Mock
+    private SubscriptionAnalysisService analysisService;
+
+    @Mock
     private Model model;
 
     @Mock
@@ -55,7 +59,7 @@ class AdminSubscriptionControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new AdminSubscriptionController(queryService, managementUseCase, priceRepository);
+        controller = new AdminSubscriptionController(queryService, managementUseCase, priceRepository, analysisService);
     }
 
     @Nested

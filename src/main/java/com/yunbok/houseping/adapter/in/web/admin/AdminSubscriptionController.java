@@ -1,6 +1,9 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.domain.model.HouseTypeComparison;
+import com.yunbok.houseping.domain.model.RealTransaction;
 import com.yunbok.houseping.domain.model.SyncResult;
+import com.yunbok.houseping.domain.port.in.SubscriptionAnalysisUseCase;
 import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +37,7 @@ public class AdminSubscriptionController {
     private final AdminSubscriptionQueryService queryService;
     private final SubscriptionManagementUseCase managementUseCase;
     private final SubscriptionPriceRepository priceRepository;
+    private final SubscriptionAnalysisUseCase analysisUseCase;
 
     @Value("${kakao.map.app-key:}")
     private String kakaoMapAppKey;
@@ -163,6 +167,126 @@ public class AdminSubscriptionController {
                     entity.getSpecialSupplyCount(),
                     entity.getTopAmount(),
                     entity.getPricePerPyeong()
+            );
+        }
+    }
+
+    /**
+     * 실거래가 시세 조회 (주택형별 비교 포함)
+     */
+    @GetMapping("/{id}/market-analysis")
+    @ResponseBody
+    public ResponseEntity<MarketAnalysisDto> getMarketAnalysis(@PathVariable Long id) {
+        try {
+            var analysis = analysisUseCase.analyze(id);
+            var market = analysis.getMarketAnalysis();
+
+            // 주택형별 비교 정보
+            List<HouseTypeComparisonDto> comparisons = analysis.getHouseTypeComparisons().stream()
+                    .map(HouseTypeComparisonDto::from)
+                    .toList();
+
+            if (market == null) {
+                return ResponseEntity.ok(new MarketAnalysisDto(
+                        null, null, null, null, 0,
+                        analysis.getDongName(),
+                        List.of(),
+                        comparisons
+                ));
+            }
+
+            List<TransactionDto> transactions = analysis.getRecentTransactions().stream()
+                    .limit(5)
+                    .map(TransactionDto::from)
+                    .toList();
+
+            return ResponseEntity.ok(new MarketAnalysisDto(
+                    market.getAverageAmountFormatted(),
+                    formatPricePerPyeong(market.getAveragePricePerPyeong()),
+                    market.getMaxAmountFormatted(),
+                    market.getMinAmountFormatted(),
+                    market.getTransactionCount(),
+                    analysis.getDongName(),
+                    transactions,
+                    comparisons
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new MarketAnalysisDto(null, null, null, null, 0, null, List.of(), List.of()));
+        }
+    }
+
+    private String formatPricePerPyeong(long price) {
+        if (price == 0) return "-";
+        return String.format("%,d만/평", price);
+    }
+
+    public record MarketAnalysisDto(
+            String averageAmount,
+            String pricePerPyeong,
+            String maxAmount,
+            String minAmount,
+            int transactionCount,
+            String dongName,
+            List<TransactionDto> recentTransactions,
+            List<HouseTypeComparisonDto> houseTypeComparisons
+    ) {}
+
+    public record HouseTypeComparisonDto(
+            String houseType,
+            String supplyArea,
+            String supplyPrice,
+            String marketPrice,
+            String estimatedProfit,
+            String transactionInfo,
+            int transactionCount,
+            boolean hasProfit
+    ) {
+        public static HouseTypeComparisonDto from(HouseTypeComparison c) {
+            String areaStr = c.getSupplyArea() != null
+                    ? c.getSupplyArea().setScale(0, java.math.RoundingMode.HALF_UP) + "㎡"
+                    : "-";
+
+            int txCount = c.getSimilarTransactions() != null ? c.getSimilarTransactions().size() : 0;
+
+            return new HouseTypeComparisonDto(
+                    c.getHouseType(),
+                    areaStr,
+                    c.getSupplyPriceFormatted(),
+                    c.getMarketPriceFormatted(),
+                    c.getEstimatedProfitFormatted(),
+                    c.getTransactionInfo(),
+                    txCount,
+                    c.hasProfit()
+            );
+        }
+    }
+
+    public record TransactionDto(
+            String aptName,
+            String area,
+            Integer floor,
+            String amount,
+            String dealDate
+    ) {
+        public static TransactionDto from(RealTransaction tx) {
+            String amountStr = tx.getDealAmount() >= 10000
+                    ? String.format("%.1f억", tx.getDealAmount() / 10000.0)
+                    : String.format("%,d만", tx.getDealAmount());
+
+            String dateStr = tx.getDealDate() != null
+                    ? tx.getDealDate().toString()
+                    : "-";
+
+            String areaStr = tx.getExclusiveArea() != null
+                    ? tx.getExclusiveArea().setScale(0, java.math.RoundingMode.HALF_UP) + "㎡"
+                    : "-";
+
+            return new TransactionDto(
+                    tx.getAptName(),
+                    areaStr,
+                    tx.getFloor(),
+                    amountStr,
+                    dateStr
             );
         }
     }

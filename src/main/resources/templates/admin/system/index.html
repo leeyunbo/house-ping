@@ -190,6 +190,16 @@
             box-shadow: var(--shadow);
         }
 
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-dark);
+            box-shadow: var(--shadow);
+        }
+
         .btn-warning {
             background: var(--warning);
             color: white;
@@ -406,6 +416,17 @@
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
                             분양가 수집 시작
+                        </button>
+                    </form>
+                    <form th:action="@{/admin/system/collect-real-transactions}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-success" onclick="return confirm('실거래가 데이터 수집을 시작합니다. 시간이 걸릴 수 있습니다. 계속하시겠습니까?');">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3v18h18"></path>
+                                <path d="M18 17V9"></path>
+                                <path d="M13 17V5"></path>
+                                <path d="M8 17v-3"></path>
+                            </svg>
+                            실거래가 수집 시작
                         </button>
                     </form>
                 </div>

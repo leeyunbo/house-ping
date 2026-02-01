@@ -30,6 +30,20 @@ public class User {
         this.status = UserStatus.ACTIVE;
     }
 
+    public void promoteToAdmin() {
+        if (this.role == UserRole.MASTER) {
+            throw new IllegalStateException("MASTER는 역할을 변경할 수 없습니다.");
+        }
+        this.role = UserRole.ADMIN;
+    }
+
+    public void demoteToUser() {
+        if (this.role == UserRole.MASTER) {
+            throw new IllegalStateException("MASTER는 역할을 변경할 수 없습니다.");
+        }
+        this.role = UserRole.USER;
+    }
+
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
     }

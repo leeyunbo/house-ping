@@ -112,4 +112,16 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
      */
     @Query("SELECT DISTINCT s.houseManageNo FROM SubscriptionEntity s WHERE LOWER(s.houseName) LIKE LOWER(CONCAT('%', :keyword, '%')) AND s.houseManageNo IS NOT NULL")
     List<String> findHouseManageNosByHouseNameContaining(@Param("keyword") String keyword);
+
+    /**
+     * 지역명 부분 일치로 청약 조회 (공개 페이지용)
+     */
+    @Query("SELECT s FROM SubscriptionEntity s WHERE s.area LIKE %:area% ORDER BY s.receiptStartDate DESC")
+    List<SubscriptionEntity> findByAreaContaining(@Param("area") String area);
+
+    /**
+     * 소스와 지역 목록으로 청약 조회
+     */
+    @Query("SELECT s FROM SubscriptionEntity s WHERE s.source = :source AND s.area IN :areas ORDER BY s.receiptStartDate DESC")
+    List<SubscriptionEntity> findBySourceAndAreaIn(@Param("source") String source, @Param("areas") List<String> areas);
 }

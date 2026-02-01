@@ -38,7 +38,7 @@ public class AuthenticationService implements AuthenticationUseCase {
                 .email(userInfo.getEmail())
                 .name(userInfo.getName())
                 .role(isMaster ? UserRole.MASTER : UserRole.USER)
-                .status(isMaster ? UserStatus.ACTIVE : UserStatus.PENDING)
+                .status(UserStatus.ACTIVE)  // 네이버 로그인 시 자동 회원가입
                 .build();
 
         newUser.updateLastLogin();

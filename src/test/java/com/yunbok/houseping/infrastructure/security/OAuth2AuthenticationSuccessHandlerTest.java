@@ -44,8 +44,8 @@ class OAuth2AuthenticationSuccessHandlerTest {
     class OnAuthenticationSuccess {
 
         @Test
-        @DisplayName("ACTIVE 사용자는 대시보드로 리다이렉트한다")
-        void redirectsActiveToDashboard() throws IOException {
+        @DisplayName("ACTIVE 사용자는 홈으로 리다이렉트한다")
+        void redirectsActiveToHome() throws IOException {
             // given
             User activeUser = User.builder()
                     .id(1L)
@@ -61,12 +61,12 @@ class OAuth2AuthenticationSuccessHandlerTest {
             handler.onAuthenticationSuccess(request, response, authentication);
 
             // then
-            verify(response).sendRedirect("/admin/dashboard");
+            verify(response).sendRedirect("/home");
         }
 
         @Test
-        @DisplayName("PENDING 사용자는 승인대기 페이지로 리다이렉트한다")
-        void redirectsPendingToPendingPage() throws IOException {
+        @DisplayName("PENDING 사용자도 홈으로 리다이렉트한다")
+        void redirectsPendingToHome() throws IOException {
             // given
             User pendingUser = User.builder()
                     .id(1L)
@@ -82,12 +82,12 @@ class OAuth2AuthenticationSuccessHandlerTest {
             handler.onAuthenticationSuccess(request, response, authentication);
 
             // then
-            verify(response).sendRedirect("/auth/pending");
+            verify(response).sendRedirect("/home");
         }
 
         @Test
-        @DisplayName("MASTER이면서 ACTIVE 사용자는 대시보드로 리다이렉트한다")
-        void redirectsActiveMasterToDashboard() throws IOException {
+        @DisplayName("MASTER 사용자도 홈으로 리다이렉트한다")
+        void redirectsMasterToHome() throws IOException {
             // given
             User masterUser = User.builder()
                     .id(1L)
@@ -103,7 +103,7 @@ class OAuth2AuthenticationSuccessHandlerTest {
             handler.onAuthenticationSuccess(request, response, authentication);
 
             // then
-            verify(response).sendRedirect("/admin/dashboard");
+            verify(response).sendRedirect("/home");
         }
     }
 }

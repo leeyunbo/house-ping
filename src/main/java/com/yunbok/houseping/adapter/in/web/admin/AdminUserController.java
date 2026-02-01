@@ -3,7 +3,6 @@ package com.yunbok.houseping.adapter.in.web.admin;
 import com.yunbok.houseping.domain.model.User;
 import com.yunbok.houseping.domain.port.in.UserManagementUseCase;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('MASTER')")
+// SecurityConfig에서 /admin/users/** → hasRole('MASTER') 설정됨
 public class AdminUserController {
 
     private final UserManagementUseCase userManagementUseCase;
@@ -42,6 +41,28 @@ public class AdminUserController {
         try {
             userManagementUseCase.deleteUser(id);
             redirectAttributes.addFlashAttribute("message", "사용자가 삭제되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/{id}/promote")
+    public String promoteToAdmin(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            userManagementUseCase.promoteToAdmin(id);
+            redirectAttributes.addFlashAttribute("message", "관리자로 승격되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/{id}/demote")
+    public String demoteToUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            userManagementUseCase.demoteToUser(id);
+            redirectAttributes.addFlashAttribute("message", "일반 사용자로 변경되었습니다.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

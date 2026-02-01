@@ -17,10 +17,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                                         Authentication authentication) throws IOException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        if (oAuth2User.getUser().isActive()) {
-            response.sendRedirect("/admin/dashboard");
-        } else {
-            response.sendRedirect("/auth/pending");
-        }
+        // 로그인 성공 시 홈으로 이동 (관리자는 네비게이션에서 관리자 페이지 접근)
+        response.sendRedirect("/home");
     }
 }

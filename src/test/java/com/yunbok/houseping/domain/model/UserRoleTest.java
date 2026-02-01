@@ -16,6 +16,13 @@ class UserRoleTest {
     }
 
     @Test
+    @DisplayName("ADMIN 역할이 존재한다")
+    void adminRoleExists() {
+        assertThat(UserRole.ADMIN).isNotNull();
+        assertThat(UserRole.ADMIN.name()).isEqualTo("ADMIN");
+    }
+
+    @Test
     @DisplayName("USER 역할이 존재한다")
     void userRoleExists() {
         assertThat(UserRole.USER).isNotNull();
@@ -23,8 +30,8 @@ class UserRoleTest {
     }
 
     @Test
-    @DisplayName("역할은 2개만 존재한다")
-    void onlyTwoRolesExist() {
-        assertThat(UserRole.values()).hasSize(2);
+    @DisplayName("역할은 3개만 존재한다")
+    void onlyThreeRolesExist() {
+        assertThat(UserRole.values()).hasSize(3);
     }
 }

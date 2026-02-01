@@ -77,11 +77,23 @@ backup_current_jar() {
     fi
 }
 
+# 기존 JAR 삭제
+clean_jar() {
+    local JAR_PATH="../build/libs/${APP_NAME}-0.0.1-SNAPSHOT.jar"
+    if [ -f "$JAR_PATH" ]; then
+        echo "🗑️  기존 JAR 파일 삭제..."
+        rm -f "$JAR_PATH"
+    fi
+}
+
 # 빌드 수행
 do_build() {
     echo ""
     echo "1️⃣  빌드"
     echo "------------------------------------------"
+
+    # 기존 JAR 삭제 후 새로 빌드
+    clean_jar
 
     # build.sh 실행
     if [ "$SKIP_TEST" = true ]; then

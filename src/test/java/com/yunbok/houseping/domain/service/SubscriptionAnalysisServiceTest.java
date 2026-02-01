@@ -1,0 +1,211 @@
+package com.yunbok.houseping.domain.service;
+
+import com.yunbok.houseping.domain.model.*;
+import com.yunbok.houseping.domain.port.out.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@DisplayName("SubscriptionAnalysisService - 청약 분석 서비스")
+@ExtendWith(MockitoExtension.class)
+class SubscriptionAnalysisServiceTest {
+
+    @Mock
+    private SubscriptionQueryPort subscriptionQueryPort;
+
+    @Mock
+    private SubscriptionPriceQueryPort subscriptionPriceQueryPort;
+
+    @Mock
+    private RealTransactionQueryPort realTransactionQueryPort;
+
+    @Mock
+    private RealTransactionFetchPort realTransactionFetchPort;
+
+    @Mock
+    private RegionCodeQueryPort regionCodeQueryPort;
+
+    private SubscriptionAnalysisService analysisService;
+
+    @BeforeEach
+    void setUp() {
+        analysisService = new SubscriptionAnalysisService(
+                subscriptionQueryPort,
+                subscriptionPriceQueryPort,
+                realTransactionQueryPort,
+                realTransactionFetchPort,
+                regionCodeQueryPort
+        );
+    }
+
+    @Nested
+    @DisplayName("analyze() - 청약 분석")
+    class Analyze {
+
+        @Test
+        @DisplayName("청약 정보가 없으면 예외를 던진다")
+        void throwsExceptionWhenSubscriptionNotFound() {
+            // given
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> analysisService.analyze(1L))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("청약 정보를 찾을 수 없습니다");
+        }
+
+        @Test
+        @DisplayName("주소에서 법정동코드를 추출하여 분석한다")
+        void extractsLawdCdFromAddress() {
+            // given
+            Subscription subscription = createSubscription("서울특별시 강남구 테헤란로 123");
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(regionCodeQueryPort.findLawdCd("서울특별시", "강남구"))
+                    .thenReturn(Optional.of("11680"));
+            when(realTransactionQueryPort.findByLawdCd("11680"))
+                    .thenReturn(createTransactionList());
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getSubscription()).isEqualTo(subscription);
+        }
+
+        @Test
+        @DisplayName("법정동코드를 찾을 수 없으면 시세 분석 없이 반환한다")
+        void returnsWithoutMarketAnalysisWhenNoLawdCd() {
+            // given
+            Subscription subscription = createSubscription("알 수 없는 주소");
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getMarketAnalysis()).isNull();
+            assertThat(result.getRecentTransactions()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("실거래 데이터가 있으면 시장 분석을 수행한다")
+        void performsMarketAnalysisWithTransactions() {
+            // given - 복합 시군구 패턴 테스트 (수원시 팔달구 → 수원시팔달구)
+            Subscription subscription = createSubscription("경기도 수원시 팔달구 인계동");
+            List<RealTransaction> transactions = createTransactionList();
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            // 복합 시군구는 findLawdCdByContaining으로 조회됨
+            when(regionCodeQueryPort.findLawdCdByContaining("수원시팔달구"))
+                    .thenReturn(Optional.of("41111"));
+            when(realTransactionQueryPort.findByLawdCd("41111"))
+                    .thenReturn(transactions);
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getMarketAnalysis()).isNotNull();
+            assertThat(result.getMarketAnalysis().getTransactionCount()).isEqualTo(2);
+            assertThat(result.getMarketAnalysis().getAverageAmount()).isEqualTo(95000L);
+        }
+    }
+
+    @Nested
+    @DisplayName("MarketAnalysis - 시장 분석 결과")
+    class MarketAnalysisTest {
+
+        @Test
+        @DisplayName("평균 거래가를 억 단위로 포맷한다")
+        void formatsAverageAmountInEok() {
+            // given
+            MarketAnalysis analysis = MarketAnalysis.builder()
+                    .averageAmount(120000L)
+                    .maxAmount(150000L)
+                    .minAmount(90000L)
+                    .averagePricePerPyeong(3500L)
+                    .transactionCount(10)
+                    .build();
+
+            // then
+            assertThat(analysis.getAverageAmountFormatted()).isEqualTo("12억");
+            assertThat(analysis.getMaxAmountFormatted()).isEqualTo("15억");
+            assertThat(analysis.getMinAmountFormatted()).isEqualTo("9억");
+        }
+
+        @Test
+        @DisplayName("1억 미만은 만원 단위로 포맷한다")
+        void formatsAmountUnderEokInMan() {
+            // given
+            MarketAnalysis analysis = MarketAnalysis.builder()
+                    .averageAmount(5000L)
+                    .maxAmount(8000L)
+                    .minAmount(3000L)
+                    .averagePricePerPyeong(200L)
+                    .transactionCount(5)
+                    .build();
+
+            // then
+            assertThat(analysis.getAverageAmountFormatted()).isEqualTo("5,000만");
+        }
+    }
+
+    private Subscription createSubscription(String address) {
+        return Subscription.builder()
+                .id(1L)
+                .source("ApplyHome")
+                .houseName("테스트 아파트")
+                .area("서울")
+                .address(address)
+                .receiptStartDate(LocalDate.now())
+                .build();
+    }
+
+    private List<RealTransaction> createTransactionList() {
+        return List.of(
+                RealTransaction.builder()
+                        .lawdCd("11680")
+                        .dealYmd("202501")
+                        .aptName("아파트1")
+                        .dealAmount(100000L)
+                        .exclusiveArea(BigDecimal.valueOf(84.5))
+                        .floor(10)
+                        .dealDate(LocalDate.now())
+                        .dongName("인계동")
+                        .build(),
+                RealTransaction.builder()
+                        .lawdCd("11680")
+                        .dealYmd("202501")
+                        .aptName("아파트2")
+                        .dealAmount(90000L)
+                        .exclusiveArea(BigDecimal.valueOf(59.9))
+                        .floor(5)
+                        .dealDate(LocalDate.now().minusDays(10))
+                        .dongName("인계동")
+                        .build()
+        );
+    }
+}

@@ -2,7 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Houseping - 로그인</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하우스핑 - 로그인</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -25,7 +26,7 @@
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             margin: 0;
-            padding: 40px;
+            padding: 24px;
             background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fff1f2 100%);
             min-height: 100vh;
             color: var(--text);
@@ -36,28 +37,36 @@
 
         .login-container {
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 20px;
             box-shadow: var(--shadow-lg);
-            padding: 48px;
-            max-width: 400px;
+            padding: 48px 40px;
+            max-width: 380px;
             width: 100%;
             text-align: center;
         }
 
         .logo {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 24px;
             background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
+        .tagline {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
         .subtitle {
             color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 32px;
+            font-size: 15px;
+            margin-bottom: 36px;
+            line-height: 1.5;
         }
 
         .error-message {
@@ -84,40 +93,53 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             background: var(--naver);
             color: white;
             border: none;
-            padding: 14px 32px;
-            border-radius: 8px;
+            padding: 16px 32px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            transition: background 0.2s;
+            transition: all 0.2s;
             width: 100%;
         }
 
         .naver-login-btn:hover {
             background: var(--naver-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(3, 199, 90, 0.3);
         }
 
         .naver-login-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
         }
 
         .footer {
-            margin-top: 32px;
-            font-size: 12px;
+            margin-top: 24px;
+            font-size: 13px;
             color: var(--text-muted);
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 36px 28px;
+            }
+            .tagline {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">Houseping</div>
-        <div class="subtitle">청약 정보 관리 시스템</div>
+
+        <div class="tagline">"이 청약, 넣을만할까?"</div>
+        <div class="subtitle">분양가 vs 시세 한눈에 비교</div>
 
         <div th:if="${param.error}" class="error-message">
             로그인에 실패했습니다. 다시 시도해주세요.
@@ -131,11 +153,11 @@
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z"/>
             </svg>
-            네이버로 로그인
+            네이버로 시작하기
         </a>
 
         <div class="footer">
-            관리자의 승인 후 서비스를 이용하실 수 있습니다.
+            바로 시작하기
         </div>
     </div>
 </body>

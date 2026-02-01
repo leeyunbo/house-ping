@@ -197,6 +197,11 @@
             color: #7c3aed;
         }
 
+        .badge-admin {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
         .badge-user {
             background: #e0e7ff;
             color: #4f46e5;
@@ -243,6 +248,24 @@
 
         .btn-delete:hover {
             background: var(--danger-dark);
+        }
+
+        .btn-promote {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-promote:hover {
+            background: #d97706;
+        }
+
+        .btn-demote {
+            background: #94a3b8;
+            color: white;
+        }
+
+        .btn-demote:hover {
+            background: #64748b;
         }
 
         .btn:disabled {
@@ -310,6 +333,7 @@
                         <td th:text="${user.naverId}">naverId</td>
                         <td>
                             <span th:if="${user.role.name() == 'MASTER'}" class="badge badge-master">MASTER</span>
+                            <span th:if="${user.role.name() == 'ADMIN'}" class="badge badge-admin">ADMIN</span>
                             <span th:if="${user.role.name() == 'USER'}" class="badge badge-user">USER</span>
                         </td>
                         <td>
@@ -322,6 +346,12 @@
                             <div class="actions">
                                 <form th:if="${user.status.name() == 'PENDING'}" th:action="@{/admin/users/{id}/approve(id=${user.id})}" method="post" style="margin: 0;">
                                     <button type="submit" class="btn btn-approve">승인</button>
+                                </form>
+                                <form th:if="${user.role.name() == 'USER'}" th:action="@{/admin/users/{id}/promote(id=${user.id})}" method="post" style="margin: 0;">
+                                    <button type="submit" class="btn btn-promote">관리자 승격</button>
+                                </form>
+                                <form th:if="${user.role.name() == 'ADMIN'}" th:action="@{/admin/users/{id}/demote(id=${user.id})}" method="post" style="margin: 0;">
+                                    <button type="submit" class="btn btn-demote">일반으로 변경</button>
                                 </form>
                                 <form th:if="${user.role.name() != 'MASTER'}" th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" style="margin: 0;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
                                     <button type="submit" class="btn btn-delete">삭제</button>
