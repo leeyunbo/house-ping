@@ -20,10 +20,11 @@ public class SubscriptionScheduler {
         managementUseCase.sync();
     }
 
-    @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
-    public void collectDailySubscriptions() {
-        subscriptionUseCase.collect(LocalDate.now(), true);
-    }
+    // 알림은 DailyNotificationScheduler에서 통합 발송
+    // @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
+    // public void collectDailySubscriptions() {
+    //     subscriptionUseCase.collect(LocalDate.now(), false);
+    // }
 
     @Scheduled(cron = "0 0 2 1 * *", zone = "Asia/Seoul")
     public void cleanupOldData() {

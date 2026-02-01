@@ -92,4 +92,12 @@ public class NotificationSubscriptionEntity {
     public void disable() {
         this.enabled = false;
     }
+
+    /**
+     * 알림 발송 상태 리셋 (테스트용)
+     */
+    public void resetNotificationStatus() {
+        this.receiptStartNotified = false;
+        this.receiptEndNotified = false;
+    }
 }

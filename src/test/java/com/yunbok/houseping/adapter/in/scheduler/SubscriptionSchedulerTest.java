@@ -53,24 +53,25 @@ class SubscriptionSchedulerTest {
         }
     }
 
-    @Nested
-    @DisplayName("collectDailySubscriptions() - 일일 청약 수집 (매일 9시)")
-    class CollectDailySubscriptions {
-
-        @Test
-        @DisplayName("청약 정보 수집 및 알림을 수행한다")
-        void collectsAndNotifies() {
-            // given
-            when(subscriptionUseCase.collect(any(LocalDate.class), eq(true)))
-                    .thenReturn(List.of());
-
-            // when
-            scheduler.collectDailySubscriptions();
-
-            // then
-            verify(subscriptionUseCase).collect(any(LocalDate.class), eq(true));
-        }
-    }
+    // DailyNotificationScheduler로 통합되어 비활성화
+    // @Nested
+    // @DisplayName("collectDailySubscriptions() - 일일 청약 수집 (매일 9시)")
+    // class CollectDailySubscriptions {
+    //
+    //     @Test
+    //     @DisplayName("청약 정보 수집 및 알림을 수행한다")
+    //     void collectsAndNotifies() {
+    //         // given
+    //         when(subscriptionUseCase.collect(any(LocalDate.class), eq(true)))
+    //                 .thenReturn(List.of());
+    //
+    //         // when
+    //         scheduler.collectDailySubscriptions();
+    //
+    //         // then
+    //         verify(subscriptionUseCase).collect(any(LocalDate.class), eq(true));
+    //     }
+    // }
 
     @Nested
     @DisplayName("cleanupOldData() - 오래된 데이터 정리 (매월 1일 2시)")

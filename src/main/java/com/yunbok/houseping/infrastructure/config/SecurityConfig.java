@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/admin/users/**").hasRole("MASTER")
+                .requestMatchers("/admin/system/**").hasRole("MASTER")
                 .requestMatchers("/admin/**").authenticated()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
