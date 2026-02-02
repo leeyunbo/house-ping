@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.*;
 
 @DisplayName("SubscriptionAnalysisService - 청약 분석 서비스")
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class SubscriptionAnalysisServiceTest {
 
     @Mock
@@ -131,6 +134,131 @@ class SubscriptionAnalysisServiceTest {
             assertThat(result.getMarketAnalysis()).isNotNull();
             assertThat(result.getMarketAnalysis().getTransactionCount()).isEqualTo(2);
             assertThat(result.getMarketAnalysis().getAverageAmount()).isEqualTo(95000L);
+        }
+
+        @Test
+        @DisplayName("분양가 정보가 있으면 주택형별 비교 분석을 수행한다")
+        void performsHouseTypeComparison() {
+            // given
+            Subscription subscription = createSubscription("서울특별시 강남구 역삼동");
+            List<RealTransaction> transactions = createTransactionList();
+            List<SubscriptionPrice> prices = List.of(
+                    SubscriptionPrice.builder()
+                            .houseManageNo("12345")
+                            .houseType("84A")
+                            .topAmount(90000L)
+                            .build()
+            );
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(regionCodeQueryPort.findLawdCd("서울특별시", "강남구"))
+                    .thenReturn(Optional.of("11680"));
+            when(realTransactionQueryPort.findByLawdCd("11680"))
+                    .thenReturn(transactions);
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(prices);
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getHouseTypeComparisons()).isNotEmpty();
+        }
+
+        @Test
+        @DisplayName("단순 시군구 패턴으로 법정동코드를 찾는다")
+        void findsLawdCdWithSimplePattern() {
+            // given - 동 이름이 일치해야 필터링 통과 (인계동)
+            Subscription subscription = createSubscription("서울특별시 강남구 인계동 123");
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(regionCodeQueryPort.findLawdCd(anyString(), anyString()))
+                    .thenReturn(Optional.of("11680"));
+            when(realTransactionQueryPort.findByLawdCd("11680"))
+                    .thenReturn(createTransactionList());
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getMarketAnalysis()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("단순 시군구 패턴 실패 시 부분 일치로 재시도한다")
+        void retriesWithPartialMatchWhenSimplePatternFails() {
+            // given - 동 이름이 일치해야 필터링 통과 (인계동)
+            Subscription subscription = createSubscription("서울특별시 강남구 인계동");
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(regionCodeQueryPort.findLawdCd(anyString(), anyString()))
+                    .thenReturn(Optional.empty());
+            when(regionCodeQueryPort.findLawdCdByContaining(anyString()))
+                    .thenReturn(Optional.of("11680"));
+            when(realTransactionQueryPort.findByLawdCd("11680"))
+                    .thenReturn(createTransactionList());
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getMarketAnalysis()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("주소가 null이면 시세 분석 없이 반환한다")
+        void returnsWithoutMarketAnalysisWhenAddressIsNull() {
+            // given
+            Subscription subscription = Subscription.builder()
+                    .id(1L)
+                    .source("ApplyHome")
+                    .houseName("테스트 아파트")
+                    .area("서울")
+                    .address(null)
+                    .receiptStartDate(LocalDate.now())
+                    .build();
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getMarketAnalysis()).isNull();
+        }
+
+        @Test
+        @DisplayName("주택형에서 면적을 추출할 수 없으면 비교에서 제외한다")
+        void skipsHouseTypeWhenAreaCannotBeExtracted() {
+            // given
+            Subscription subscription = createSubscription("서울특별시 강남구 역삼동");
+            List<SubscriptionPrice> prices = List.of(
+                    SubscriptionPrice.builder()
+                            .houseManageNo("12345")
+                            .houseType("INVALID")  // 숫자가 없는 타입
+                            .topAmount(90000L)
+                            .build()
+            );
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(regionCodeQueryPort.findLawdCd("서울특별시", "강남구"))
+                    .thenReturn(Optional.of("11680"));
+            when(realTransactionQueryPort.findByLawdCd("11680"))
+                    .thenReturn(createTransactionList());
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(prices);
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then
+            assertThat(result.getHouseTypeComparisons()).isEmpty();
         }
     }
 

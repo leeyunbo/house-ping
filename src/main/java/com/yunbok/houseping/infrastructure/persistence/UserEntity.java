@@ -59,6 +59,8 @@ public class UserEntity {
                 .role(user.getRole())
                 .status(user.getStatus())
                 .lastLoginAt(user.getLastLoginAt())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
                 .build();
     }
 

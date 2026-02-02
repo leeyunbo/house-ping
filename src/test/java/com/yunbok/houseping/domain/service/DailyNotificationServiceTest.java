@@ -173,5 +173,55 @@ class DailyNotificationServiceTest {
             verify(persistencePort, never()).findPendingReceiptEndTargets(any());
             verify(persistencePort, never()).findPendingReceiptStartTargets(any());
         }
+
+        @Test
+        @DisplayName("발송 실패 시 예외를 던지고 실패 이력을 저장한다")
+        void savesFailureHistoryWhenSendingFails() {
+            // given
+            LocalDate today = LocalDate.now();
+            LocalDate tomorrow = today.plusDays(1);
+
+            when(persistencePort.findPendingReceiptEndTargets(today))
+                    .thenReturn(List.of());
+            when(persistencePort.findPendingReceiptStartTargets(tomorrow))
+                    .thenReturn(List.of());
+            when(subscriptionCollector.collectFromAllAreas(today))
+                    .thenReturn(List.of());
+            doThrow(new RuntimeException("발송 실패"))
+                    .when(notificationSender).sendDailyReport(any());
+
+            // when & then
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.sendDailyReport())
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("발송 실패");
+
+            verify(historyRepository).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("sendDailyReportManual() - 수동 일일 알림 발송")
+    class SendDailyReportManual {
+
+        @Test
+        @DisplayName("수동으로 일일 리포트를 발송한다")
+        void sendsReportManually() {
+            // given
+            LocalDate today = LocalDate.now();
+            LocalDate tomorrow = today.plusDays(1);
+
+            when(persistencePort.findPendingReceiptEndTargets(today))
+                    .thenReturn(List.of());
+            when(persistencePort.findPendingReceiptStartTargets(tomorrow))
+                    .thenReturn(List.of());
+            when(subscriptionCollector.collectFromAllAreas(today))
+                    .thenReturn(List.of());
+
+            // when
+            service.sendDailyReportManual();
+
+            // then
+            verify(notificationSender).sendDailyReport(any(DailyNotificationReport.class));
+        }
     }
 }

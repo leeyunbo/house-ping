@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.5.5'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
+    id 'info.solidsoft.pitest' version '1.15.0'
 }
 
 group = 'com.yunbok'
@@ -138,4 +139,15 @@ jacocoTestCoverageVerification {
             }
         }
     }
+}
+
+// Mutation Testing (PIT)
+// 비즈니스 로직(Service)에만 적용 - Model/DTO 제외
+pitest {
+    targetClasses = ['com.yunbok.houseping.domain.service.*']
+    targetTests = ['com.yunbok.houseping.**']
+    threads = 4
+    outputFormats = ['HTML', 'XML']
+    timestampedReports = false
+    junit5PluginVersion = '1.2.1'
 }

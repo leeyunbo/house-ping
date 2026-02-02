@@ -155,6 +155,74 @@ class UserManagementServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("promoteToAdmin() - 관리자 승격")
+    class PromoteToAdmin {
+
+        @Test
+        @DisplayName("USER를 ADMIN으로 승격한다")
+        void promotesUserToAdmin() {
+            // given
+            User user = createUser(1L, "user", UserRole.USER, UserStatus.ACTIVE);
+            when(userPersistencePort.findById(1L)).thenReturn(Optional.of(user));
+            when(userPersistencePort.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // when
+            service.promoteToAdmin(1L);
+
+            // then
+            ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+            verify(userPersistencePort).save(userCaptor.capture());
+            assertThat(userCaptor.getValue().getRole()).isEqualTo(UserRole.ADMIN);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 사용자 ID로 승격 시 예외가 발생한다")
+        void throwsExceptionWhenUserNotFound() {
+            // given
+            when(userPersistencePort.findById(999L)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> service.promoteToAdmin(999L))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("사용자를 찾을 수 없습니다");
+        }
+    }
+
+    @Nested
+    @DisplayName("demoteToUser() - 사용자 강등")
+    class DemoteToUser {
+
+        @Test
+        @DisplayName("ADMIN을 USER로 강등한다")
+        void demotesAdminToUser() {
+            // given
+            User admin = createUser(1L, "admin", UserRole.ADMIN, UserStatus.ACTIVE);
+            when(userPersistencePort.findById(1L)).thenReturn(Optional.of(admin));
+            when(userPersistencePort.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // when
+            service.demoteToUser(1L);
+
+            // then
+            ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+            verify(userPersistencePort).save(userCaptor.capture());
+            assertThat(userCaptor.getValue().getRole()).isEqualTo(UserRole.USER);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 사용자 ID로 강등 시 예외가 발생한다")
+        void throwsExceptionWhenUserNotFound() {
+            // given
+            when(userPersistencePort.findById(999L)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> service.demoteToUser(999L))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("사용자를 찾을 수 없습니다");
+        }
+    }
+
     private User createUser(Long id, String naverId, UserRole role, UserStatus status) {
         return User.builder()
                 .id(id)
