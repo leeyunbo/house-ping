@@ -49,3 +49,6 @@ Thumbs.db
 
 # Test
 test-output/
+
+# Review comments
+.review/

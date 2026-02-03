@@ -43,16 +43,24 @@ class SubscriptionAnalysisServiceTest {
     @Mock
     private RegionCodeQueryPort regionCodeQueryPort;
 
+    private AddressHelper addressParser;
+    private HouseTypeComparisonBuilder comparisonBuilder;
+    private MarketAnalyzer marketAnalyzer;
     private SubscriptionAnalysisService analysisService;
 
     @BeforeEach
     void setUp() {
+        addressParser = new AddressHelper(regionCodeQueryPort);
+        comparisonBuilder = new HouseTypeComparisonBuilder();
+        marketAnalyzer = new MarketAnalyzer();
         analysisService = new SubscriptionAnalysisService(
                 subscriptionQueryPort,
                 subscriptionPriceQueryPort,
                 realTransactionQueryPort,
                 realTransactionFetchPort,
-                regionCodeQueryPort
+                addressParser,
+                comparisonBuilder,
+                marketAnalyzer
         );
     }
 
