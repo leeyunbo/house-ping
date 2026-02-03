@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Slack용 메시지 포맷터
@@ -57,86 +58,77 @@ public class SlackMessageFormatter implements SubscriptionMessageFormatter {
 
     @Override
     public String formatDailyReport(DailyNotificationReport report) {
-        if (report.isEmpty()) {
-            return ":mailbox_with_no_mail: 오늘은 알림이 없습니다.";
-        }
-
         StringBuilder sb = new StringBuilder();
-        sb.append(":clipboard: *오늘의 청약 알림*\n\n");
 
-        // 접수 마감 (오늘) - 긴급
-        if (!report.receiptEndToday().isEmpty()) {
-            sb.append(":warning: *접수 마감 (오늘)* ─────────\n");
-            for (NotificationTarget target : report.receiptEndToday()) {
-                sb.append(formatReceiptEndItem(target));
+        // 헤더 - 오늘 날짜
+        sb.append(":bell: *").append(formatTodayHeader()).append(" 청약 알림*\n");
+        sb.append("━━━━━━━━━━━━━━━━━━━━\n\n");
+
+        // 섹션 1: 내 관심 청약 (등록한 알림)
+        sb.append(":pushpin: *내 관심 청약*\n");
+        boolean hasMySubscriptions = !report.receiptEndToday().isEmpty() || !report.receiptStartTomorrow().isEmpty();
+
+        if (!hasMySubscriptions) {
+            sb.append("   등록된 알림 없음\n");
+        } else {
+            // 오늘 마감 - 긴급
+            if (!report.receiptEndToday().isEmpty()) {
+                sb.append("\n:red_circle: *오늘 마감*\n");
+                for (NotificationTarget target : report.receiptEndToday()) {
+                    sb.append(formatCompactItem(target.houseName(), target.area(), target.totalSupplyCount(), target.detailUrl()));
+                }
             }
-            sb.append("\n");
+
+            // 내일 접수 시작
+            if (!report.receiptStartTomorrow().isEmpty()) {
+                sb.append("\n:large_green_circle: *내일 접수 시작*\n");
+                for (NotificationTarget target : report.receiptStartTomorrow()) {
+                    sb.append(formatCompactItem(target.houseName(), target.area(), target.totalSupplyCount(), target.detailUrl()));
+                }
+            }
         }
 
-        // 접수 시작 (내일) - 중요
-        if (!report.receiptStartTomorrow().isEmpty()) {
-            sb.append(":calendar: *접수 시작 (내일)* ─────────\n");
-            for (NotificationTarget target : report.receiptStartTomorrow()) {
-                sb.append(formatReceiptStartItem(target));
-            }
-            sb.append("\n");
-        }
+        sb.append("\n━━━━━━━━━━━━━━━━━━━━\n\n");
 
-        // 신규 청약 - 정보
-        if (!report.newSubscriptions().isEmpty()) {
-            sb.append(":new: *신규 청약* ─────────\n");
-            for (SubscriptionInfo subscription : report.newSubscriptions()) {
-                sb.append(formatNewSubscriptionItem(subscription));
-            }
+        // 섹션 2: 오늘의 청약 현황 (신규)
+        sb.append(":newspaper: *오늘의 신규 청약*\n");
+        if (report.newSubscriptions().isEmpty()) {
+            sb.append("   신규 청약 없음\n");
+        } else {
             sb.append("\n");
+            int displayCount = Math.min(report.newSubscriptions().size(), 5);
+            for (int i = 0; i < displayCount; i++) {
+                SubscriptionInfo sub = report.newSubscriptions().get(i);
+                sb.append(formatCompactItem(sub.getHouseName(), sub.getArea(), sub.getTotalSupplyCount(), sub.getDetailUrl()));
+            }
+            if (report.newSubscriptions().size() > 5) {
+                sb.append("   _외 ").append(report.newSubscriptions().size() - 5).append("건..._\n");
+            }
         }
 
         // 요약
-        sb.append("━━━━━━━━━━━━━━━━━━━━\n");
-        sb.append(String.format("신규 %d건 | 내일 접수 %d건 | 오늘 마감 %d건",
-                report.newSubscriptions().size(),
+        sb.append("\n━━━━━━━━━━━━━━━━━━━━\n");
+        sb.append(String.format(":bar_chart: 오늘 마감 *%d*건 | 내일 접수 *%d*건 | 신규 *%d*건",
+                report.receiptEndToday().size(),
                 report.receiptStartTomorrow().size(),
-                report.receiptEndToday().size()));
+                report.newSubscriptions().size()));
 
         return sb.toString();
     }
 
-    private String formatReceiptEndItem(NotificationTarget target) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("• *").append(target.houseName()).append("*")
-          .append(" | ").append(target.area() != null ? target.area() : "-")
-          .append(" | ").append(formatSupplyCount(target.totalSupplyCount())).append("\n");
-        sb.append("  접수 마감: 오늘까지");
-        if (target.detailUrl() != null) {
-            sb.append(" | <").append(target.detailUrl()).append("|상세보기>");
-        }
-        sb.append("\n");
-        return sb.toString();
+    private String formatTodayHeader() {
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M월 d일(E)", Locale.KOREAN);
+        return today.format(formatter);
     }
 
-    private String formatReceiptStartItem(NotificationTarget target) {
+    private String formatCompactItem(String houseName, String area, Integer supplyCount, String detailUrl) {
         StringBuilder sb = new StringBuilder();
-        sb.append("• *").append(target.houseName()).append("*")
-          .append(" | ").append(target.area() != null ? target.area() : "-")
-          .append(" | ").append(formatSupplyCount(target.totalSupplyCount())).append("\n");
-        sb.append("  접수 기간: ").append(formatDate(target.receiptStartDate()))
-          .append(" ~ ").append(formatDate(target.receiptEndDate()));
-        if (target.detailUrl() != null) {
-            sb.append(" | <").append(target.detailUrl()).append("|상세보기>");
-        }
-        sb.append("\n");
-        return sb.toString();
-    }
-
-    private String formatNewSubscriptionItem(SubscriptionInfo subscription) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("• *").append(subscription.getHouseName()).append("*")
-          .append(" | ").append(subscription.getArea())
-          .append(" | ").append(formatSupplyCount(subscription.getTotalSupplyCount())).append("\n");
-        sb.append("  접수 기간: ").append(formatDate(subscription.getReceiptStartDate()))
-          .append(" ~ ").append(formatDate(subscription.getReceiptEndDate()));
-        if (subscription.getDetailUrl() != null) {
-            sb.append(" | <").append(subscription.getDetailUrl()).append("|상세보기>");
+        sb.append("   • ").append(houseName);
+        sb.append(" (").append(area != null ? area : "-");
+        sb.append(", ").append(formatSupplyCount(supplyCount)).append(")");
+        if (detailUrl != null) {
+            sb.append(" <").append(detailUrl).append("|보기>");
         }
         sb.append("\n");
         return sb.toString();
@@ -144,12 +136,5 @@ public class SlackMessageFormatter implements SubscriptionMessageFormatter {
 
     private String formatSupplyCount(Integer count) {
         return count != null ? count + "세대" : "-";
-    }
-
-    private String formatDate(LocalDate date) {
-        if (date == null) {
-            return "-";
-        }
-        return date.format(DateTimeFormatter.ofPattern("M/d"));
     }
 }
