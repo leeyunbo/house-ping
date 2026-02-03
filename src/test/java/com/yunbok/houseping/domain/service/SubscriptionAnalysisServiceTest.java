@@ -234,6 +234,63 @@ class SubscriptionAnalysisServiceTest {
         }
 
         @Test
+        @DisplayName("시세는 유사 면적 거래의 평균으로 계산한다")
+        void calculatesMarketPriceAsAverage() {
+            // given
+            Subscription subscription = createSubscription("서울특별시 강남구 인계동");
+            List<RealTransaction> transactions = List.of(
+                    RealTransaction.builder()
+                            .lawdCd("11680")
+                            .aptName("아파트1")
+                            .dealAmount(100000L)
+                            .exclusiveArea(BigDecimal.valueOf(84))
+                            .dealDate(LocalDate.now())
+                            .dongName("인계동")
+                            .build(),
+                    RealTransaction.builder()
+                            .lawdCd("11680")
+                            .aptName("아파트2")
+                            .dealAmount(90000L)
+                            .exclusiveArea(BigDecimal.valueOf(85))
+                            .dealDate(LocalDate.now().minusDays(1))
+                            .dongName("인계동")
+                            .build(),
+                    RealTransaction.builder()
+                            .lawdCd("11680")
+                            .aptName("아파트3")
+                            .dealAmount(110000L)
+                            .exclusiveArea(BigDecimal.valueOf(83))
+                            .dealDate(LocalDate.now().minusDays(2))
+                            .dongName("인계동")
+                            .build()
+            );
+            List<SubscriptionPrice> prices = List.of(
+                    SubscriptionPrice.builder()
+                            .houseManageNo("12345")
+                            .houseType("84A")
+                            .topAmount(95000L)
+                            .build()
+            );
+
+            when(subscriptionQueryPort.findById(1L)).thenReturn(Optional.of(subscription));
+            when(regionCodeQueryPort.findLawdCd("서울특별시", "강남구"))
+                    .thenReturn(Optional.of("11680"));
+            when(realTransactionQueryPort.findByLawdCd("11680"))
+                    .thenReturn(transactions);
+            when(subscriptionPriceQueryPort.findByHouseManageNo(any()))
+                    .thenReturn(prices);
+
+            // when
+            SubscriptionAnalysisResult result = analysisService.analyze(1L);
+
+            // then - 평균: (100000 + 90000 + 110000) / 3 = 100000
+            assertThat(result.getHouseTypeComparisons()).hasSize(1);
+            HouseTypeComparison comparison = result.getHouseTypeComparisons().get(0);
+            assertThat(comparison.getMarketPrice()).isEqualTo(100000L);
+            assertThat(comparison.getEstimatedProfit()).isEqualTo(5000L); // 100000 - 95000
+        }
+
+        @Test
         @DisplayName("주택형에서 면적을 추출할 수 없으면 비교에서 제외한다")
         void skipsHouseTypeWhenAreaCannotBeExtracted() {
             // given

@@ -41,7 +41,7 @@ public class HouseTypeComparison {
      */
     public String getEstimatedProfitFormatted() {
         if (estimatedProfit == null) return "-";
-        String sign = estimatedProfit >= 0 ? "+" : "";
+        String sign = estimatedProfit >= 0 ? "+" : "-";
         return sign + formatPrice(Math.abs(estimatedProfit));
     }
 

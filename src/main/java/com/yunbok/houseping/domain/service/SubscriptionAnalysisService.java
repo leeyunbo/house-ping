@@ -182,11 +182,14 @@ public class SubscriptionAnalysisService implements SubscriptionAnalysisUseCase 
                     .limit(5)
                     .toList();
 
-            // 예상 차익 계산
+            // 예상 차익 계산 (유사 면적 거래 평균)
             Long marketPrice = null;
             Long estimatedProfit = null;
             if (!similarAreaTx.isEmpty()) {
-                marketPrice = similarAreaTx.get(0).getDealAmount();
+                marketPrice = (long) similarAreaTx.stream()
+                        .mapToLong(RealTransaction::getDealAmount)
+                        .average()
+                        .orElse(0);
                 if (price.getTopAmount() != null) {
                     estimatedProfit = marketPrice - price.getTopAmount();
                 }
