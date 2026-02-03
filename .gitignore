@@ -9,7 +9,7 @@ script/*.pid
 build/
 src/main/generated/
 .gradle/
-out/
+/out/
 target/
 *.jar
 *.war
