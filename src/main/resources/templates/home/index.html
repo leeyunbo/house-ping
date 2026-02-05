@@ -114,11 +114,33 @@
             margin-bottom: 12px;
         }
 
+        .card-badges {
+            display: flex;
+            gap: 6px;
+        }
+
         .card-status {
             font-size: 12px;
             padding: 4px 10px;
             border-radius: 12px;
             font-weight: 600;
+        }
+
+        .card-source {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .source-applyhome {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .source-lh {
+            background: #ffedd5;
+            color: #c2410c;
         }
 
         .status-active {
@@ -173,12 +195,440 @@
             font-size: 16px;
         }
 
+        /* 캘린더 섹션 */
+        .calendar-section {
+            margin-top: 48px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calendar-container {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            position: relative;
+            min-height: 500px;
+        }
+
+        .calendar-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 16px;
+            transition: opacity 0.3s ease;
+        }
+
+        .calendar-loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .calendar-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .calendar-loading p {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            padding: 4px 8px;
+            background: var(--bg);
+            border-radius: 4px;
+        }
+
+        .legend-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .legend-color.applyhome-receipt { background: #3b82f6; }
+        .legend-color.applyhome-winner { background: #10b981; }
+        .legend-color.lh-receipt { background: #f97316; }
+        .legend-color.lh-winner { background: #a855f7; }
+
+        .legend-notice {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* FullCalendar 커스텀 */
+        .fc {
+            --fc-border-color: var(--border);
+            --fc-today-bg-color: #fef3c7;
+            --fc-page-bg-color: transparent;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .fc .fc-button {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 500;
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-transform: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .fc .fc-button:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .fc .fc-button-primary:not(:disabled).fc-button-active,
+        .fc .fc-button-primary:not(:disabled):active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .fc .fc-button-primary:focus {
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        .fc .fc-col-header-cell {
+            padding: 10px 0;
+            background: var(--bg);
+        }
+
+        .fc .fc-col-header-cell-cushion {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .fc .fc-daygrid-day-top {
+            display: flex;
+            justify-content: flex-end;
+            padding: 6px;
+        }
+
+        .fc .fc-daygrid-day-number {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text);
+            text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number {
+            background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            color: white;
+            font-weight: 700;
+        }
+
+        .fc .fc-day-today {
+            background: rgba(239, 68, 68, 0.05) !important;
+        }
+
+        .fc .fc-daygrid-event {
+            border-radius: 4px;
+            border: none;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .fc .fc-daygrid-event:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .fc .fc-daygrid-event.expired-event {
+            background: #94a3b8 !important;
+            opacity: 0.7;
+        }
+
+        .fc .fc-daygrid-more-link {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 2px 6px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 4px;
+        }
+
+        /* 이벤트 모달 */
+        .event-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .event-modal-overlay.active { display: flex; }
+
+        .event-modal {
+            background: var(--card);
+            padding: 0;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .event-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 0;
+        }
+
+        .event-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .event-modal-close {
+            background: var(--bg);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .event-modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .event-modal-body {
+            padding: 16px 20px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .event-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .event-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .event-tag.receipt { background: #dbeafe; color: #1d4ed8; }
+        .event-tag.winner { background: #d1fae5; color: #047857; }
+        .event-tag.lh-receipt { background: #ffedd5; color: #c2410c; }
+        .event-tag.lh-winner { background: #f3e8ff; color: #7c3aed; }
+        .event-tag.source-applyhome { background: #dbeafe; color: #1d4ed8; }
+        .event-tag.source-lh { background: #ffedd5; color: #c2410c; }
+
+        .event-info {
+            display: grid;
+            gap: 12px;
+        }
+
+        .event-info-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .event-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .event-info-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .event-info-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .event-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 0;
+        }
+
+        .event-btn-analysis {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .event-btn-analysis:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .event-btn-analysis.disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .event-btn-analysis.disabled:hover {
+            transform: none;
+        }
+
+        .event-btn-detail {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px 16px;
+            background: var(--bg);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .event-btn-detail:hover {
+            background: var(--border);
+        }
+
+        .event-lh-notice {
+            margin-top: 12px;
+            padding: 10px;
+            background: #fff7ed;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #c2410c;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .hero h1 { font-size: 32px; }
             .hero p { font-size: 16px; }
             .subscription-grid { grid-template-columns: 1fr; }
+            .legend { gap: 12px; }
+            .legend-divider { display: none; }
+            .fc .fc-toolbar { flex-direction: column; gap: 10px; }
+            .fc .fc-toolbar-title { font-size: 16px; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script th:if="${kakaoMapAppKey != null and kakaoMapAppKey != ''}"
+            th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapAppKey} + '&amp;libraries=services'"></script>
 </head>
 <body>
     <nav th:replace="~{fragments/home-layout :: navbar}"></nav>
@@ -187,7 +637,7 @@
     <section class="hero">
         <h1>이 청약, 넣을만할까?</h1>
         <p>청약 정보와 주변 실거래가를 한눈에 비교 분석하세요</p>
-        <p class="service-notice">현재 서울·경기 지역만 제공됩니다</p>
+        <p class="service-notice">서울·경기 청약만 모았어요</p>
     </section>
 
     <!-- Filters -->
@@ -204,9 +654,17 @@
                 접수중 <span class="badge badge-success" th:text="${#lists.size(activeSubscriptions)} + '건'">0건</span>
             </h2>
             <div class="subscription-grid">
-                <a th:each="s : ${activeSubscriptions}" th:href="@{/home/analysis/{id}(id=${s.id})}" class="subscription-card">
+                <a th:each="s : ${activeSubscriptions}"
+                   th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
+                   th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
+                   class="subscription-card">
                     <div class="card-header">
-                        <span class="card-status status-active">접수중</span>
+                        <div class="card-badges">
+                            <span class="card-source"
+                                  th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'source-lh' : 'source-applyhome'"
+                                  th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
+                            <span class="card-status status-active">접수중</span>
+                        </div>
                     </div>
                     <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
                     <p class="card-area" th:text="${s.area}">서울</p>
@@ -230,9 +688,17 @@
                 접수예정 <span class="badge badge-primary" th:text="${#lists.size(upcomingSubscriptions)} + '건'">0건</span>
             </h2>
             <div class="subscription-grid">
-                <a th:each="s : ${upcomingSubscriptions}" th:href="@{/home/analysis/{id}(id=${s.id})}" class="subscription-card">
+                <a th:each="s : ${upcomingSubscriptions}"
+                   th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
+                   th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
+                   class="subscription-card">
                     <div class="card-header">
-                        <span class="card-status status-upcoming">접수예정</span>
+                        <div class="card-badges">
+                            <span class="card-source"
+                                  th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'source-lh' : 'source-applyhome'"
+                                  th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
+                            <span class="card-status status-upcoming">접수예정</span>
+                        </div>
                     </div>
                     <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
                     <p class="card-area" th:text="${s.area}">서울</p>
@@ -251,8 +717,227 @@
         <div th:if="${activeSubscriptions.isEmpty() and upcomingSubscriptions.isEmpty()}" class="empty-state">
             <p>현재 접수중이거나 예정된 청약이 없습니다.</p>
         </div>
+
+        <!-- 청약 캘린더 섹션 -->
+        <section class="calendar-section">
+            <div class="calendar-header">
+                <h2 class="section-title">청약 캘린더</h2>
+            </div>
+            <div class="calendar-container">
+                <div class="calendar-loading" id="calendarLoading">
+                    <div class="calendar-spinner"></div>
+                    <p>캘린더 로딩 중...</p>
+                </div>
+                <div class="legend">
+                    <div class="legend-group">
+                        <span class="legend-title">청약Home</span>
+                        <div class="legend-item">
+                            <div class="legend-color applyhome-receipt"></div>
+                            <span>접수</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color applyhome-winner"></div>
+                            <span>발표</span>
+                        </div>
+                    </div>
+                    <div class="legend-divider"></div>
+                    <div class="legend-group">
+                        <span class="legend-title">LH</span>
+                        <div class="legend-item">
+                            <div class="legend-color lh-receipt"></div>
+                            <span>접수</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color lh-winner"></div>
+                            <span>발표</span>
+                        </div>
+                    </div>
+                    <span class="legend-notice">시세 분석은 청약Home만 제공해요</span>
+                </div>
+                <div id="publicCalendar"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 이벤트 상세 모달 -->
+    <div class="event-modal-overlay" id="eventModal">
+        <div class="event-modal">
+            <div class="event-modal-header">
+                <h3 class="event-modal-title" id="eventModalTitle">청약 정보</h3>
+                <button class="event-modal-close" onclick="closeEventModal()">×</button>
+            </div>
+            <div class="event-modal-body" id="eventModalBody">
+                <!-- 동적으로 채워짐 -->
+            </div>
+        </div>
     </div>
 
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('publicCalendar');
+            if (!calendarEl) return;
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek'
+                },
+                buttonText: {
+                    today: '오늘',
+                    month: '월간',
+                    week: '주간'
+                },
+                titleFormat: { year: 'numeric', month: 'long' },
+                loading: function(isLoading) {
+                    const overlay = document.getElementById('calendarLoading');
+                    if (isLoading) {
+                        overlay.classList.remove('hidden');
+                    } else {
+                        overlay.classList.add('hidden');
+                    }
+                },
+                events: function(info, successCallback, failureCallback) {
+                    const start = info.startStr.split('T')[0];
+                    const end = info.endStr.split('T')[0];
+                    fetch(`/home/calendar/events?start=${start}&end=${end}`)
+                        .then(response => response.json())
+                        .then(events => {
+                            successCallback(events);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching events:', error);
+                            failureCallback(error);
+                            document.getElementById('calendarLoading').classList.add('hidden');
+                        });
+                },
+                eventClick: function(info) {
+                    showEventModal(info.event);
+                },
+                eventDidMount: function(info) {
+                    if (info.event.extendedProps.expired) {
+                        info.el.classList.add('expired-event');
+                    }
+                },
+                eventDisplay: 'block',
+                dayMaxEvents: 3,
+                moreLinkText: function(n) { return '+' + n + '개'; },
+                height: 'auto',
+                fixedWeekCount: false
+            });
+            calendar.render();
+        });
+
+        function showEventModal(event) {
+            const props = event.extendedProps;
+            const modalTitle = document.getElementById('eventModalTitle');
+            const modalBody = document.getElementById('eventModalBody');
+
+            const isLH = props.source && props.source.toUpperCase().includes('LH');
+            const eventTypeLabel = props.eventType === 'receipt' ? '접수' : '발표';
+
+            let eventTypeClass;
+            if (isLH) {
+                eventTypeClass = props.eventType === 'receipt' ? 'lh-receipt' : 'lh-winner';
+            } else {
+                eventTypeClass = props.eventType === 'receipt' ? 'receipt' : 'winner';
+            }
+
+            const sourceClass = isLH ? 'source-lh' : 'source-applyhome';
+            const sourceLabel = isLH ? 'LH' : '청약Home';
+
+            modalTitle.textContent = props.houseName || '청약 정보';
+
+            let html = `
+                <div class="event-tags">
+                    <span class="event-tag ${sourceClass}">${sourceLabel}</span>
+                    <span class="event-tag ${eventTypeClass}">${eventTypeLabel}</span>
+                </div>
+
+                <div class="event-info">
+                    <div class="event-info-row">
+                        <div class="event-info-item">
+                            <span class="event-info-label">지역</span>
+                            <span class="event-info-value">${props.area || '-'}</span>
+                        </div>
+                        <div class="event-info-item">
+                            <span class="event-info-label">주택유형</span>
+                            <span class="event-info-value">${props.houseType || '-'}</span>
+                        </div>
+                    </div>
+
+                    <div class="event-info-item">
+                        <span class="event-info-label">공급세대수</span>
+                        <span class="event-info-value">${props.totalSupplyCount ? props.totalSupplyCount.toLocaleString() + '세대' : '-'}</span>
+                    </div>
+
+                    <div class="event-divider"></div>
+
+                    <div class="event-info-item">
+                        <span class="event-info-label">접수기간</span>
+                        <span class="event-info-value">${formatDate(props.receiptStartDate)} ~ ${formatDate(props.receiptEndDate)}</span>
+                    </div>
+
+                    <div class="event-info-item">
+                        <span class="event-info-label">당첨자 발표일</span>
+                        <span class="event-info-value">${formatDate(props.winnerAnnounceDate)}</span>
+                    </div>
+                </div>
+            `;
+
+            // 청약Home만 분석 버튼 활성화
+            if (props.hasAnalysis) {
+                html += `
+                    <a href="/home/analysis/${event.id}" class="event-btn-analysis">
+                        시세 분석 보기
+                    </a>
+                `;
+            } else {
+                html += `
+                    <div class="event-btn-analysis disabled">
+                        시세 분석 (청약Home만 제공)
+                    </div>
+                    <div class="event-lh-notice">
+                        LH 청약은 시세 분석이 제공되지 않습니다
+                    </div>
+                `;
+            }
+
+            if (props.detailUrl) {
+                html += `
+                    <a href="${props.detailUrl}" target="_blank" class="event-btn-detail">
+                        상세 페이지 보기 →
+                    </a>
+                `;
+            }
+
+            modalBody.innerHTML = html;
+            document.getElementById('eventModal').classList.add('active');
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.remove('active');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeEventModal();
+        });
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('eventModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEventModal();
+        });
+    </script>
 </body>
 </html>

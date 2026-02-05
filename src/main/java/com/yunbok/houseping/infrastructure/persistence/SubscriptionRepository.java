@@ -124,4 +124,10 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
      */
     @Query("SELECT s FROM SubscriptionEntity s WHERE s.source = :source AND s.area IN :areas ORDER BY s.receiptStartDate DESC")
     List<SubscriptionEntity> findBySourceAndAreaIn(@Param("source") String source, @Param("areas") List<String> areas);
+
+    /**
+     * 지역 목록으로 청약 조회 (모든 소스)
+     */
+    @Query("SELECT s FROM SubscriptionEntity s WHERE s.area LIKE %:area1% OR s.area LIKE %:area2% ORDER BY s.receiptStartDate DESC")
+    List<SubscriptionEntity> findByAreaLikeOrAreaLike(@Param("area1") String area1, @Param("area2") String area2);
 }

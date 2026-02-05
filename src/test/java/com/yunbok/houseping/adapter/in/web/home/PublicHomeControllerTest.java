@@ -34,13 +34,16 @@ class PublicHomeControllerTest {
     private SubscriptionAnalysisUseCase subscriptionAnalysisUseCase;
 
     @Mock
+    private PublicCalendarService publicCalendarService;
+
+    @Mock
     private Model model;
 
     private PublicHomeController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new PublicHomeController(subscriptionQueryUseCase, subscriptionAnalysisUseCase);
+        controller = new PublicHomeController(subscriptionQueryUseCase, subscriptionAnalysisUseCase, publicCalendarService);
     }
 
     @Nested

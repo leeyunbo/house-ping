@@ -20,7 +20,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SubscriptionQueryService implements SubscriptionQueryUseCase {
 
-    private static final String APPLY_HOME_SOURCE = "ApplyHome";
     private static final List<String> SUPPORTED_AREAS = List.of("서울", "경기");
 
     private final SubscriptionQueryPort subscriptionQueryPort;
@@ -38,12 +37,11 @@ public class SubscriptionQueryService implements SubscriptionQueryUseCase {
         if (area != null && !area.isBlank()) {
             subscriptions = subscriptionQueryPort.findByAreaContaining(area);
         } else {
-            subscriptions = subscriptionQueryPort.findBySourceAndAreas(APPLY_HOME_SOURCE, SUPPORTED_AREAS);
+            subscriptions = subscriptionQueryPort.findBySupportedAreas(SUPPORTED_AREAS);
         }
 
-        // ApplyHome만, 서울/경기만, 접수중+예정만 필터링
+        // 서울/경기만, 접수중+예정만 필터링 (ApplyHome + LH 모두 포함)
         return subscriptions.stream()
-                .filter(s -> APPLY_HOME_SOURCE.equals(s.getSource()))
                 .filter(s -> s.getArea() != null && SUPPORTED_AREAS.stream()
                         .anyMatch(supported -> s.getArea().contains(supported)))
                 .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE

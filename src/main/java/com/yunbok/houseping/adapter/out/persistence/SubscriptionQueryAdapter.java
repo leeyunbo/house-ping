@@ -43,6 +43,20 @@ public class SubscriptionQueryAdapter implements SubscriptionQueryPort {
     }
 
     @Override
+    public List<Subscription> findBySupportedAreas(List<String> areas) {
+        if (areas.size() >= 2) {
+            return subscriptionRepository.findByAreaLikeOrAreaLike(areas.get(0), areas.get(1)).stream()
+                    .map(this::toDomain)
+                    .toList();
+        } else if (areas.size() == 1) {
+            return subscriptionRepository.findByAreaContaining(areas.get(0)).stream()
+                    .map(this::toDomain)
+                    .toList();
+        }
+        return List.of();
+    }
+
+    @Override
     public List<Subscription> findRecentSubscriptions(int limit) {
         PageRequest pageRequest = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "receiptStartDate"));
         return subscriptionRepository.findAll(pageRequest).getContent().stream()

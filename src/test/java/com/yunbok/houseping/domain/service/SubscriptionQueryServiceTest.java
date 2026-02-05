@@ -98,7 +98,7 @@ class SubscriptionQueryServiceTest {
         void usesDefaultWhenAreaNotProvided() {
             // given
             Subscription subscription = createSubscription("ApplyHome", "서울", SubscriptionStatus.ACTIVE);
-            when(subscriptionQueryPort.findBySourceAndAreas("ApplyHome", List.of("서울", "경기")))
+            when(subscriptionQueryPort.findBySupportedAreas(List.of("서울", "경기")))
                     .thenReturn(List.of(subscription));
 
             // when
@@ -106,12 +106,12 @@ class SubscriptionQueryServiceTest {
 
             // then
             assertThat(result).hasSize(1);
-            verify(subscriptionQueryPort).findBySourceAndAreas("ApplyHome", List.of("서울", "경기"));
+            verify(subscriptionQueryPort).findBySupportedAreas(List.of("서울", "경기"));
         }
 
         @Test
-        @DisplayName("ApplyHome 소스만 필터링한다")
-        void filtersOnlyApplyHomeSource() {
+        @DisplayName("ApplyHome과 LH 소스 모두 포함한다")
+        void includesBothApplyHomeAndLH() {
             // given
             Subscription applyHome = createSubscription("ApplyHome", "서울", SubscriptionStatus.ACTIVE);
             Subscription lh = createSubscription("LH", "서울", SubscriptionStatus.ACTIVE);
@@ -122,8 +122,9 @@ class SubscriptionQueryServiceTest {
             List<Subscription> result = service.findActiveAndUpcomingSubscriptions("서울");
 
             // then
-            assertThat(result).hasSize(1);
-            assertThat(result.get(0).getSource()).isEqualTo("ApplyHome");
+            assertThat(result).hasSize(2);
+            assertThat(result).extracting(Subscription::getSource)
+                    .containsExactlyInAnyOrder("ApplyHome", "LH");
         }
 
         @Test
@@ -166,14 +167,14 @@ class SubscriptionQueryServiceTest {
         @DisplayName("빈 문자열 지역은 null과 동일하게 처리한다")
         void treatsBlankAreaAsNull() {
             // given
-            when(subscriptionQueryPort.findBySourceAndAreas("ApplyHome", List.of("서울", "경기")))
+            when(subscriptionQueryPort.findBySupportedAreas(List.of("서울", "경기")))
                     .thenReturn(List.of());
 
             // when
             service.findActiveAndUpcomingSubscriptions("   ");
 
             // then
-            verify(subscriptionQueryPort).findBySourceAndAreas("ApplyHome", List.of("서울", "경기"));
+            verify(subscriptionQueryPort).findBySupportedAreas(List.of("서울", "경기"));
         }
     }
 

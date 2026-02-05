@@ -197,17 +197,20 @@ public class AdminSubscriptionQueryService {
         boolean isLH = entity.getSource() != null && entity.getSource().toUpperCase().contains("LH");
         String sourceTag = isLH ? "[LH]" : "[청약]";
 
-        // 접수 종료일이 오늘 이전이면 만료
-        boolean expired = entity.getReceiptEndDate() != null
-                && entity.getReceiptEndDate().isBefore(LocalDate.now());
-
+        boolean expired;
         if ("receipt".equals(eventType)) {
+            // 접수 이벤트: 접수 종료일 기준
+            expired = entity.getReceiptEndDate() != null
+                    && entity.getReceiptEndDate().isBefore(LocalDate.now());
             title = sourceTag + " " + entity.getHouseName();
             start = entity.getReceiptStartDate();
             // FullCalendar는 end를 exclusive로 처리하므로 +1일
             end = entity.getReceiptEndDate() != null ? entity.getReceiptEndDate().plusDays(1) : start.plusDays(1);
             color = isLH ? "#f97316" : "#3b82f6"; // LH: 오렌지, 청약Home: 파란색
         } else {
+            // 발표 이벤트: 발표일 기준
+            expired = entity.getWinnerAnnounceDate() != null
+                    && entity.getWinnerAnnounceDate().isBefore(LocalDate.now());
             title = sourceTag + " " + entity.getHouseName();
             start = entity.getWinnerAnnounceDate();
             end = start.plusDays(1);

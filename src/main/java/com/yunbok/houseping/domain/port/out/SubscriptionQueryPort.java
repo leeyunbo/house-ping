@@ -26,6 +26,11 @@ public interface SubscriptionQueryPort {
     List<Subscription> findBySourceAndAreas(String source, List<String> areas);
 
     /**
+     * 지원 지역으로 청약 목록 조회 (모든 소스)
+     */
+    List<Subscription> findBySupportedAreas(List<String> areas);
+
+    /**
      * 최근 청약 목록 조회 (페이징)
      */
     List<Subscription> findRecentSubscriptions(int limit);
