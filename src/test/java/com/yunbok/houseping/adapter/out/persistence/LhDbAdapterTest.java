@@ -1,8 +1,9 @@
 package com.yunbok.houseping.adapter.out.persistence;
 
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
+import com.yunbok.houseping.adapter.persistence.LhDbAdapter;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.entity.SubscriptionEntity;
+import com.yunbok.houseping.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

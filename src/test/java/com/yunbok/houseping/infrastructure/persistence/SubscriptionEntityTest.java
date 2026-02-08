@@ -1,5 +1,11 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
+import com.yunbok.houseping.entity.SubscriptionEntity;
+import com.yunbok.houseping.entity.RegionCodeEntity;
+import com.yunbok.houseping.repository.RegionCodeRepository;
+import com.yunbok.houseping.entity.RealTransactionCacheEntity;
+import com.yunbok.houseping.repository.RealTransactionCacheRepository;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

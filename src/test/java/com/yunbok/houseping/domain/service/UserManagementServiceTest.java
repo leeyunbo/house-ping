@@ -1,9 +1,11 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.User;
-import com.yunbok.houseping.domain.model.UserRole;
-import com.yunbok.houseping.domain.model.UserStatus;
-import com.yunbok.houseping.domain.port.out.UserPersistencePort;
+import com.yunbok.houseping.core.service.user.UserManagementService;
+
+import com.yunbok.houseping.core.domain.User;
+import com.yunbok.houseping.core.domain.UserRole;
+import com.yunbok.houseping.core.domain.UserStatus;
+import com.yunbok.houseping.adapter.persistence.UserPersistenceAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,7 +28,7 @@ import static org.mockito.Mockito.*;
 class UserManagementServiceTest {
 
     @Mock
-    private UserPersistencePort userPersistencePort;
+    private UserPersistenceAdapter userPersistencePort;
 
     private UserManagementService service;
 

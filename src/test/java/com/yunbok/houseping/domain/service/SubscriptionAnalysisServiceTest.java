@@ -1,7 +1,17 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.*;
-import com.yunbok.houseping.domain.port.out.*;
+import com.yunbok.houseping.core.service.subscription.SubscriptionAnalysisService;
+import com.yunbok.houseping.support.util.AddressHelper;
+import com.yunbok.houseping.core.service.subscription.HouseTypeComparisonBuilder;
+import com.yunbok.houseping.core.service.subscription.MarketAnalyzer;
+
+import com.yunbok.houseping.adapter.persistence.RealTransactionQueryAdapter;
+import com.yunbok.houseping.adapter.persistence.RegionCodeQueryAdapter;
+import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
+import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
+import com.yunbok.houseping.core.port.RealTransactionFetchPort;
+import com.yunbok.houseping.support.dto.*;
+import com.yunbok.houseping.core.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,19 +39,19 @@ import static org.mockito.Mockito.*;
 class SubscriptionAnalysisServiceTest {
 
     @Mock
-    private SubscriptionQueryPort subscriptionQueryPort;
+    private SubscriptionQueryAdapter subscriptionQueryPort;
 
     @Mock
-    private SubscriptionPriceQueryPort subscriptionPriceQueryPort;
+    private SubscriptionPriceQueryAdapter subscriptionPriceQueryPort;
 
     @Mock
-    private RealTransactionQueryPort realTransactionQueryPort;
+    private RealTransactionQueryAdapter realTransactionQueryPort;
 
     @Mock
     private RealTransactionFetchPort realTransactionFetchPort;
 
     @Mock
-    private RegionCodeQueryPort regionCodeQueryPort;
+    private RegionCodeQueryAdapter regionCodeQueryPort;
 
     private AddressHelper addressParser;
     private HouseTypeComparisonBuilder comparisonBuilder;

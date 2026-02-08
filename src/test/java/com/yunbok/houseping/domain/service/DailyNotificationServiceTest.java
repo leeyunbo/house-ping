@@ -1,11 +1,14 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.DailyNotificationReport;
-import com.yunbok.houseping.domain.model.NotificationTarget;
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.domain.port.out.NotificationSubscriptionPersistencePort;
-import com.yunbok.houseping.domain.port.out.notification.NotificationSender;
-import com.yunbok.houseping.infrastructure.persistence.NotificationHistoryRepository;
+import com.yunbok.houseping.core.service.notification.DailyNotificationService;
+import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
+
+import com.yunbok.houseping.support.dto.DailyNotificationReport;
+import com.yunbok.houseping.support.dto.NotificationTarget;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.adapter.persistence.NotificationSubscriptionPersistenceAdapter;
+import com.yunbok.houseping.core.port.NotificationSender;
+import com.yunbok.houseping.repository.NotificationHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +34,7 @@ class DailyNotificationServiceTest {
     private SubscriptionCollector subscriptionCollector;
 
     @Mock
-    private NotificationSubscriptionPersistencePort persistencePort;
+    private NotificationSubscriptionPersistenceAdapter persistencePort;
 
     @Mock
     private NotificationSender notificationSender;

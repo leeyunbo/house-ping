@@ -1,6 +1,8 @@
 package com.yunbok.houseping.adapter.in.web;
 
-import com.yunbok.houseping.adapter.in.web.dto.ApiResponse;
+import com.yunbok.houseping.controller.GlobalExceptionHandler;
+
+import com.yunbok.houseping.support.dto.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

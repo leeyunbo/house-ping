@@ -1,8 +1,10 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.NotificationTarget;
-import com.yunbok.houseping.domain.port.out.NotificationSubscriptionPersistencePort;
-import com.yunbok.houseping.domain.port.out.notification.NotificationSender;
+import com.yunbok.houseping.core.service.notification.SubscriptionNotificationService;
+
+import com.yunbok.houseping.support.dto.NotificationTarget;
+import com.yunbok.houseping.adapter.persistence.NotificationSubscriptionPersistenceAdapter;
+import com.yunbok.houseping.core.port.NotificationSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,7 +28,7 @@ import static org.mockito.Mockito.*;
 class SubscriptionNotificationServiceTest {
 
     @Mock
-    private NotificationSubscriptionPersistencePort persistencePort;
+    private NotificationSubscriptionPersistenceAdapter persistencePort;
 
     @Mock
     private NotificationSender notificationSender;

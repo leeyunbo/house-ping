@@ -1,5 +1,6 @@
 package com.yunbok.houseping.adapter.in.web;
 
+import com.yunbok.houseping.controller.web.AuthController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

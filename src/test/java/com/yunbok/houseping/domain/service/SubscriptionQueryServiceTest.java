@@ -1,10 +1,11 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.Subscription;
-import com.yunbok.houseping.domain.model.SubscriptionPrice;
-import com.yunbok.houseping.domain.model.SubscriptionStatus;
-import com.yunbok.houseping.domain.port.out.SubscriptionPriceQueryPort;
-import com.yunbok.houseping.domain.port.out.SubscriptionQueryPort;
+import com.yunbok.houseping.core.service.subscription.SubscriptionQueryService;
+import com.yunbok.houseping.core.domain.Subscription;
+import com.yunbok.houseping.core.domain.SubscriptionPrice;
+import com.yunbok.houseping.core.domain.SubscriptionStatus;
+import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
+import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,10 +28,10 @@ import static org.mockito.Mockito.*;
 class SubscriptionQueryServiceTest {
 
     @Mock
-    private SubscriptionQueryPort subscriptionQueryPort;
+    private SubscriptionQueryAdapter subscriptionQueryPort;
 
     @Mock
-    private SubscriptionPriceQueryPort subscriptionPriceQueryPort;
+    private SubscriptionPriceQueryAdapter subscriptionPriceQueryPort;
 
     private SubscriptionQueryService service;
 

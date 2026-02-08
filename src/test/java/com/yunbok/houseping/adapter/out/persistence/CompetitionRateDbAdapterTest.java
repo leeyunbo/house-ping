@@ -1,8 +1,9 @@
 package com.yunbok.houseping.adapter.out.persistence;
 
-import com.yunbok.houseping.domain.model.CompetitionRate;
-import com.yunbok.houseping.infrastructure.persistence.CompetitionRateEntity;
-import com.yunbok.houseping.infrastructure.persistence.CompetitionRateRepository;
+import com.yunbok.houseping.adapter.persistence.CompetitionRateDbAdapter;
+import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.entity.CompetitionRateEntity;
+import com.yunbok.houseping.repository.CompetitionRateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

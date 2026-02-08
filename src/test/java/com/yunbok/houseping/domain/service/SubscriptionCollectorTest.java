@@ -1,8 +1,10 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.domain.model.SubscriptionConfig;
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
+import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
+import com.yunbok.houseping.core.service.subscription.SubscriptionProviderChain;
+import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.core.domain.SubscriptionConfig;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

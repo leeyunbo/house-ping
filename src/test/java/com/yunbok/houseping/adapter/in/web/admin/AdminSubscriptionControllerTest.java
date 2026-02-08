@@ -1,10 +1,15 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
-import com.yunbok.houseping.domain.model.SyncResult;
-import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
-import com.yunbok.houseping.domain.service.SubscriptionAnalysisService;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceEntity;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
+import com.yunbok.houseping.support.dto.CalendarEventDto;
+import com.yunbok.houseping.controller.web.AdminSubscriptionController;
+import com.yunbok.houseping.controller.web.dto.AdminSubscriptionDto;
+import com.yunbok.houseping.core.service.admin.AdminSubscriptionQueryService;
+import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
+import com.yunbok.houseping.core.service.subscription.SubscriptionAnalysisService;
+import com.yunbok.houseping.controller.web.dto.AdminSubscriptionSearchCriteria;
+import com.yunbok.houseping.support.dto.SyncResult;
+import com.yunbok.houseping.entity.SubscriptionPriceEntity;
+import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,7 +46,7 @@ class AdminSubscriptionControllerTest {
     private AdminSubscriptionQueryService queryService;
 
     @Mock
-    private SubscriptionManagementUseCase managementUseCase;
+    private SubscriptionManagementService managementUseCase;
 
     @Mock
     private SubscriptionPriceRepository priceRepository;

@@ -1,5 +1,7 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
+import com.yunbok.houseping.controller.web.dto.AdminSubscriptionSearchCriteria;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

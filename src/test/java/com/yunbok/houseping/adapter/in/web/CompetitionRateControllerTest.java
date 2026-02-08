@@ -1,7 +1,9 @@
 package com.yunbok.houseping.adapter.in.web;
 
-import com.yunbok.houseping.adapter.in.web.dto.ApiResponse;
-import com.yunbok.houseping.domain.service.CompetitionRateCollectorService;
+import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
+import com.yunbok.houseping.controller.api.CompetitionRateController;
+import com.yunbok.houseping.support.dto.ApiResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,33 +22,33 @@ import static org.mockito.Mockito.when;
 class CompetitionRateControllerTest {
 
     @Mock
-    private CompetitionRateCollectorService collectorService;
+    private CompetitionRateCollectorService collectorUseCase;
 
     private CompetitionRateController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new CompetitionRateController(collectorService);
+        controller = new CompetitionRateController(collectorUseCase);
     }
 
     @Test
     @DisplayName("collect()는 경쟁률 수집을 실행한다")
     void collectExecutesCollector() {
         // given
-        when(collectorService.collect()).thenReturn(10);
+        when(collectorUseCase.collect()).thenReturn(10);
 
         // when
         controller.collect();
 
         // then
-        verify(collectorService).collect();
+        verify(collectorUseCase).collect();
     }
 
     @Test
     @DisplayName("collect()는 수집된 개수를 반환한다")
     void collectReturnsCollectedCount() {
         // given
-        when(collectorService.collect()).thenReturn(25);
+        when(collectorUseCase.collect()).thenReturn(25);
 
         // when
         ApiResponse<Map<String, Integer>> response = controller.collect();
@@ -59,7 +61,7 @@ class CompetitionRateControllerTest {
     @DisplayName("collect()는 성공 메시지를 포함한다")
     void collectIncludesSuccessMessage() {
         // given
-        when(collectorService.collect()).thenReturn(0);
+        when(collectorUseCase.collect()).thenReturn(0);
 
         // when
         ApiResponse<Map<String, Integer>> response = controller.collect();
@@ -72,7 +74,7 @@ class CompetitionRateControllerTest {
     @DisplayName("수집 결과가 0개여도 정상 응답한다")
     void collectHandlesZeroResults() {
         // given
-        when(collectorService.collect()).thenReturn(0);
+        when(collectorUseCase.collect()).thenReturn(0);
 
         // when
         ApiResponse<Map<String, Integer>> response = controller.collect();

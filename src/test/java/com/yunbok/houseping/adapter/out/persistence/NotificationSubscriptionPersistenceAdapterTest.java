@@ -1,10 +1,11 @@
 package com.yunbok.houseping.adapter.out.persistence;
 
-import com.yunbok.houseping.domain.model.NotificationTarget;
-import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionEntity;
-import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionRepository;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
+import com.yunbok.houseping.adapter.persistence.NotificationSubscriptionPersistenceAdapter;
+import com.yunbok.houseping.support.dto.NotificationTarget;
+import com.yunbok.houseping.entity.NotificationSubscriptionEntity;
+import com.yunbok.houseping.repository.NotificationSubscriptionRepository;
+import com.yunbok.houseping.entity.SubscriptionEntity;
+import com.yunbok.houseping.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

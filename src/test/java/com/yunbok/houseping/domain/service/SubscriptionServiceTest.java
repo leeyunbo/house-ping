@@ -1,8 +1,11 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.domain.port.out.notification.NotificationSender;
+import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
+import com.yunbok.houseping.core.service.subscription.SubscriptionService;
+
+import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.core.port.NotificationSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

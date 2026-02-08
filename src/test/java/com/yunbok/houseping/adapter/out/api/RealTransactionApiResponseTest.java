@@ -1,5 +1,7 @@
 package com.yunbok.houseping.adapter.out.api;
 
+import com.yunbok.houseping.support.external.RealTransactionApiResponse;
+import com.yunbok.houseping.support.external.RealTransactionItem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

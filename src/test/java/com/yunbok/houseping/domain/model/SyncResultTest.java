@@ -1,5 +1,7 @@
 package com.yunbok.houseping.domain.model;
 
+import com.yunbok.houseping.support.dto.SyncResult;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

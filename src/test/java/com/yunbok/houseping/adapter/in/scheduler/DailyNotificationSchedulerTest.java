@@ -1,6 +1,9 @@
 package com.yunbok.houseping.adapter.in.scheduler;
 
-import com.yunbok.houseping.domain.service.DailyNotificationService;
+import com.yunbok.houseping.core.service.notification.DailyNotificationService;
+import com.yunbok.houseping.scheduler.DailyNotificationScheduler;
+
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,13 +19,13 @@ import static org.mockito.Mockito.*;
 class DailyNotificationSchedulerTest {
 
     @Mock
-    private DailyNotificationService dailyNotificationService;
+    private DailyNotificationService dailyNotificationUseCase;
 
     private DailyNotificationScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        scheduler = new DailyNotificationScheduler(dailyNotificationService);
+        scheduler = new DailyNotificationScheduler(dailyNotificationUseCase);
     }
 
     @Nested
@@ -33,13 +36,13 @@ class DailyNotificationSchedulerTest {
         @DisplayName("일일 종합 알림을 발송한다")
         void sendsDailyReport() {
             // given
-            doNothing().when(dailyNotificationService).sendDailyReport();
+            doNothing().when(dailyNotificationUseCase).sendDailyReport();
 
             // when
             scheduler.sendDailyReport();
 
             // then
-            verify(dailyNotificationService).sendDailyReport();
+            verify(dailyNotificationUseCase).sendDailyReport();
         }
 
         @Test
@@ -47,13 +50,13 @@ class DailyNotificationSchedulerTest {
         void handlesException() {
             // given
             doThrow(new RuntimeException("Test exception"))
-                    .when(dailyNotificationService).sendDailyReport();
+                    .when(dailyNotificationUseCase).sendDailyReport();
 
             // when
             scheduler.sendDailyReport();
 
             // then
-            verify(dailyNotificationService).sendDailyReport();
+            verify(dailyNotificationUseCase).sendDailyReport();
         }
     }
 }

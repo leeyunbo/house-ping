@@ -1,5 +1,9 @@
 package com.yunbok.houseping.infrastructure.dto;
 
+import com.yunbok.houseping.support.external.TelegramWebhookDto;
+import com.yunbok.houseping.support.external.TelegramCommandDto;
+import com.yunbok.houseping.support.external.TelegramResponseDto;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

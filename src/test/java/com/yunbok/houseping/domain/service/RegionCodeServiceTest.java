@@ -1,7 +1,9 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.infrastructure.persistence.RegionCodeEntity;
-import com.yunbok.houseping.infrastructure.persistence.RegionCodeRepository;
+import com.yunbok.houseping.core.service.region.RegionCodeService;
+
+import com.yunbok.houseping.entity.RegionCodeEntity;
+import com.yunbok.houseping.repository.RegionCodeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -1,11 +1,12 @@
 package com.yunbok.houseping.adapter.in.scheduler;
 
-import com.yunbok.houseping.adapter.out.api.ApplyhomeApiAdapter;
-import com.yunbok.houseping.domain.model.SyncResult;
-import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
-import com.yunbok.houseping.domain.port.in.SubscriptionUseCase;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
+import com.yunbok.houseping.scheduler.SubscriptionScheduler;
+import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
+import com.yunbok.houseping.adapter.api.ApplyhomeApiAdapter;
+import com.yunbok.houseping.support.dto.SyncResult;
+
+import com.yunbok.houseping.repository.SubscriptionPriceRepository;
+import com.yunbok.houseping.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,11 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @DisplayName("SubscriptionScheduler - 청약 정보 스케줄러")
@@ -26,10 +24,7 @@ import static org.mockito.Mockito.*;
 class SubscriptionSchedulerTest {
 
     @Mock
-    private SubscriptionUseCase subscriptionUseCase;
-
-    @Mock
-    private SubscriptionManagementUseCase managementUseCase;
+    private SubscriptionManagementService managementUseCase;
 
     @Mock
     private SubscriptionRepository subscriptionRepository;
@@ -45,7 +40,6 @@ class SubscriptionSchedulerTest {
     @BeforeEach
     void setUp() {
         scheduler = new SubscriptionScheduler(
-                subscriptionUseCase,
                 managementUseCase,
                 subscriptionRepository,
                 priceRepository,
@@ -70,26 +64,6 @@ class SubscriptionSchedulerTest {
             verify(managementUseCase).sync();
         }
     }
-
-    // DailyNotificationScheduler로 통합되어 비활성화
-    // @Nested
-    // @DisplayName("collectDailySubscriptions() - 일일 청약 수집 (매일 9시)")
-    // class CollectDailySubscriptions {
-    //
-    //     @Test
-    //     @DisplayName("청약 정보 수집 및 알림을 수행한다")
-    //     void collectsAndNotifies() {
-    //         // given
-    //         when(subscriptionUseCase.collect(any(LocalDate.class), eq(true)))
-    //                 .thenReturn(List.of());
-    //
-    //         // when
-    //         scheduler.collectDailySubscriptions();
-    //
-    //         // then
-    //         verify(subscriptionUseCase).collect(any(LocalDate.class), eq(true));
-    //     }
-    // }
 
     @Nested
     @DisplayName("cleanupOldData() - 오래된 데이터 정리 (매월 1일 2시)")

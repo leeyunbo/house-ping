@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.security;
 
+import com.yunbok.houseping.config.oauth2.OAuth2AuthenticationFailureHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;

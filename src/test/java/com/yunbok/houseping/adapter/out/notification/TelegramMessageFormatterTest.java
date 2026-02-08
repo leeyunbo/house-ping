@@ -1,7 +1,9 @@
 package com.yunbok.houseping.adapter.out.notification;
 
-import com.yunbok.houseping.domain.model.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
+import com.yunbok.houseping.adapter.formatter.TelegramMessageFormatter;
+
+import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -51,7 +53,7 @@ class TelegramMessageFormatterTest {
             String result = formatter.formatBatchSummary(List.of());
 
             // then
-            assertThat(result).isEqualTo("📭 오늘은 신규 청약 정보가 없습니다.");
+            assertThat(result).isEqualTo("오늘은 신규 청약 정보가 없습니다.");
         }
 
         @Test
@@ -119,7 +121,7 @@ class TelegramMessageFormatterTest {
             String result = formatter.formatNoDataMessage();
 
             // then
-            assertThat(result).isEqualTo("📭 오늘은 신규 청약 정보가 없습니다.");
+            assertThat(result).isEqualTo("오늘은 신규 청약 정보가 없습니다.");
         }
     }
 

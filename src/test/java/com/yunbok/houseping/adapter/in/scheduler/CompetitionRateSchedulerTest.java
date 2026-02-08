@@ -1,6 +1,8 @@
 package com.yunbok.houseping.adapter.in.scheduler;
 
-import com.yunbok.houseping.domain.service.CompetitionRateCollectorService;
+import com.yunbok.houseping.scheduler.CompetitionRateScheduler;
+import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,13 +18,13 @@ import static org.mockito.Mockito.*;
 class CompetitionRateSchedulerTest {
 
     @Mock
-    private CompetitionRateCollectorService collectorService;
+    private CompetitionRateCollectorService collectorUseCase;
 
     private CompetitionRateScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        scheduler = new CompetitionRateScheduler(collectorService);
+        scheduler = new CompetitionRateScheduler(collectorUseCase);
     }
 
     @Nested
@@ -33,26 +35,26 @@ class CompetitionRateSchedulerTest {
         @DisplayName("수집 서비스를 호출한다")
         void callsCollectorService() {
             // given
-            when(collectorService.collect()).thenReturn(10);
+            when(collectorUseCase.collect()).thenReturn(10);
 
             // when
             scheduler.collectCompetitionRates();
 
             // then
-            verify(collectorService).collect();
+            verify(collectorUseCase).collect();
         }
 
         @Test
         @DisplayName("예외가 발생해도 스케줄러가 중단되지 않는다")
         void handlesException() {
             // given
-            when(collectorService.collect()).thenThrow(new RuntimeException("수집 실패"));
+            when(collectorUseCase.collect()).thenThrow(new RuntimeException("수집 실패"));
 
             // when
             scheduler.collectCompetitionRates();
 
             // then - 예외 처리됨
-            verify(collectorService).collect();
+            verify(collectorUseCase).collect();
         }
     }
 }

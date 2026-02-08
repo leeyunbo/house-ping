@@ -1,6 +1,10 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
-import com.yunbok.houseping.domain.service.CompetitionRateCollectorService;
+import com.yunbok.houseping.controller.web.AdminCompetitionRateController;
+import com.yunbok.houseping.core.service.admin.AdminCompetitionRateQueryService;
+import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
+import com.yunbok.houseping.controller.web.dto.AdminCompetitionRateSearchCriteria;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,7 +30,7 @@ class AdminCompetitionRateControllerTest {
     private AdminCompetitionRateQueryService queryService;
 
     @Mock
-    private CompetitionRateCollectorService collectorService;
+    private CompetitionRateCollectorService collectorUseCase;
 
     @Mock
     private Model model;
@@ -38,7 +42,7 @@ class AdminCompetitionRateControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new AdminCompetitionRateController(queryService, collectorService);
+        controller = new AdminCompetitionRateController(queryService, collectorUseCase);
     }
 
     @Nested
@@ -143,7 +147,7 @@ class AdminCompetitionRateControllerTest {
         @DisplayName("수집 성공 시 목록 페이지로 리다이렉트한다")
         void redirectsToListOnSuccess() {
             // given
-            when(collectorService.collect()).thenReturn(10);
+            when(collectorUseCase.collect()).thenReturn(10);
 
             // when
             String result = controller.collect(redirectAttributes);
@@ -156,7 +160,7 @@ class AdminCompetitionRateControllerTest {
         @DisplayName("수집 성공 시 성공 메시지를 추가한다")
         void addsSuccessMessageOnSuccess() {
             // given
-            when(collectorService.collect()).thenReturn(10);
+            when(collectorUseCase.collect()).thenReturn(10);
 
             // when
             controller.collect(redirectAttributes);
@@ -169,7 +173,7 @@ class AdminCompetitionRateControllerTest {
         @DisplayName("수집 실패 시 에러 메시지를 추가한다")
         void addsErrorMessageOnFailure() {
             // given
-            when(collectorService.collect()).thenThrow(new RuntimeException("API 오류"));
+            when(collectorUseCase.collect()).thenThrow(new RuntimeException("API 오류"));
 
             // when
             String result = controller.collect(redirectAttributes);

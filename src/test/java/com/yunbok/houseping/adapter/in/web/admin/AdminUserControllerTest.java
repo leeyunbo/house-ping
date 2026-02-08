@@ -1,9 +1,11 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
-import com.yunbok.houseping.domain.model.User;
-import com.yunbok.houseping.domain.model.UserRole;
-import com.yunbok.houseping.domain.model.UserStatus;
-import com.yunbok.houseping.domain.port.in.UserManagementUseCase;
+import com.yunbok.houseping.core.service.user.UserManagementService;
+import com.yunbok.houseping.controller.web.AdminUserController;
+import com.yunbok.houseping.core.domain.User;
+import com.yunbok.houseping.core.domain.UserRole;
+import com.yunbok.houseping.core.domain.UserStatus;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +26,7 @@ import static org.mockito.Mockito.*;
 class AdminUserControllerTest {
 
     @Mock
-    private UserManagementUseCase userManagementUseCase;
+    private UserManagementService userManagementUseCase;
 
     @Mock
     private Model model;

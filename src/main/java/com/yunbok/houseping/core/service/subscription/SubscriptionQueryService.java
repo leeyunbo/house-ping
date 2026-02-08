@@ -1,0 +1,67 @@
+package com.yunbok.houseping.core.service.subscription;
+
+import com.yunbok.houseping.core.domain.Subscription;
+import com.yunbok.houseping.core.domain.SubscriptionPrice;
+import com.yunbok.houseping.core.domain.SubscriptionStatus;
+import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
+import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * 청약 조회 서비스
+ * UseCase를 구현하고 Port를 통해 데이터 접근
+ */
+@Service
+@RequiredArgsConstructor
+public class SubscriptionQueryService {
+
+    private static final List<String> SUPPORTED_AREAS = List.of("서울", "경기");
+
+    private final SubscriptionQueryAdapter subscriptionQueryPort;
+    private final SubscriptionPriceQueryAdapter subscriptionPriceQueryPort;
+
+    public Optional<Subscription> findById(Long id) {
+        return subscriptionQueryPort.findById(id);
+    }
+
+    public List<Subscription> findActiveAndUpcomingSubscriptions(String area) {
+        List<Subscription> subscriptions;
+
+        if (area != null && !area.isBlank()) {
+            subscriptions = subscriptionQueryPort.findByAreaContaining(area);
+        } else {
+            subscriptions = subscriptionQueryPort.findBySupportedAreas(SUPPORTED_AREAS);
+        }
+
+        // 서울/경기만, 접수중+예정만 필터링 (ApplyHome + LH 모두 포함)
+        return subscriptions.stream()
+                .filter(s -> s.getArea() != null && SUPPORTED_AREAS.stream()
+                        .anyMatch(supported -> s.getArea().contains(supported)))
+                .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE
+                        || s.getStatus() == SubscriptionStatus.UPCOMING)
+                .toList();
+    }
+
+    public List<Subscription> filterActiveSubscriptions(List<Subscription> subscriptions) {
+        return subscriptions.stream()
+                .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE)
+                .toList();
+    }
+
+    public List<Subscription> filterUpcomingSubscriptions(List<Subscription> subscriptions) {
+        return subscriptions.stream()
+                .filter(s -> s.getStatus() == SubscriptionStatus.UPCOMING)
+                .toList();
+    }
+
+    public List<SubscriptionPrice> findPricesByHouseManageNo(String houseManageNo) {
+        if (houseManageNo == null || houseManageNo.isBlank()) {
+            return List.of();
+        }
+        return subscriptionPriceQueryPort.findByHouseManageNo(houseManageNo);
+    }
+}

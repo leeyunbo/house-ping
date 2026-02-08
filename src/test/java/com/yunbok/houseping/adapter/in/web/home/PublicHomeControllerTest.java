@@ -1,10 +1,14 @@
 package com.yunbok.houseping.adapter.in.web.home;
 
-import com.yunbok.houseping.domain.model.Subscription;
-import com.yunbok.houseping.domain.model.SubscriptionAnalysisResult;
-import com.yunbok.houseping.domain.model.SubscriptionStatus;
-import com.yunbok.houseping.domain.port.in.SubscriptionAnalysisUseCase;
-import com.yunbok.houseping.domain.port.in.SubscriptionQueryUseCase;
+import com.yunbok.houseping.controller.web.PublicHomeController;
+import com.yunbok.houseping.core.service.subscription.SubscriptionQueryService;
+import com.yunbok.houseping.core.service.subscription.SubscriptionAnalysisService;
+import com.yunbok.houseping.core.service.calendar.PublicCalendarService;
+import com.yunbok.houseping.core.domain.Subscription;
+import com.yunbok.houseping.support.dto.SubscriptionAnalysisResult;
+import com.yunbok.houseping.core.domain.SubscriptionStatus;
+
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,10 +32,10 @@ import static org.mockito.Mockito.*;
 class PublicHomeControllerTest {
 
     @Mock
-    private SubscriptionQueryUseCase subscriptionQueryUseCase;
+    private SubscriptionQueryService subscriptionQueryUseCase;
 
     @Mock
-    private SubscriptionAnalysisUseCase subscriptionAnalysisUseCase;
+    private SubscriptionAnalysisService subscriptionAnalysisUseCase;
 
     @Mock
     private PublicCalendarService publicCalendarService;

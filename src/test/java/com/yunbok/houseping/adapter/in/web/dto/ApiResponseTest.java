@@ -1,5 +1,6 @@
 package com.yunbok.houseping.adapter.in.web.dto;
 
+import com.yunbok.houseping.support.dto.ApiResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

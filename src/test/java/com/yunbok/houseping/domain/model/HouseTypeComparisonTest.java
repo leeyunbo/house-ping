@@ -1,5 +1,8 @@
 package com.yunbok.houseping.domain.model;
 
+import com.yunbok.houseping.support.dto.HouseTypeComparison;
+import com.yunbok.houseping.core.domain.RealTransaction;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

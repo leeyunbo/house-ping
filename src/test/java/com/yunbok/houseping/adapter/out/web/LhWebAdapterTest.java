@@ -1,6 +1,7 @@
 package com.yunbok.houseping.adapter.out.web;
 
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
+import com.yunbok.houseping.adapter.api.LhWebAdapter;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

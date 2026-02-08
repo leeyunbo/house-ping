@@ -1,12 +1,16 @@
 package com.yunbok.houseping.adapter.in.web;
 
-import com.yunbok.houseping.adapter.in.web.dto.*;
-import com.yunbok.houseping.domain.model.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.domain.model.SyncResult;
-import com.yunbok.houseping.domain.port.in.SubscriptionManagementUseCase;
-import com.yunbok.houseping.domain.port.in.SubscriptionUseCase;
-import com.yunbok.houseping.domain.port.out.SubscriptionMessageFormatter;
+import com.yunbok.houseping.core.service.subscription.SubscriptionService;
+import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
+import com.yunbok.houseping.controller.api.SubscriptionController;
+
+import com.yunbok.houseping.support.dto.*;
+import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.support.dto.SyncResult;
+
+
+import com.yunbok.houseping.adapter.formatter.SubscriptionMessageFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,10 +32,10 @@ import static org.mockito.Mockito.when;
 class SubscriptionControllerTest {
 
     @Mock
-    private SubscriptionUseCase subscriptionUseCase;
+    private SubscriptionService subscriptionUseCase;
 
     @Mock
-    private SubscriptionManagementUseCase managementUseCase;
+    private SubscriptionManagementService managementUseCase;
 
     @Mock
     private SubscriptionMessageFormatter messageFormatter;

@@ -1,7 +1,8 @@
 package com.yunbok.houseping.adapter.out.api;
 
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.infrastructure.config.SubscriptionProperties;
+import com.yunbok.houseping.adapter.api.LhApiAdapter;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.config.SubscriptionProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

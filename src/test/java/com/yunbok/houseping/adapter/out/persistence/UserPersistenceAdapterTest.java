@@ -1,10 +1,11 @@
 package com.yunbok.houseping.adapter.out.persistence;
 
-import com.yunbok.houseping.domain.model.User;
-import com.yunbok.houseping.domain.model.UserRole;
-import com.yunbok.houseping.domain.model.UserStatus;
-import com.yunbok.houseping.infrastructure.persistence.UserEntity;
-import com.yunbok.houseping.infrastructure.persistence.UserRepository;
+import com.yunbok.houseping.adapter.persistence.UserPersistenceAdapter;
+import com.yunbok.houseping.core.domain.User;
+import com.yunbok.houseping.core.domain.UserRole;
+import com.yunbok.houseping.core.domain.UserStatus;
+import com.yunbok.houseping.entity.UserEntity;
+import com.yunbok.houseping.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

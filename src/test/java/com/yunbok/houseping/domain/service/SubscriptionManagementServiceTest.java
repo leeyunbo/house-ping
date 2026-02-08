@@ -1,11 +1,13 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.domain.model.SubscriptionConfig;
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.domain.model.SyncResult;
-import com.yunbok.houseping.domain.port.out.SubscriptionPersistencePort;
-import com.yunbok.houseping.domain.port.out.SubscriptionProvider;
+import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
+
+import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.core.domain.SubscriptionConfig;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.support.dto.SyncResult;
+import com.yunbok.houseping.adapter.persistence.SubscriptionPersistenceAdapter;
+import com.yunbok.houseping.core.port.SubscriptionProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,7 +30,7 @@ import static org.mockito.Mockito.*;
 class SubscriptionManagementServiceTest {
 
     @Mock
-    private SubscriptionPersistencePort persistencePort;
+    private SubscriptionPersistenceAdapter persistencePort;
 
     @Mock
     private SubscriptionProvider mockProvider;

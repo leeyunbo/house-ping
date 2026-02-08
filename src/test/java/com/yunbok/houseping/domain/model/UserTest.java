@@ -1,5 +1,9 @@
 package com.yunbok.houseping.domain.model;
 
+import com.yunbok.houseping.core.domain.User;
+import com.yunbok.houseping.core.domain.UserRole;
+import com.yunbok.houseping.core.domain.UserStatus;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
+import com.yunbok.houseping.entity.CompetitionRateEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

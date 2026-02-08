@@ -1,9 +1,12 @@
 package com.yunbok.houseping.adapter.in.web.admin;
 
-import com.yunbok.houseping.infrastructure.persistence.CompetitionRateEntity;
-import com.yunbok.houseping.infrastructure.persistence.CompetitionRateRepository;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionEntity;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionRepository;
+import com.yunbok.houseping.controller.web.dto.AdminCompetitionRateDto;
+import com.yunbok.houseping.core.service.admin.AdminCompetitionRateQueryService;
+import com.yunbok.houseping.controller.web.dto.AdminCompetitionRateSearchCriteria;
+import com.yunbok.houseping.entity.CompetitionRateEntity;
+import com.yunbok.houseping.repository.CompetitionRateRepository;
+import com.yunbok.houseping.entity.SubscriptionEntity;
+import com.yunbok.houseping.repository.SubscriptionRepository;
 import com.querydsl.core.types.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

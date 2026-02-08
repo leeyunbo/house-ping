@@ -1,9 +1,11 @@
 package com.yunbok.houseping.adapter.out.notification;
 
-import com.yunbok.houseping.domain.model.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.domain.model.DailyNotificationReport;
-import com.yunbok.houseping.domain.model.NotificationTarget;
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
+import com.yunbok.houseping.adapter.formatter.SlackMessageFormatter;
+
+import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.support.dto.DailyNotificationReport;
+import com.yunbok.houseping.support.dto.NotificationTarget;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

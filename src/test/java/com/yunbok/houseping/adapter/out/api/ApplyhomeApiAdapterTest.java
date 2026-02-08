@@ -1,8 +1,13 @@
 package com.yunbok.houseping.adapter.out.api;
 
-import com.yunbok.houseping.domain.model.SubscriptionInfo;
-import com.yunbok.houseping.infrastructure.config.SubscriptionProperties;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceRepository;
+import com.yunbok.houseping.adapter.api.ApplyhomeApiAdapter;
+import com.yunbok.houseping.support.external.ApplyhomeApiItem;
+import com.yunbok.houseping.support.external.ApplyhomeArbitraryResponse;
+import com.yunbok.houseping.support.external.ApplyhomeAptResponse;
+import com.yunbok.houseping.support.external.ApplyhomeRemainingResponse;
+import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.config.SubscriptionProperties;
+import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

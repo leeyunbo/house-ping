@@ -1,9 +1,10 @@
 package com.yunbok.houseping.adapter.out.api;
 
-import com.yunbok.houseping.adapter.out.api.dto.CompetitionRateItem;
-import com.yunbok.houseping.adapter.out.api.dto.CompetitionRateResponse;
-import com.yunbok.houseping.domain.model.CompetitionRate;
-import com.yunbok.houseping.infrastructure.config.SubscriptionProperties;
+import com.yunbok.houseping.adapter.api.ApplyhomeCompetitionRateAdapter;
+import com.yunbok.houseping.support.external.CompetitionRateItem;
+import com.yunbok.houseping.support.external.CompetitionRateResponse;
+import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.config.SubscriptionProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

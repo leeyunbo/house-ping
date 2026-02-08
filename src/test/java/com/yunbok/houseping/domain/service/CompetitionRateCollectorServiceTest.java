@@ -1,10 +1,12 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.CompetitionRate;
-import com.yunbok.houseping.domain.model.SubscriptionConfig;
-import com.yunbok.houseping.domain.port.out.CompetitionRatePersistencePort;
-import com.yunbok.houseping.domain.port.out.CompetitionRateProvider;
-import com.yunbok.houseping.domain.port.out.SubscriptionPersistencePort;
+import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
+
+import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.core.domain.SubscriptionConfig;
+import com.yunbok.houseping.adapter.persistence.CompetitionRateDbAdapter;
+import com.yunbok.houseping.core.port.CompetitionRateProvider;
+import com.yunbok.houseping.adapter.persistence.SubscriptionPersistenceAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,10 +30,10 @@ import static org.mockito.Mockito.*;
 class CompetitionRateCollectorServiceTest {
 
     @Mock
-    private CompetitionRatePersistencePort competitionRatePort;
+    private CompetitionRateDbAdapter competitionRatePort;
 
     @Mock
-    private SubscriptionPersistencePort subscriptionPort;
+    private SubscriptionPersistenceAdapter subscriptionPort;
 
     @Mock
     private CompetitionRateProvider competitionRateProvider;

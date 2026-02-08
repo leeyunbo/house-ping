@@ -1,7 +1,10 @@
 package com.yunbok.houseping.domain.service;
 
-import com.yunbok.houseping.domain.model.*;
-import com.yunbok.houseping.domain.port.out.UserPersistencePort;
+import com.yunbok.houseping.core.service.auth.AuthenticationService;
+
+import com.yunbok.houseping.config.oauth2.OAuth2UserInfo;
+import com.yunbok.houseping.core.domain.*;
+import com.yunbok.houseping.adapter.persistence.UserPersistenceAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +27,7 @@ import static org.mockito.Mockito.*;
 class AuthenticationServiceTest {
 
     @Mock
-    private UserPersistencePort userPersistencePort;
+    private UserPersistenceAdapter userPersistencePort;
 
     private AuthenticationService service;
 

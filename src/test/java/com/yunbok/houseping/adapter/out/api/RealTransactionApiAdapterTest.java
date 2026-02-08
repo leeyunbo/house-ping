@@ -1,7 +1,9 @@
 package com.yunbok.houseping.adapter.out.api;
 
-import com.yunbok.houseping.infrastructure.persistence.RealTransactionCacheEntity;
-import com.yunbok.houseping.infrastructure.persistence.RealTransactionCacheRepository;
+import com.yunbok.houseping.adapter.api.RealTransactionApiAdapter;
+import com.yunbok.houseping.support.external.RealTransactionApiResponse;
+import com.yunbok.houseping.entity.RealTransactionCacheEntity;
+import com.yunbok.houseping.repository.RealTransactionCacheRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

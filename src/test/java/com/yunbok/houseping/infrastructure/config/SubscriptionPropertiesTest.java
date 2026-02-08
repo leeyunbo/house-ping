@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.config;
 
+import com.yunbok.houseping.config.SubscriptionProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
