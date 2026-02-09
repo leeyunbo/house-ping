@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yunbok.houseping.support.util.DateParsingUtil;
 import com.yunbok.houseping.support.util.AreaCodeMapping;
 import com.yunbok.houseping.core.domain.LhApiTypeCode;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.adapter.dto.LhSubscriptionInfo;
 import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
@@ -31,8 +32,8 @@ import java.util.Set;
 @ConditionalOnProperty(name = "feature.subscription.lh-api-enabled", havingValue = "true", matchIfMissing = false)
 public class LhApiAdapter implements SubscriptionProvider {
 
-    private static final String LH_PROVIDER_NAME = "LH";
-    private static final String SOURCE_NAME = "LH";
+    private static final String LH_PROVIDER_NAME = SubscriptionSource.LH.getValue();
+    private static final String SOURCE_NAME = SubscriptionSource.LH.getValue();
     private static final String RECEIPT_STATUS_IN_PROGRESS = "접수중";
 
     /** 비주거용 공고 제외 키워드 */

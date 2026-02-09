@@ -2,6 +2,7 @@ package com.yunbok.houseping.core.service.admin;
 
 import com.yunbok.houseping.controller.web.dto.AdminSubscriptionDto;
 import com.yunbok.houseping.controller.web.dto.AdminSubscriptionSearchCriteria;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.support.dto.CalendarEventDto;
 import com.yunbok.houseping.support.util.AreaNormalizer;
 
@@ -197,7 +198,7 @@ public class AdminSubscriptionQueryService {
         String color;
         String textColor = "#ffffff";
 
-        boolean isLH = entity.getSource() != null && entity.getSource().toUpperCase().contains("LH");
+        boolean isLH = SubscriptionSource.LH.matches(entity.getSource());
         String sourceTag = isLH ? "[LH]" : "[청약]";
 
         boolean expired;

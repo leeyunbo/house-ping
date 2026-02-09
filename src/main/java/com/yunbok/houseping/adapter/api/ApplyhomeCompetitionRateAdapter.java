@@ -5,6 +5,7 @@ import com.yunbok.houseping.support.external.CompetitionRateResponse;
 import com.yunbok.houseping.core.domain.CompetitionRate;
 import com.yunbok.houseping.core.port.CompetitionRateProvider;
 import com.yunbok.houseping.config.SubscriptionProperties;
+import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,16 +86,12 @@ public class ApplyhomeCompetitionRateAdapter implements CompetitionRateProvider 
                             page, totalPages, response.currentCount());
                 }
                 // API 부하 방지를 위한 짧은 대기
-                Thread.sleep(100);
+                ApiRateLimiter.delay(100);
             }
 
             log.info("[경쟁률 API] APT 경쟁률 전체 조회 완료 - 총 {}건", allRates.size());
             return allRates;
 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("[경쟁률 API] APT 경쟁률 조회 중단 - {}", e.getMessage());
-            return allRates;
         } catch (Exception e) {
             log.warn("[경쟁률 API] APT 경쟁률 조회 중 오류 - {}", e.getMessage());
             return allRates;

@@ -1,6 +1,7 @@
 package com.yunbok.houseping.core.service.calendar;
 
 import com.querydsl.core.BooleanBuilder;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.support.dto.PublicCalendarEventDto;
 import com.yunbok.houseping.entity.QSubscriptionEntity;
 import com.yunbok.houseping.entity.SubscriptionEntity;
@@ -82,7 +83,7 @@ public class PublicCalendarService {
         String color;
         String textColor = "#ffffff";
 
-        boolean isLH = entity.getSource() != null && entity.getSource().toUpperCase().contains("LH");
+        boolean isLH = SubscriptionSource.LH.matches(entity.getSource());
         String sourceTag = isLH ? "[LH]" : "[청약]";
 
         // 청약Home만 분석 페이지 제공

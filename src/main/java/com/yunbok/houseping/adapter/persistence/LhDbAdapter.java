@@ -1,5 +1,6 @@
 package com.yunbok.houseping.adapter.persistence;
 
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionRepository;
 import com.yunbok.houseping.adapter.dto.LhSubscriptionInfo;
@@ -20,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LhDbAdapter implements SubscriptionProvider {
 
-    private static final String SOURCE_PREFIX = "LH";
+    private static final String SOURCE_PREFIX = SubscriptionSource.LH.getValue();
     private final SubscriptionRepository subscriptionRepository;
 
     public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {

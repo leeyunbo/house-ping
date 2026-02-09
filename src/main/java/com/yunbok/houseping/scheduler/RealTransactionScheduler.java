@@ -1,9 +1,11 @@
 package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.adapter.api.RealTransactionApiAdapter;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.service.region.RegionCodeService;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionRepository;
+import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,7 +42,7 @@ public class RealTransactionScheduler {
 
             // 접수예정 + 접수중 청약 조회 (ApplyHome만)
             List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll().stream()
-                    .filter(s -> "ApplyHome".equals(s.getSource()))
+                    .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
                     .filter(s -> s.getReceiptStartDate() != null)
                     .filter(s -> {
                         LocalDate endDate = s.getReceiptEndDate() != null ? s.getReceiptEndDate() : s.getReceiptStartDate();
@@ -68,7 +70,7 @@ public class RealTransactionScheduler {
                     // 6개월치 실거래가 수집 (2개월 전부터)
                     realTransactionApiAdapter.fetchRecentTransactions(lawdCd, 6);
                     successCount++;
-                    Thread.sleep(200); // API 과부하 방지
+                    ApiRateLimiter.delay(200); // API 과부하 방지
                 } catch (Exception e) {
                     failCount++;
                     log.warn("[실거래가 스케줄러] {} 수집 실패: {}", lawdCd, e.getMessage());

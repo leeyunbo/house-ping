@@ -3,6 +3,7 @@ package com.yunbok.houseping.adapter.api;
 import com.yunbok.houseping.support.util.DateParsingUtil;
 import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.core.domain.HouseType;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.config.SubscriptionProperties;
@@ -38,7 +39,7 @@ import java.util.Optional;
 )
 public class ApplyhomeApiAdapter implements SubscriptionProvider {
 
-    private static final String SOURCE_NAME = "ApplyHome";
+    private static final String SOURCE_NAME = SubscriptionSource.APPLYHOME.getValue();
 
     @Value("${applyhome.api.key}")
     private String apiKey;

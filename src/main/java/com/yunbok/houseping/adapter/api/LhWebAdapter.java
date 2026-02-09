@@ -3,6 +3,7 @@ package com.yunbok.houseping.adapter.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yunbok.houseping.adapter.dto.LhSubscriptionInfo;
 import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,8 +39,8 @@ import java.util.stream.Collectors;
 public class LhWebAdapter implements SubscriptionProvider {
 
     private static final DateTimeFormatter LH_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final String LH_PROVIDER_NAME = "LH웹";
-    private static final String SOURCE_NAME = "LH";
+    private static final String LH_PROVIDER_NAME = SubscriptionSource.LH.getValue() + "웹";
+    private static final String SOURCE_NAME = SubscriptionSource.LH.getValue();
 
     /** 비주거용 공고 제외 키워드 */
     private static final Set<String> NON_RESIDENTIAL_KEYWORDS = Set.of(

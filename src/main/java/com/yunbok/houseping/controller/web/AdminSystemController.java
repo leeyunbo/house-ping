@@ -4,6 +4,7 @@ import com.yunbok.houseping.scheduler.RealTransactionScheduler;
 import com.yunbok.houseping.adapter.api.ApplyhomeApiAdapter;
 import com.yunbok.houseping.adapter.formatter.SlackMessageFormatter;
 import com.yunbok.houseping.adapter.formatter.TelegramMessageFormatter;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.core.service.notification.DailyNotificationService;
 import com.yunbok.houseping.entity.NotificationHistoryEntity;
@@ -12,6 +13,7 @@ import com.yunbok.houseping.repository.NotificationSubscriptionRepository;
 import com.yunbok.houseping.repository.SubscriptionRepository;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
+import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -203,7 +205,7 @@ public class AdminSystemController {
             // 2025-01-01 이후 ApplyHome 청약 조회
             LocalDate startDate = LocalDate.of(2025, 1, 1);
             List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll().stream()
-                    .filter(s -> "ApplyHome".equals(s.getSource()))
+                    .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
                     .filter(s -> s.getHouseManageNo() != null && !s.getHouseManageNo().isEmpty())
                     .filter(s -> s.getReceiptStartDate() != null && !s.getReceiptStartDate().isBefore(startDate))
                     .filter(s -> !subscriptionPriceRepository.existsByHouseManageNo(s.getHouseManageNo()))
@@ -224,7 +226,7 @@ public class AdminSystemController {
                     successCount.incrementAndGet();
 
                     // API 과부하 방지
-                    Thread.sleep(100);
+                    ApiRateLimiter.delay(100);
                 } catch (Exception e) {
                     failCount.incrementAndGet();
                     log.warn("[분양가] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());

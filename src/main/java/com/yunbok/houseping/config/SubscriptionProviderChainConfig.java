@@ -5,6 +5,7 @@ import com.yunbok.houseping.adapter.api.LhApiAdapter;
 import com.yunbok.houseping.adapter.persistence.ApplyhomeDbAdapter;
 import com.yunbok.houseping.adapter.persistence.LhDbAdapter;
 import com.yunbok.houseping.adapter.api.LhWebAdapter;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.core.service.subscription.FallbackProviderChain;
 import com.yunbok.houseping.core.service.subscription.SubscriptionProviderChain;
@@ -52,12 +53,12 @@ public class SubscriptionProviderChainConfig {
     @Bean
     @ConditionalOnProperty(name = "feature.subscription.lh-api-enabled", havingValue = "true")
     public SubscriptionProviderChain lhChain(@LhSource List<SubscriptionProvider> providers) {
-        return new FallbackProviderChain(providers, "LH");
+        return new FallbackProviderChain(providers, SubscriptionSource.LH.getValue());
     }
 
     @Bean
     @ConditionalOnProperty(name = "feature.subscription.applyhome-api-enabled", havingValue = "true")
     public SubscriptionProviderChain applyhomeChain(@ApplyhomeSource List<SubscriptionProvider> providers) {
-        return new FallbackProviderChain(providers, "ApplyHome");
+        return new FallbackProviderChain(providers, SubscriptionSource.APPLYHOME.getValue());
     }
 }

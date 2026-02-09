@@ -31,10 +31,12 @@ public class SecurityConfig {
                 // 메인 페이지 (공개)
                 .requestMatchers("/").permitAll()
                 .requestMatchers("/home", "/home/**").permitAll()
-                .requestMatchers("/favicon.ico", "/favicon.svg").permitAll()
+                .requestMatchers("/favicon.ico", "/favicon.svg", "/robots.txt", "/sitemap.xml", "/*.html").permitAll()
                 // 인증 관련
                 .requestMatchers("/auth/**", "/oauth/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
+                // Actuator: health만 공개, 나머지는 MASTER만
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/actuator/**").hasRole("MASTER")
                 // 관리자 페이지 (MASTER/ADMIN만)
                 .requestMatchers("/admin/users/**").hasRole("MASTER")
                 .requestMatchers("/admin/system/**").hasRole("MASTER")
@@ -56,7 +58,7 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/auth/logout")
                 .logoutSuccessUrl("/auth/login?logout")
-                .logoutRequestMatcher(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/auth/logout", "GET"))
+                .logoutRequestMatcher(org.springframework.security.web.util.matcher.RegexRequestMatcher.regexMatcher("/auth/logout"))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
             );

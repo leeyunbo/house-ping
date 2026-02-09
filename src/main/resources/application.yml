@@ -152,5 +152,6 @@ spring:
   config:
     activate:
       on-profile: production
-
-# 프로덕션 환경에서는 logback-spring.xml의 production 프로파일 설정 사용
+  jpa:
+    hibernate:
+      ddl-auto: validate  # 프로덕션에서는 스키마 자동 변경 금지

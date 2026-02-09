@@ -2,6 +2,7 @@ package com.yunbok.houseping.adapter.persistence;
 
 import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionRepository;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ApplyhomeDbAdapter implements SubscriptionProvider {
 
-    private static final String SOURCE_PREFIX = "ApplyHome";
+    private static final String SOURCE_PREFIX = SubscriptionSource.APPLYHOME.getValue();
     private final SubscriptionRepository subscriptionRepository;
 
     public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {

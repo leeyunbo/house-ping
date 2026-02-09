@@ -1,10 +1,12 @@
 package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.adapter.api.ApplyhomeApiAdapter;
+import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 import com.yunbok.houseping.repository.SubscriptionRepository;
+import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,7 +43,7 @@ public class SubscriptionScheduler {
         try {
             // 분양가 데이터가 없는 ApplyHome 청약 조회
             List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll().stream()
-                    .filter(s -> "ApplyHome".equals(s.getSource()))
+                    .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
                     .filter(s -> s.getHouseManageNo() != null && !s.getHouseManageNo().isEmpty())
                     .filter(s -> !priceRepository.existsByHouseManageNo(s.getHouseManageNo()))
                     .toList();
@@ -59,7 +61,7 @@ public class SubscriptionScheduler {
                             subscription.getHouseType()
                     );
                     successCount++;
-                    Thread.sleep(100); // API 과부하 방지
+                    ApiRateLimiter.delay(100); // API 과부하 방지
                 } catch (Exception e) {
                     failCount++;
                     log.warn("[분양가] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
