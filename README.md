@@ -169,8 +169,9 @@ NAVER_CLIENT_SECRET=your_client_secret
 ```
 
 ### Layered Architecture
-- 초기에는 헥사고날 아키텍처를 채택했으나, 프로젝트 규모 대비 과도한 복잡성으로 판단
-- 외부 연동 시스템(청약 API, 알람 API)에는 포트/어댑터 개념은 유지하되 그 외에는 구조를 단순화하여 core 패키지로 통합
+- 초기에는 헥사고날 아키텍처를 채택했으나, 도메인 영역이 좁아 완벽한 DIP 적용의 실익이 적다고 판단
+- 변경 가능성이 높은 외부 연동(청약 API, 알림 API)에만 Port/Adapter 적용
+- 변경이 발생하지 않는 영역(Repository 등)은 직접 의존
 
 ```
   [External]              [Core]                    [External]
