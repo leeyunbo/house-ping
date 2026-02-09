@@ -156,9 +156,9 @@ NAVER_CLIENT_SECRET=your_client_secret
 
 ## 아키텍처
 
-### Hexagonal Architecture
-- houseping 서비스는 외부 시스템과의 상호작용이 굉장히 다양하며 변경이 많은 서비스입니다.
-- 따라서 헥사고날 아키텍처를 채택하여 외부 의존성과 변경이 적은 비즈니스 로직을 분리하여 테스트 용이성과 확장성을 확보했습니다.
+### ~~Hexagonal Architecture~~ ![Deprecated](https://img.shields.io/badge/status-deprecated-red)
+- ~~houseping 서비스는 외부 시스템과의 상호작용이 굉장히 다양하며 변경이 많은 서비스입니다.~~
+- ~~따라서  헥사고날  아키텍처를 채택하여 외부 의존성과  변경이 적은 비즈니스 로직을 분리하여 테스트 용이성과 확장성을 확보했습니다.~~
 
 ```
 [Adapter In]                [Domain]                 [Adapter Out]
@@ -166,6 +166,17 @@ NAVER_CLIENT_SECRET=your_client_secret
   Scheduler                   │                      API Client
                               │                      Notification
                          Domain Model
+```
+
+### Layered Architecture
+- 초기에는 헥사고날 아키텍처를 채택했으나, 프로젝트 규모 대비 과도한 복잡성으로 판단
+- 외부 연동 시스템(청약 API, 알람 API)에는 포트/어댑터 개념은 유지하되 그 외에는 구조를 단순화하여 core 패키지로 통합
+
+```
+  [External]              [Core]                    [External]
+   Controller  ─────▶   Service    ◀─────             Adapter
+   Scheduler             Port                      (API, DB, 알림)
+                         Domain
 ```
 
 ### 책임 연쇄 패턴
