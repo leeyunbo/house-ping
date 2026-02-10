@@ -1,0 +1,58 @@
+package com.yunbok.houseping.controller.web;
+
+import com.yunbok.houseping.core.domain.Subscription;
+import com.yunbok.houseping.core.service.subscription.SubscriptionQueryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.time.YearMonth;
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class SitemapController {
+
+    private static final String BASE_URL = "https://house-ping.com";
+
+    private final SubscriptionQueryService subscriptionQueryService;
+
+    @GetMapping(value = "/sitemap.xml", produces = "application/xml;charset=UTF-8")
+    @ResponseBody
+    public String sitemap() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
+
+        // 홈페이지
+        appendUrl(sb, BASE_URL + "/home", "daily", "1.0");
+
+        // 월별 페이지: 최근 12개월
+        YearMonth now = YearMonth.now();
+        for (int i = -6; i <= 6; i++) {
+            YearMonth ym = now.plusMonths(i);
+            String path = String.format("/home/%d/%02d", ym.getYear(), ym.getMonthValue());
+            appendUrl(sb, BASE_URL + path, "weekly", "0.8");
+        }
+
+        // 분석 페이지: 전체 청약
+        List<Subscription> allSubscriptions = subscriptionQueryService.findAll();
+        for (Subscription s : allSubscriptions) {
+            if (s.getId() != null) {
+                appendUrl(sb, BASE_URL + "/home/analysis/" + s.getId(), "weekly", "0.6");
+            }
+        }
+
+        sb.append("</urlset>");
+        return sb.toString();
+    }
+
+    private void appendUrl(StringBuilder sb, String loc, String changefreq, String priority) {
+        sb.append("  <url>\n");
+        sb.append("    <loc>").append(loc).append("</loc>\n");
+        sb.append("    <changefreq>").append(changefreq).append("</changefreq>\n");
+        sb.append("    <priority>").append(priority).append("</priority>\n");
+        sb.append("  </url>\n");
+    }
+}

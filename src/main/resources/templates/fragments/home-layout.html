@@ -1,66 +1,80 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:fragment="head(title)">
+<head th:fragment="head(title, description)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} + ' - Houseping'">Houseping</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="청약 일정, 경쟁률, 시세 분석을 한눈에. 청약홈, LH 청약 정보 통합 제공">
+    <meta name="description" th:attr="content=${description != null ? description : '청약 일정, 경쟁률, 시세 분석을 한눈에. 청약홈, LH 청약 정보 통합 제공'}">
     <meta name="keywords" content="청약, 아파트 청약, 청약홈, LH, 경쟁률, 분양, 청약 일정, 청약 분석">
 
     <!-- Open Graph (카카오톡, 페이스북 공유용) -->
-    <meta property="og:title" content="Houseping - 청약 분석">
-    <meta property="og:description" content="청약 일정, 경쟁률, 시세 분석을 한눈에">
+    <meta property="og:title" th:attr="content=${title} + ' - Houseping'">
+    <meta property="og:description" th:attr="content=${description != null ? description : '청약 일정, 경쟁률, 시세 분석을 한눈에'}">
     <meta property="og:url" content="https://house-ping.com/home">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Houseping">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Houseping - 청약 분석">
-    <meta name="twitter:description" content="청약 일정, 경쟁률, 시세 분석을 한눈에">
+    <meta name="twitter:title" th:attr="content=${title} + ' - Houseping'">
+    <meta name="twitter:description" th:attr="content=${description != null ? description : '청약 일정, 경쟁률, 시세 분석을 한눈에'}">
 
     <link rel="canonical" href="https://house-ping.com/home">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
+            --primary: #3182f6;
+            --primary-light: #ebf4ff;
+            --primary-dark: #1b64da;
             --accent: #f97316;
-            --success: #10b981;
+            --success: #00c471;
+            --success-light: #e8faf0;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --bg: #f8fafc;
+            --bg: #f2f4f6;
             --card: #ffffff;
-            --border: #e2e8f0;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --border: #e5e8eb;
+            --text: #191f28;
+            --text-secondary: #4e5968;
+            --text-muted: #8b95a1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fff1f2 100%);
+            background: var(--bg);
             min-height: 100vh;
             color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .navbar {
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .navbar-inner {
-            max-width: 1200px;
+            max-width: 960px;
+            width: 100%;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -68,26 +82,24 @@
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             text-decoration: none;
-            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
+            letter-spacing: -0.3px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 960px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 20px;
         }
 
         .footer {
             text-align: center;
-            padding: 40px 24px;
+            padding: 48px 24px 32px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
         }
     </style>
 </head>

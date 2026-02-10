@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +50,18 @@ public class SubscriptionQueryAdapter {
                     .toList();
         }
         return List.of();
+    }
+
+    public List<Subscription> findByReceiptStartDateBetween(LocalDate startDate, LocalDate endDate) {
+        return subscriptionRepository.findByReceiptStartDateBetween(startDate, endDate).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    public List<Subscription> findAll() {
+        return subscriptionRepository.findAll().stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     public List<Subscription> findRecentSubscriptions(int limit) {

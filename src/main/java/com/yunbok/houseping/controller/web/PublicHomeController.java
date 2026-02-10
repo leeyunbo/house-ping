@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 /**
@@ -74,7 +75,56 @@ public class PublicHomeController {
         model.addAttribute("areas", List.of("서울", "경기"));
         model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);
 
+        // 월별/지역별 바로가기용 데이터
+        YearMonth now = YearMonth.now();
+        model.addAttribute("currentYear", now.getYear());
+        model.addAttribute("currentMonth", now.getMonthValue());
+        YearMonth prev = now.minusMonths(1);
+        YearMonth next = now.plusMonths(1);
+        model.addAttribute("prevYear", prev.getYear());
+        model.addAttribute("prevMonth", prev.getMonthValue());
+        model.addAttribute("nextYear", next.getYear());
+        model.addAttribute("nextMonth", next.getMonthValue());
         return "home/index";
+    }
+
+    /**
+     * 월별 청약 일정 (SEO 페이지)
+     */
+    @GetMapping("/{year}/{month}")
+    public String monthly(@PathVariable int year, @PathVariable int month, Model model) {
+        if (month < 1 || month > 12) {
+            return "redirect:/home";
+        }
+
+        List<Subscription> subscriptions = subscriptionQueryUseCase.findByMonth(year, month);
+        List<Subscription> activeSubscriptions = subscriptionQueryUseCase.filterActiveSubscriptions(subscriptions);
+        List<Subscription> upcomingSubscriptions = subscriptionQueryUseCase.filterUpcomingSubscriptions(subscriptions);
+        List<Subscription> closedSubscriptions = subscriptions.stream()
+                .filter(s -> s.getStatus() == com.yunbok.houseping.core.domain.SubscriptionStatus.CLOSED)
+                .toList();
+
+        model.addAttribute("subscriptions", subscriptions);
+        model.addAttribute("activeSubscriptions", activeSubscriptions);
+        model.addAttribute("upcomingSubscriptions", upcomingSubscriptions);
+        model.addAttribute("closedSubscriptions", closedSubscriptions);
+        model.addAttribute("year", year);
+        model.addAttribute("month", month);
+
+        YearMonth current = YearMonth.of(year, month);
+        YearMonth prev = current.minusMonths(1);
+        YearMonth next = current.plusMonths(1);
+        model.addAttribute("prevYear", prev.getYear());
+        model.addAttribute("prevMonth", prev.getMonthValue());
+        model.addAttribute("nextYear", next.getYear());
+        model.addAttribute("nextMonth", next.getMonthValue());
+
+        String title = year + "년 " + month + "월 청약 일정";
+        String description = year + "년 " + month + "월 아파트 청약 일정, 접수 기간, 공급 세대수 정보";
+        model.addAttribute("pageTitle", title);
+        model.addAttribute("pageDescription", description);
+
+        return "home/monthly";
     }
 
     /**

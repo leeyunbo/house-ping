@@ -8,6 +8,8 @@ import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +58,17 @@ public class SubscriptionQueryService {
         return subscriptions.stream()
                 .filter(s -> s.getStatus() == SubscriptionStatus.UPCOMING)
                 .toList();
+    }
+
+    public List<Subscription> findByMonth(int year, int month) {
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate firstDay = ym.atDay(1);
+        LocalDate lastDay = ym.atEndOfMonth();
+        return subscriptionQueryPort.findByReceiptStartDateBetween(firstDay, lastDay);
+    }
+
+    public List<Subscription> findAll() {
+        return subscriptionQueryPort.findAll();
     }
 
     public List<SubscriptionPrice> findPricesByHouseManageNo(String houseManageNo) {

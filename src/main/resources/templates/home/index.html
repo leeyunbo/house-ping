@@ -1,233 +1,282 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/home-layout :: head('청약 분석')}"></head>
+<head th:replace="~{fragments/home-layout :: head('청약 분석', null)}"></head>
 <head>
     <style>
+        /* Hero */
         .hero {
             text-align: center;
-            padding: 80px 24px 60px;
+            padding: 56px 20px 32px;
         }
 
         .hero h1 {
-            font-size: 48px;
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 16px;
-            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            line-height: 1.35;
         }
 
         .hero p {
-            font-size: 20px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
         .hero .service-notice {
-            font-size: 14px;
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 13px;
             color: var(--text-muted);
-            opacity: 0.7;
-            margin-bottom: 32px;
+            background: var(--card);
+            padding: 6px 14px;
+            border-radius: 20px;
         }
 
+        /* Filters */
         .filters {
-            max-width: 1200px;
-            margin: 0 auto 32px;
-            padding: 0 24px;
+            max-width: 960px;
+            margin: 0 auto 28px;
+            padding: 0 20px;
             display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .filter-btn {
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 20px;
-            border: 1px solid var(--border);
+            border: none;
             background: var(--card);
-            color: var(--text-muted);
+            color: var(--text-secondary);
             font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             text-decoration: none;
         }
 
-        .filter-btn:hover, .filter-btn.active {
-            background: var(--primary);
+        .filter-btn:hover {
+            background: #e8e8e8;
+        }
+
+        .filter-btn.active {
+            background: var(--text);
             color: white;
-            border-color: var(--primary);
+        }
+
+        /* Section */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
         .section-title {
-            font-size: 24px;
+            font-size: 17px;
             font-weight: 600;
-            margin-bottom: 24px;
+            color: var(--text);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
-        .section-title .badge {
-            font-size: 14px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-
-        .badge-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-
-        .badge-primary {
-            background: rgba(99, 102, 241, 0.1);
+        .section-count {
+            font-size: 17px;
+            font-weight: 600;
             color: var(--primary);
         }
 
+        /* Card Grid */
         .subscription-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            margin-bottom: 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 36px;
         }
 
         .subscription-card {
             background: var(--card);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            transition: all 0.2s;
+            border-radius: var(--radius);
+            padding: 20px;
             text-decoration: none;
             color: inherit;
             display: block;
+            transition: background 0.15s ease;
         }
 
         .subscription-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
+            background: #f8f9fa;
         }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
+        .subscription-card:active {
+            background: #f0f1f3;
         }
 
-        .card-badges {
+        .card-top {
             display: flex;
+            align-items: center;
             gap: 6px;
+            margin-bottom: 10px;
         }
 
-        .card-status {
+        .card-badges { display: flex; gap: 6px; }
+
+        .card-badge {
             font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-weight: 600;
+            letter-spacing: -0.2px;
         }
 
-        .card-source {
+        .badge-active {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge-upcoming {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-source {
             font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 12px;
+            padding: 3px 7px;
+            border-radius: 6px;
             font-weight: 600;
         }
 
-        .source-applyhome {
-            background: #dbeafe;
-            color: #1d4ed8;
+        .badge-source.applyhome {
+            background: #f0f4ff;
+            color: #4a7cff;
         }
 
-        .source-lh {
-            background: #ffedd5;
-            color: #c2410c;
-        }
-
-        .status-active {
-            background: var(--success);
-            color: white;
-        }
-
-        .status-upcoming {
-            background: var(--primary);
-            color: white;
-        }
-
-        .status-closed {
-            background: var(--text-muted);
-            color: white;
+        .badge-source.lh {
+            background: #fff4eb;
+            color: #e57219;
         }
 
         .card-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 8px;
+            color: var(--text);
+            margin-bottom: 4px;
             line-height: 1.4;
+            letter-spacing: -0.3px;
         }
 
-        .card-area {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-        }
-
-        .card-info {
+        .card-meta {
             display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
+            align-items: center;
+            gap: 12px;
             font-size: 13px;
             color: var(--text-muted);
+            margin-top: 8px;
         }
 
-        .card-info span {
+        .card-meta-item {
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
+        .card-meta-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 60px 24px;
+            padding: 80px 24px;
             color: var(--text-muted);
         }
 
         .empty-state p {
-            font-size: 16px;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
-        /* 캘린더 섹션 */
-        .calendar-section {
-            margin-top: 48px;
+        /* 월별 바로가기 */
+        .monthly-shortcut {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-top: 36px;
+            text-align: center;
         }
 
-        .calendar-header {
+        .monthly-shortcut-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .month-chips {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .month-chip {
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            gap: 2px;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .month-chip:hover {
+            background: #e4e6e9;
+        }
+
+        .month-chip.current {
+            background: var(--primary);
+            color: white;
+        }
+
+        .month-chip-label {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .month-chip-sub {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* Calendar Section */
+        .calendar-section {
+            margin-top: 36px;
         }
 
         .calendar-container {
             background: var(--card);
             padding: 24px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
+            border-radius: var(--radius);
             position: relative;
             min-height: 500px;
         }
 
         .calendar-loading {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(255, 255, 255, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 100;
-            border-radius: 16px;
+            border-radius: var(--radius);
             transition: opacity 0.3s ease;
         }
 
@@ -237,29 +286,27 @@
         }
 
         .calendar-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border);
+            width: 32px;
+            height: 32px;
+            border: 2.5px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .calendar-loading p {
-            margin-top: 12px;
+            margin-top: 10px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .legend {
             display: flex;
-            gap: 24px;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
+            gap: 20px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
             border-bottom: 1px solid var(--border);
             align-items: center;
             flex-wrap: wrap;
@@ -268,41 +315,41 @@
         .legend-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .legend-title {
             font-size: 12px;
             font-weight: 700;
-            color: var(--text);
-            padding: 4px 8px;
+            color: var(--text-secondary);
+            padding: 3px 8px;
             background: var(--bg);
-            border-radius: 4px;
+            border-radius: 6px;
         }
 
         .legend-divider {
             width: 1px;
-            height: 24px;
+            height: 20px;
             background: var(--border);
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             font-size: 12px;
             font-weight: 500;
             color: var(--text-muted);
         }
 
         .legend-color {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 2px;
         }
 
-        .legend-color.applyhome-receipt { background: #3b82f6; }
-        .legend-color.applyhome-winner { background: #10b981; }
+        .legend-color.applyhome-receipt { background: #3182f6; }
+        .legend-color.applyhome-winner { background: #00c471; }
         .legend-color.lh-receipt { background: #f97316; }
         .legend-color.lh-winner { background: #a855f7; }
 
@@ -312,51 +359,48 @@
             margin-left: auto;
         }
 
-        /* FullCalendar 커스텀 */
+        /* FullCalendar */
         .fc {
             --fc-border-color: var(--border);
-            --fc-today-bg-color: #fef3c7;
+            --fc-today-bg-color: rgba(49, 130, 246, 0.04);
             --fc-page-bg-color: transparent;
         }
 
         .fc .fc-toolbar-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             color: var(--text);
         }
 
         .fc .fc-button {
-            background: var(--card);
-            border: 1px solid var(--border);
-            color: var(--text);
+            background: var(--bg);
+            border: none;
+            color: var(--text-secondary);
             font-weight: 500;
             padding: 8px 14px;
-            border-radius: 8px;
+            border-radius: var(--radius-xs);
             text-transform: none;
             font-size: 13px;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
         }
 
         .fc .fc-button:hover {
-            background: var(--bg);
-            border-color: var(--primary);
-            color: var(--primary);
+            background: #e4e6e9;
         }
 
         .fc .fc-button-primary:not(:disabled).fc-button-active,
         .fc .fc-button-primary:not(:disabled):active {
-            background: var(--primary);
-            border-color: var(--primary);
+            background: var(--text);
             color: white;
         }
 
         .fc .fc-button-primary:focus {
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+            box-shadow: none;
         }
 
         .fc .fc-col-header-cell {
-            padding: 10px 0;
-            background: var(--bg);
+            padding: 8px 0;
+            background: transparent;
         }
 
         .fc .fc-col-header-cell-cushion {
@@ -368,26 +412,22 @@
         .fc .fc-daygrid-day-top {
             display: flex;
             justify-content: flex-end;
-            padding: 6px;
+            padding: 4px 6px;
         }
 
         .fc .fc-daygrid-day-number {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
-            color: var(--text);
+            color: var(--text-secondary);
             text-decoration: none;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 2px 6px;
+            border-radius: 6px;
         }
 
         .fc .fc-day-today .fc-daygrid-day-number {
-            background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            background: var(--primary);
             color: white;
             font-weight: 700;
-        }
-
-        .fc .fc-day-today {
-            background: rgba(239, 68, 68, 0.05) !important;
         }
 
         .fc .fc-daygrid-event {
@@ -396,19 +436,18 @@
             padding: 2px 6px;
             font-size: 11px;
             font-weight: 500;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: opacity 0.15s ease;
         }
 
         .fc .fc-daygrid-event:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            opacity: 0.85;
         }
 
         .fc .fc-daygrid-event.expired-event {
-            background: #94a3b8 !important;
-            opacity: 0.7;
+            background: #c9cdd2 !important;
+            opacity: 0.6;
         }
 
         .fc .fc-daygrid-more-link {
@@ -416,21 +455,20 @@
             font-weight: 600;
             color: var(--primary);
             padding: 2px 6px;
-            background: rgba(99, 102, 241, 0.1);
-            border-radius: 4px;
         }
 
-        /* 이벤트 모달 */
+        /* Modal */
         .event-modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 1000;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-end;
+            padding: 0;
         }
 
         .event-modal-overlay.active { display: flex; }
@@ -438,20 +476,19 @@
         .event-modal {
             background: var(--card);
             padding: 0;
-            border-radius: 16px;
-            max-width: 400px;
+            border-radius: 20px 20px 0 0;
+            max-width: 480px;
             width: 100%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: slideUp 0.3s ease;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
 
         .event-modal-header {
@@ -466,6 +503,7 @@
             font-weight: 700;
             margin: 0;
             color: var(--text);
+            letter-spacing: -0.3px;
         }
 
         .event-modal-close {
@@ -480,23 +518,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
         }
 
         .event-modal-close:hover {
-            background: #fee2e2;
-            color: #ef4444;
+            background: #e4e6e9;
         }
 
         .event-modal-body {
-            padding: 16px 20px 20px;
+            padding: 16px 20px 28px;
             overflow-y: auto;
             flex: 1;
         }
 
         .event-tags {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 16px;
         }
 
@@ -504,17 +541,17 @@
             display: inline-flex;
             align-items: center;
             padding: 4px 10px;
-            border-radius: 9999px;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
         }
 
-        .event-tag.receipt { background: #dbeafe; color: #1d4ed8; }
-        .event-tag.winner { background: #d1fae5; color: #047857; }
-        .event-tag.lh-receipt { background: #ffedd5; color: #c2410c; }
+        .event-tag.receipt { background: #ebf4ff; color: #3182f6; }
+        .event-tag.winner { background: #e8faf0; color: #00c471; }
+        .event-tag.lh-receipt { background: #fff4eb; color: #e57219; }
         .event-tag.lh-winner { background: #f3e8ff; color: #7c3aed; }
-        .event-tag.source-applyhome { background: #dbeafe; color: #1d4ed8; }
-        .event-tag.source-lh { background: #ffedd5; color: #c2410c; }
+        .event-tag.source-applyhome { background: #ebf4ff; color: #3182f6; }
+        .event-tag.source-lh { background: #fff4eb; color: #e57219; }
 
         .event-info {
             display: grid;
@@ -534,15 +571,14 @@
         }
 
         .event-info-label {
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
             color: var(--text-muted);
-            text-transform: uppercase;
         }
 
         .event-info-value {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text);
         }
 
@@ -556,74 +592,87 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
             width: 100%;
             margin-top: 16px;
-            padding: 12px 20px;
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            padding: 14px 20px;
+            background: var(--primary);
             color: white;
             text-decoration: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
             font-weight: 600;
-            transition: all 0.2s;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+            transition: background 0.15s ease;
         }
 
         .event-btn-analysis:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            background: var(--primary-dark);
         }
 
         .event-btn-analysis.disabled {
-            background: #94a3b8;
+            background: #d1d5db;
             cursor: not-allowed;
-            box-shadow: none;
         }
 
         .event-btn-analysis.disabled:hover {
-            transform: none;
+            background: #d1d5db;
         }
 
         .event-btn-detail {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             width: 100%;
             margin-top: 8px;
-            padding: 10px 16px;
+            padding: 12px 16px;
             background: var(--bg);
-            color: var(--text);
+            color: var(--text-secondary);
             text-decoration: none;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: var(--radius-xs);
+            font-size: 14px;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: background 0.15s ease;
         }
 
         .event-btn-detail:hover {
-            background: var(--border);
+            background: #e4e6e9;
         }
 
         .event-lh-notice {
             margin-top: 12px;
-            padding: 10px;
-            background: #fff7ed;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #c2410c;
+            padding: 12px;
+            background: #fff8f0;
+            border-radius: var(--radius-xs);
+            font-size: 13px;
+            color: #b35c14;
             text-align: center;
         }
 
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 32px; }
-            .hero p { font-size: 16px; }
-            .subscription-grid { grid-template-columns: 1fr; }
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero { padding: 40px 20px 24px; }
+            .hero h1 { font-size: 24px; }
             .legend { gap: 12px; }
             .legend-divider { display: none; }
+            .legend-notice { margin-left: 0; }
             .fc .fc-toolbar { flex-direction: column; gap: 10px; }
-            .fc .fc-toolbar-title { font-size: 16px; }
+            .fc .fc-toolbar-title { font-size: 15px; }
+            .month-chip { padding: 10px 18px; }
+            .event-modal { max-width: 100%; }
+        }
+
+        @media (min-width: 641px) {
+            .event-modal-overlay {
+                align-items: center;
+                padding: 20px;
+            }
+            .event-modal {
+                border-radius: var(--radius);
+            }
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
@@ -650,33 +699,33 @@
     <div class="container">
         <!-- 접수중 청약 -->
         <section th:if="${!activeSubscriptions.isEmpty()}">
-            <h2 class="section-title">
-                접수중 <span class="badge badge-success" th:text="${#lists.size(activeSubscriptions)} + '건'">0건</span>
-            </h2>
+            <div class="section-header">
+                <h2 class="section-title">접수중 <span class="section-count" th:text="${#lists.size(activeSubscriptions)}">0</span></h2>
+            </div>
             <div class="subscription-grid">
                 <a th:each="s : ${activeSubscriptions}"
                    th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
                    th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
                    class="subscription-card">
-                    <div class="card-header">
-                        <div class="card-badges">
-                            <span class="card-source"
-                                  th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'source-lh' : 'source-applyhome'"
-                                  th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
-                            <span class="card-status status-active">접수중</span>
-                        </div>
+                    <div class="card-top">
+                        <span class="card-badge badge-active">접수중</span>
+                        <span class="badge-source"
+                              th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'lh' : 'applyhome'"
+                              th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
                     </div>
                     <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
-                    <p class="card-area" th:text="${s.area}">서울</p>
-                    <div class="card-info">
-                        <span th:if="${s.receiptStartDate != null}">
+                    <div class="card-meta">
+                        <span class="card-meta-item" th:text="${s.area}">서울</span>
+                        <span th:if="${s.receiptStartDate != null}" class="card-meta-dot"></span>
+                        <span th:if="${s.receiptStartDate != null}" class="card-meta-item">
                             <span th:text="${#temporals.format(s.receiptStartDate, 'M/d')}">1/1</span>
                             <span th:if="${s.receiptEndDate != null}">
                                 ~ <span th:text="${#temporals.format(s.receiptEndDate, 'M/d')}">1/5</span>
                             </span>
                         </span>
+                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}" class="card-meta-dot"></span>
                         <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}"
-                              th:text="${s.totalSupplyCount} + '세대'">100세대</span>
+                              class="card-meta-item" th:text="${s.totalSupplyCount} + '세대'">100세대</span>
                     </div>
                 </a>
             </div>
@@ -684,30 +733,30 @@
 
         <!-- 접수예정 청약 -->
         <section th:if="${!upcomingSubscriptions.isEmpty()}">
-            <h2 class="section-title">
-                접수예정 <span class="badge badge-primary" th:text="${#lists.size(upcomingSubscriptions)} + '건'">0건</span>
-            </h2>
+            <div class="section-header">
+                <h2 class="section-title">접수예정 <span class="section-count" th:text="${#lists.size(upcomingSubscriptions)}">0</span></h2>
+            </div>
             <div class="subscription-grid">
                 <a th:each="s : ${upcomingSubscriptions}"
                    th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
                    th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
                    class="subscription-card">
-                    <div class="card-header">
-                        <div class="card-badges">
-                            <span class="card-source"
-                                  th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'source-lh' : 'source-applyhome'"
-                                  th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
-                            <span class="card-status status-upcoming">접수예정</span>
-                        </div>
+                    <div class="card-top">
+                        <span class="card-badge badge-upcoming">접수예정</span>
+                        <span class="badge-source"
+                              th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'lh' : 'applyhome'"
+                              th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
                     </div>
                     <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
-                    <p class="card-area" th:text="${s.area}">서울</p>
-                    <div class="card-info">
-                        <span th:if="${s.receiptStartDate != null}">
-                            접수일: <span th:text="${#temporals.format(s.receiptStartDate, 'M/d')}">1/1</span>
+                    <div class="card-meta">
+                        <span class="card-meta-item" th:text="${s.area}">서울</span>
+                        <span th:if="${s.receiptStartDate != null}" class="card-meta-dot"></span>
+                        <span th:if="${s.receiptStartDate != null}" class="card-meta-item">
+                            접수 <span th:text="${#temporals.format(s.receiptStartDate, 'M/d')}">1/1</span>
                         </span>
+                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}" class="card-meta-dot"></span>
                         <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}"
-                              th:text="${s.totalSupplyCount} + '세대'">100세대</span>
+                              class="card-meta-item" th:text="${s.totalSupplyCount} + '세대'">100세대</span>
                     </div>
                 </a>
             </div>
@@ -720,7 +769,7 @@
 
         <!-- 청약 캘린더 섹션 -->
         <section class="calendar-section">
-            <div class="calendar-header">
+            <div class="section-header">
                 <h2 class="section-title">청약 캘린더</h2>
             </div>
             <div class="calendar-container">
@@ -755,6 +804,23 @@
                     <span class="legend-notice">시세 분석은 청약Home만 제공해요</span>
                 </div>
                 <div id="publicCalendar"></div>
+            </div>
+        </section>
+
+        <!-- 월별 바로가기 -->
+        <section class="monthly-shortcut">
+            <p class="monthly-shortcut-title">월별 청약 일정 보기</p>
+            <div class="month-chips">
+                <a th:href="@{/home/{y}/{m}(y=${prevYear}, m=${prevMonth})}" class="month-chip">
+                    <span class="month-chip-label" th:text="${prevMonth} + '월'">1월</span>
+                </a>
+                <a th:href="@{/home/{y}/{m}(y=${currentYear}, m=${currentMonth})}" class="month-chip current">
+                    <span class="month-chip-label" th:text="${currentMonth} + '월'">2월</span>
+                    <span class="month-chip-sub">이번 달</span>
+                </a>
+                <a th:href="@{/home/{y}/{m}(y=${nextYear}, m=${nextMonth})}" class="month-chip">
+                    <span class="month-chip-label" th:text="${nextMonth} + '월'">3월</span>
+                </a>
             </div>
         </section>
     </div>
