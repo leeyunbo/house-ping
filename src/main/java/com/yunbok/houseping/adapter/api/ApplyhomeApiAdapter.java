@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Slf4j
 @Component
@@ -64,31 +65,40 @@ public class ApplyhomeApiAdapter implements SubscriptionProvider {
     public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {
         log.info("[청약Home API] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
 
-        List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchRegularApts(areaName, targetDate));
-        allSubscriptions.addAll(fetchPrivatePreApts(areaName, targetDate));
-        allSubscriptions.addAll(fetchNewlywedApts(areaName, targetDate));
-        allSubscriptions.addAll(fetchRemainingApts(areaName, targetDate));
-        allSubscriptions.addAll(fetchArbitraryApts(areaName, targetDate));
+        List<SubscriptionInfo> allSubscriptions = new ArrayList<>();
+        allSubscriptions.addAll(fetchSafely(() -> fetchRegularApts(areaName, targetDate), "일반APT"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchPrivatePreApts(areaName, targetDate), "민간사전"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchNewlywedApts(areaName, targetDate), "신혼희망"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchRemainingApts(areaName, targetDate), "잔여세대"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchArbitraryApts(areaName, targetDate), "임의공급"));
 
         log.info("[청약Home API] {} 지역에서 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
         return allSubscriptions;
     }
 
     public List<SubscriptionInfo> fetchAll(String areaName) {
+        log.info("[청약Home API] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
+
+        List<SubscriptionInfo> allSubscriptions = new ArrayList<>();
+        allSubscriptions.addAll(fetchSafely(() -> fetchAllRegularApts(areaName), "일반APT"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchAllPrivatePreApts(areaName), "민간사전"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchAllNewlywedApts(areaName), "신혼희망"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchAllRemainingApts(areaName), "잔여세대"));
+        allSubscriptions.addAll(fetchSafely(() -> fetchAllArbitraryApts(areaName), "임의공급"));
+
+        log.info("[청약Home API] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
+        return allSubscriptions;
+    }
+
+    /**
+     * 개별 API 호출을 안전하게 실행 (실패해도 다른 API 수집 계속)
+     */
+    private List<ApplyHomeSubscriptionInfo> fetchSafely(
+            Supplier<List<ApplyHomeSubscriptionInfo>> fetcher, String type) {
         try {
-            log.info("[청약Home API] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
-
-            List<SubscriptionInfo> allSubscriptions = new ArrayList<>(fetchAllRegularApts(areaName));
-            allSubscriptions.addAll(fetchAllPrivatePreApts(areaName));
-            allSubscriptions.addAll(fetchAllNewlywedApts(areaName));
-            allSubscriptions.addAll(fetchAllRemainingApts(areaName));
-            allSubscriptions.addAll(fetchAllArbitraryApts(areaName));
-
-            log.info("[청약Home API] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allSubscriptions.size());
-            return allSubscriptions;
-
+            return fetcher.get();
         } catch (Exception e) {
-            log.error("[청약Home API] 전체 데이터 수집 실패: {}", e.getMessage(), e);
+            log.warn("[청약Home API] {} 수집 실패 (계속 진행): {}", type, e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -217,7 +227,7 @@ public class ApplyhomeApiAdapter implements SubscriptionProvider {
     private List<ApplyHomeSubscriptionInfo> fetchArbitraryAptSubscriptions(String areaName, LocalDate targetDate) {
         ApplyhomeArbitraryResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/getArbLttotPblancDetail")
+                        .path("/getOPTLttotPblancDetail")
                         .queryParam("page", properties.getApi().getDefaultPage())
                         .queryParam("perPage", properties.getApi().getPageSize())
                         .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
@@ -236,7 +246,7 @@ public class ApplyhomeApiAdapter implements SubscriptionProvider {
     private List<ApplyHomeSubscriptionInfo> fetchAllArbitraryAptSubscriptions(String areaName) {
         ApplyhomeArbitraryResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/getArbLttotPblancDetail")
+                        .path("/getOPTLttotPblancDetail")
                         .queryParam("page", properties.getApi().getDefaultPage())
                         .queryParam("perPage", properties.getApi().getPageSize())
                         .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
@@ -508,7 +518,7 @@ public class ApplyhomeApiAdapter implements SubscriptionProvider {
     private List<ApplyhomePriceDetailItem> fetchArbitraryPriceDetails(String houseManageNo, String pblancNo) {
         ApplyhomePriceDetailResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/getArbLttotPblancMdl")
+                        .path("/getOPTLttotPblancMdl")
                         .queryParam("page", 1)
                         .queryParam("perPage", 100)
                         .queryParam("cond[HOUSE_MANAGE_NO::EQ]", houseManageNo)

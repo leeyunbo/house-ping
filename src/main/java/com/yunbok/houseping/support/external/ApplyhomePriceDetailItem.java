@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 /**
  * 청약Home API 주택형별 분양정보 (분양가 상세) 응답 항목 DTO
+ * 주의: 임의공급 API는 일부 필드가 없거나 형식이 다름
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ApplyhomePriceDetailItem(
@@ -22,13 +23,28 @@ public record ApplyhomePriceDetailItem(
     @JsonProperty("LFE_FRST_HSHLDCO") Integer lifeFirstCount,
     @JsonProperty("OLD_PARNTS_SUPORT_HSHLDCO") Integer oldParentsSupportCount,
     @JsonProperty("INSTT_RECOMEND_HSHLDCO") Integer institutionRecommendCount,
-    @JsonProperty("LTTOT_TOP_AMOUNT") Long topAmount
+    @JsonProperty("LTTOT_TOP_AMOUNT") String topAmountRaw  // API가 쉼표 포함 문자열로 반환
 ) {
+    /**
+     * 분양가 (만원) - 쉼표 제거 후 파싱
+     */
+    public Long topAmount() {
+        if (topAmountRaw == null || topAmountRaw.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(topAmountRaw.replace(",", "").trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     /**
      * 평당 가격 계산 (만원/평)
      */
     public Long getPricePerPyeong() {
-        if (topAmount == null || supplyArea == null || supplyArea.compareTo(BigDecimal.ZERO) == 0) {
+        Long amount = topAmount();
+        if (amount == null || supplyArea == null || supplyArea.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
         // 1평 = 3.3058 제곱미터
@@ -36,6 +52,6 @@ public record ApplyhomePriceDetailItem(
         if (pyeong.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
-        return BigDecimal.valueOf(topAmount).divide(pyeong, 0, java.math.RoundingMode.HALF_UP).longValue();
+        return BigDecimal.valueOf(amount).divide(pyeong, 0, java.math.RoundingMode.HALF_UP).longValue();
     }
 }
