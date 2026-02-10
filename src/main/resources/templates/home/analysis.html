@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/home-layout :: head('청약 분석')}"></head>
+<head th:replace="~{fragments/home-layout :: head(${subscription.houseName + ' 청약 분석'})}"></head>
 <head>
     <style>
         .back-link {
