@@ -1159,74 +1159,63 @@
         searchAddressWithRetry(geocoder, map, mapContainer, address, houseName, 0);
     }
 
-    // 주소 검색 재시도 함수 (최대 3회)
+    // 주소 검색 함수 (전체 주소 → 동/리/읍/면까지 단축 → 실패)
     function searchAddressWithRetry(geocoder, map, mapContainer, address, houseName, attempt) {
-        const maxAttempts = 3;
         const mapLoading = document.getElementById('mapLoading');
 
         geocoder.addressSearch(address, function(result, status) {
             if (status === kakao.maps.services.Status.OK) {
-                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                // 마커 생성
-                const marker = new kakao.maps.Marker({
-                    map: map,
-                    position: coords
-                });
-
-                // 인포윈도우 생성
-                const infowindow = new kakao.maps.InfoWindow({
-                    content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
-                });
-                infowindow.open(map, marker);
-
-                // 로딩 숨기고 지도 표시
-                if (mapLoading) mapLoading.style.display = 'none';
-                if (mapContainer) mapContainer.style.display = 'block';
-
-                // 지도 크기 재계산 후 중심 이동
-                map.relayout();
-                map.setCenter(coords);
-            } else {
-                // 재시도 가능한 경우
-                if (attempt < maxAttempts - 1) {
-                    const shorterAddress = removeLastWord(address);
-                    if (shorterAddress && shorterAddress !== address) {
-                        searchAddressWithRetry(geocoder, map, mapContainer, shorterAddress, houseName, attempt + 1);
-                        return;
-                    }
+                showMapWithMarker(map, mapContainer, mapLoading, result[0], houseName);
+            } else if (attempt === 0) {
+                // 첫 시도 실패 시 동/리/읍/면까지 단축해서 재시도
+                const baseAddress = extractBaseAddress(address);
+                if (baseAddress && baseAddress !== address) {
+                    searchAddressWithRetry(geocoder, map, mapContainer, baseAddress, houseName, 1);
+                } else {
+                    hideMap(mapLoading, mapContainer);
                 }
-                // 모든 시도 실패 시 로딩과 지도 숨기기
-                if (mapLoading) mapLoading.style.display = 'none';
-                if (mapContainer) mapContainer.style.display = 'none';
+            } else {
+                hideMap(mapLoading, mapContainer);
             }
         });
     }
 
-    // 주소에서 마지막 단어 제거 (괄호 안 공백은 무시)
-    function removeLastWord(address) {
+    // 지도에 마커 표시
+    function showMapWithMarker(map, mapContainer, mapLoading, location, houseName) {
+        const coords = new kakao.maps.LatLng(location.y, location.x);
+        const marker = new kakao.maps.Marker({ map: map, position: coords });
+        const infowindow = new kakao.maps.InfoWindow({
+            content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
+        });
+        infowindow.open(map, marker);
+
+        if (mapLoading) mapLoading.style.display = 'none';
+        if (mapContainer) mapContainer.style.display = 'block';
+        map.relayout();
+        map.setCenter(coords);
+    }
+
+    // 지도 숨기기
+    function hideMap(mapLoading, mapContainer) {
+        if (mapLoading) mapLoading.style.display = 'none';
+        if (mapContainer) mapContainer.style.display = 'none';
+    }
+
+    // 주소에서 동/리/읍/면까지만 추출
+    function extractBaseAddress(address) {
         if (!address) return null;
+        const words = address.trim().split(/\s+/);
+        const suffixes = ['동', '리', '읍', '면', '가', '로'];
 
-        const words = [];
-        let current = '';
-        let parenDepth = 0;
-
-        for (const char of address.trim()) {
-            if (char === '(') parenDepth++;
-            else if (char === ')') parenDepth--;
-
-            if (char === ' ' && parenDepth === 0) {
-                if (current) words.push(current);
-                current = '';
-            } else {
-                current += char;
+        for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            for (const suffix of suffixes) {
+                if (word.endsWith(suffix) && word.length > 1) {
+                    return words.slice(0, i + 1).join(' ');
+                }
             }
         }
-        if (current) words.push(current);
-
-        if (words.length <= 1) return null;
-        words.pop();
-        return words.join(' ');
+        return null;
     }
 
     function toggleNotification(subscriptionId, element) {
