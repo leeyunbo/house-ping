@@ -48,6 +48,10 @@ master:
 server:
   port: 10030
   forward-headers-strategy: framework
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+    min-response-size: 1024
 
 # 기능 토글 설정
 feature:

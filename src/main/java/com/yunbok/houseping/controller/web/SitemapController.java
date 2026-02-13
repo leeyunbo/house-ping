@@ -27,12 +27,13 @@ public class SitemapController {
 
         // 홈페이지
         appendUrl(sb, BASE_URL + "/home", "daily", "1.0");
+        appendUrl(sb, BASE_URL + "/home/calculator", "monthly", "0.8");
 
         // 월별 페이지: 최근 12개월
         YearMonth now = YearMonth.now();
         for (int i = -6; i <= 6; i++) {
             YearMonth ym = now.plusMonths(i);
-            String path = String.format("/home/%d/%02d", ym.getYear(), ym.getMonthValue());
+            String path = String.format("/home/%d/%d", ym.getYear(), ym.getMonthValue());
             appendUrl(sb, BASE_URL + path, "weekly", "0.8");
         }
 

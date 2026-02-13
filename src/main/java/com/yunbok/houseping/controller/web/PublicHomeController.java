@@ -85,6 +85,8 @@ public class PublicHomeController {
         model.addAttribute("prevMonth", prev.getMonthValue());
         model.addAttribute("nextYear", next.getYear());
         model.addAttribute("nextMonth", next.getMonthValue());
+
+        model.addAttribute("canonicalPath", "/home");
         return "home/index";
     }
 
@@ -123,6 +125,7 @@ public class PublicHomeController {
         String description = year + "년 " + month + "월 아파트 청약 일정, 접수 기간, 공급 세대수 정보";
         model.addAttribute("pageTitle", title);
         model.addAttribute("pageDescription", description);
+        model.addAttribute("canonicalPath", "/home/" + year + "/" + month);
 
         return "home/monthly";
     }
@@ -137,6 +140,15 @@ public class PublicHomeController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         return ResponseEntity.ok(publicCalendarService.getCalendarEvents(start, end));
+    }
+
+    /**
+     * 청약 가점 계산기
+     */
+    @GetMapping("/calculator")
+    public String calculator(Model model) {
+        model.addAttribute("canonicalPath", "/home/calculator");
+        return "home/calculator";
     }
 
     /**
@@ -161,6 +173,22 @@ public class PublicHomeController {
 
             // 상태 라벨
             model.addAttribute("statusLabel", subscription.getStatusLabel());
+
+            // SEO
+            model.addAttribute("canonicalPath", "/home/analysis/" + id);
+            StringBuilder desc = new StringBuilder();
+            desc.append(subscription.getHouseName()).append(" 청약 분석 - ").append(subscription.getArea());
+            if (subscription.getTotalSupplyCount() != null) {
+                desc.append(", ").append(subscription.getTotalSupplyCount()).append("세대");
+            }
+            if (subscription.getReceiptStartDate() != null) {
+                desc.append(", 접수기간 ").append(subscription.getReceiptStartDate());
+                if (subscription.getReceiptEndDate() != null) {
+                    desc.append("~").append(subscription.getReceiptEndDate());
+                }
+            }
+            desc.append(". 분양가, 주변 시세 비교 분석");
+            model.addAttribute("pageDescription", desc.toString());
 
             // 카카오맵 키
             model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);

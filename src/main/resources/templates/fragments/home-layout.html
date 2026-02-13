@@ -12,16 +12,20 @@
     <!-- Open Graph (카카오톡, 페이스북 공유용) -->
     <meta property="og:title" th:attr="content=${title} + ' - Houseping'">
     <meta property="og:description" th:attr="content=${description != null ? description : '청약 일정, 경쟁률, 시세 분석을 한눈에'}">
-    <meta property="og:url" content="https://house-ping.com/home">
+    <meta property="og:url" th:attr="content='https://house-ping.com' + ${canonicalPath ?: '/home'}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Houseping">
+    <meta property="og:image" content="https://house-ping.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" th:attr="content=${title} + ' - Houseping'">
     <meta name="twitter:description" th:attr="content=${description != null ? description : '청약 일정, 경쟁률, 시세 분석을 한눈에'}">
+    <meta name="twitter:image" content="https://house-ping.com/og-image.png">
 
-    <link rel="canonical" href="https://house-ping.com/home">
+    <link rel="canonical" th:attr="href='https://house-ping.com' + ${canonicalPath ?: '/home'}">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {

@@ -648,6 +648,59 @@
             text-align: center;
         }
 
+        /* Tool Banner */
+        .tool-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-top: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.15s ease;
+        }
+
+        .tool-banner:hover { background: #f8f9fa; }
+
+        .tool-banner-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .tool-banner-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .tool-banner-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .tool-banner-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .tool-banner-arrow {
+            font-size: 18px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .hero { padding: 40px 20px 24px; }
@@ -823,6 +876,18 @@
                 </a>
             </div>
         </section>
+
+        <!-- 가점 계산기 바로가기 -->
+        <a href="/home/calculator" class="tool-banner">
+            <div class="tool-banner-left">
+                <div class="tool-banner-icon">🧮</div>
+                <div>
+                    <div class="tool-banner-title">청약 가점 계산기</div>
+                    <div class="tool-banner-desc">내 청약 가점을 미리 계산해보세요</div>
+                </div>
+            </div>
+            <span class="tool-banner-arrow">›</span>
+        </a>
     </div>
 
     <!-- 이벤트 상세 모달 -->
@@ -839,6 +904,26 @@
     </div>
 
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <!-- JSON-LD 구조화 데이터 -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Houseping",
+        "url": "https://house-ping.com",
+        "description": "청약 일정, 경쟁률, 시세 분석을 한눈에. 청약홈, LH 청약 정보 통합 제공"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Houseping",
+        "url": "https://house-ping.com",
+        "logo": "https://house-ping.com/og-image.png"
+    }
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
