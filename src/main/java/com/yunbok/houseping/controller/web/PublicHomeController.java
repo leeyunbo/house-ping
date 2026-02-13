@@ -143,6 +143,15 @@ public class PublicHomeController {
     }
 
     /**
+     * 청약 캘린더 페이지
+     */
+    @GetMapping("/calendar")
+    public String calendar(Model model) {
+        model.addAttribute("canonicalPath", "/home/calendar");
+        return "home/calendar";
+    }
+
+    /**
      * 청약 가점 계산기
      */
     @GetMapping("/calculator")

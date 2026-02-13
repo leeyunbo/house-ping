@@ -29,14 +29,14 @@
             font-weight: 700;
             margin-bottom: 16px;
         }
-        .hero-status.active { background: #dcfce7; color: #16a34a; }
-        .hero-status.upcoming { background: #dbeafe; color: #2563eb; }
-        .hero-status.closed { background: var(--bg); color: var(--text-muted); }
+        .hero-status.active { background: var(--success-light); color: var(--success); }
+        .hero-status.upcoming { background: var(--primary-light); color: var(--primary); }
+        .hero-status.closed { background: var(--bg-secondary); color: var(--text-muted); }
 
         .hero h1 {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 900;
-            letter-spacing: -1.5px;
+            letter-spacing: -1.2px;
             line-height: 1.25;
             color: var(--text);
             margin-bottom: 12px;
@@ -73,15 +73,15 @@
         /* ───────── Insight Banner ───────── */
         .insight-banner {
             margin-top: 32px;
-            border-radius: 20px;
+            border-radius: var(--radius);
             padding: 28px 32px;
             display: flex;
             align-items: center;
             gap: 16px;
         }
 
-        .insight-banner.positive { background: #f0fdf4; }
-        .insight-banner.negative { background: #fef2f2; }
+        .insight-banner.positive { background: var(--success-light); }
+        .insight-banner.negative { background: rgba(239,68,68,0.06); }
 
         .insight-icon {
             width: 48px;
@@ -94,8 +94,8 @@
             font-size: 24px;
         }
 
-        .insight-banner.positive .insight-icon { background: #dcfce7; }
-        .insight-banner.negative .insight-icon { background: #fee2e2; }
+        .insight-banner.positive .insight-icon { background: rgba(0,196,113,0.15); }
+        .insight-banner.negative .insight-icon { background: rgba(239,68,68,0.12); }
 
         .insight-text {
             font-size: 15px;
@@ -108,8 +108,8 @@
             font-weight: 800;
         }
 
-        .insight-banner.positive .insight-text strong { color: #16a34a; }
-        .insight-banner.negative .insight-text strong { color: #ef4444; }
+        .insight-banner.positive .insight-text strong { color: var(--success); }
+        .insight-banner.negative .insight-text strong { color: var(--danger); }
 
         /* ───────── Section ───────── */
         .section {
@@ -148,8 +148,9 @@
 
         .info-card {
             background: var(--card);
-            border-radius: 20px;
+            border-radius: var(--radius);
             padding: 28px;
+            border: 1px solid var(--border);
         }
 
         .info-card-title {
@@ -169,7 +170,7 @@
         }
 
         .info-item + .info-item {
-            border-top: 1px solid var(--bg);
+            border-top: 1px solid var(--border);
         }
 
         .info-item-label {
@@ -197,8 +198,9 @@
 
         .map-wrap {
             background: var(--card);
-            border-radius: 20px;
+            border-radius: var(--radius);
             overflow: hidden;
+            border: 1px solid var(--border);
         }
 
         #kakaoMap {
@@ -226,8 +228,9 @@
         /* ───────── Table Card ───────── */
         .table-card {
             background: var(--card);
-            border-radius: 20px;
+            border-radius: var(--radius);
             padding: 28px;
+            border: 1px solid var(--border);
         }
 
         .tbl {
@@ -241,7 +244,7 @@
             color: var(--text-muted);
             padding: 0 12px 16px;
             text-align: right;
-            border-bottom: 2px solid var(--bg);
+            border-bottom: 2px solid var(--border);
         }
 
         .tbl th:first-child { text-align: left; }
@@ -250,7 +253,7 @@
             font-size: 14px;
             padding: 16px 12px;
             text-align: right;
-            border-bottom: 1px solid var(--bg);
+            border-bottom: 1px solid var(--border);
             color: var(--text);
         }
 
@@ -262,9 +265,9 @@
         .tbl tbody tr:last-child td { border-bottom: none; }
 
         .tbl .accent { color: var(--primary); font-weight: 700; }
-        .tbl .green { color: #16a34a; font-weight: 700; }
-        .tbl .red { color: #ef4444; font-weight: 700; }
-        .tbl .yellow { color: #ca8a04; font-weight: 700; }
+        .tbl .green { color: var(--success); font-weight: 700; }
+        .tbl .red { color: var(--danger); font-weight: 700; }
+        .tbl .yellow { color: var(--warning); font-weight: 700; }
 
         .tbl .type-sub {
             font-size: 12px;
@@ -275,22 +278,23 @@
         /* ───────── Comparison Hero ───────── */
         .comparison-hero {
             background: var(--card);
-            border-radius: 20px;
+            border-radius: var(--radius);
             padding: 36px;
             text-align: center;
             margin-bottom: 16px;
+            border: 1px solid var(--border);
         }
 
         .comparison-hero-value {
-            font-size: 40px;
+            font-size: 44px;
             font-weight: 900;
-            letter-spacing: -1px;
+            letter-spacing: -2px;
             margin-bottom: 6px;
         }
 
-        .comparison-hero-value.green { color: #16a34a; }
-        .comparison-hero-value.red { color: #ef4444; }
-        .comparison-hero-value.yellow { color: #ca8a04; }
+        .comparison-hero-value.green { color: var(--success); }
+        .comparison-hero-value.red { color: var(--danger); }
+        .comparison-hero-value.yellow { color: var(--warning); }
 
         .comparison-hero-label {
             font-size: 14px;
@@ -306,23 +310,24 @@
 
         .stat-card {
             background: var(--card);
-            border-radius: 20px;
+            border-radius: var(--radius);
             padding: 28px 20px;
             text-align: center;
+            border: 1px solid var(--border);
         }
 
         .stat-card-value {
-            font-size: 26px;
-            font-weight: 800;
+            font-size: 28px;
+            font-weight: 900;
             color: var(--primary);
-            letter-spacing: -0.5px;
+            letter-spacing: -0.8px;
             margin-bottom: 6px;
         }
 
         .stat-card-label {
             font-size: 13px;
             color: var(--text-muted);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         /* ───────── Transaction List ───────── */
@@ -339,7 +344,7 @@
         }
 
         .tx-item + .tx-item {
-            border-top: 1px solid var(--bg);
+            border-top: 1px solid var(--border);
         }
 
         .tx-name {
@@ -364,7 +369,7 @@
 
         /* ───────── Note Box ───────── */
         .note-box {
-            background: var(--bg);
+            background: var(--bg-secondary);
             border-radius: 16px;
             padding: 20px 24px;
             margin-top: 20px;
@@ -434,7 +439,7 @@
     </style>
 </head>
 <body>
-    <nav th:replace="~{fragments/home-layout :: navbar}"></nav>
+    <nav th:replace="~{fragments/home-layout :: navbar('')}"></nav>
 
     <div class="container">
         <!-- ========== HERO ========== -->
@@ -727,6 +732,8 @@
         <div class="bottom-spacer"></div>
     </div>
 
+    <nav th:replace="~{fragments/home-layout :: bottomTab('')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
 
     <!-- JSON-LD 구조화 데이터 -->

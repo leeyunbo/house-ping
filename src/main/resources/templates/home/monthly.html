@@ -33,7 +33,7 @@
             padding: 8px 18px;
             border-radius: 20px;
             border: none;
-            background: var(--card);
+            background: var(--bg-secondary);
             color: var(--text-secondary);
             font-size: 14px;
             font-weight: 500;
@@ -42,130 +42,16 @@
         }
 
         .month-nav a:hover {
-            background: #e4e6e9;
+            background: var(--border);
         }
 
         .month-nav .current {
             font-size: 15px;
             font-weight: 600;
-            color: var(--text);
             padding: 8px 18px;
             background: var(--primary);
             color: white;
             border-radius: 20px;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-count {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .section-count.muted {
-            color: var(--text-muted);
-        }
-
-        .subscription-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 36px;
-        }
-
-        .subscription-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 20px;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            transition: background 0.15s ease;
-        }
-
-        .subscription-card:hover { background: #f8f9fa; }
-        .subscription-card:active { background: #f0f1f3; }
-
-        .card-top {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-
-        .card-badge {
-            font-size: 12px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-            letter-spacing: -0.2px;
-        }
-
-        .badge-active { background: var(--success-light); color: var(--success); }
-        .badge-upcoming { background: var(--primary-light); color: var(--primary); }
-        .badge-closed { background: #f2f4f6; color: var(--text-muted); }
-
-        .badge-source {
-            font-size: 11px;
-            padding: 3px 7px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .badge-source.applyhome { background: #f0f4ff; color: #4a7cff; }
-        .badge-source.lh { background: #fff4eb; color: #e57219; }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
-            line-height: 1.4;
-            letter-spacing: -0.3px;
-        }
-
-        .card-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .card-meta-item { display: flex; align-items: center; gap: 4px; }
-
-        .card-meta-dot {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: var(--border);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 24px;
-            color: var(--text-muted);
-        }
-
-        .empty-state p {
-            font-size: 15px;
-            line-height: 1.6;
         }
 
         .back-link {
@@ -186,7 +72,7 @@
     </style>
 </head>
 <body>
-    <nav th:replace="~{fragments/home-layout :: navbar}"></nav>
+    <nav th:replace="~{fragments/home-layout :: navbar('')}"></nav>
 
     <section class="page-header">
         <h1 th:text="${year} + '년 ' + ${month} + '월 청약 일정'">2026년 2월 청약 일정</h1>
@@ -301,6 +187,8 @@
         </div>
     </div>
 
+    <nav th:replace="~{fragments/home-layout :: bottomTab('')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
 
     <!-- JSON-LD 구조화 데이터 -->

@@ -5,17 +5,17 @@
     <style>
         /* ───────── Hero ───────── */
         .hero {
-            padding: 56px 0 0;
+            padding: 40px 0 0;
             text-align: center;
         }
 
         .hero h1 {
-            font-size: 36px;
-            font-weight: 900;
-            letter-spacing: -1.5px;
-            line-height: 1.25;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.35;
             color: var(--text);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .hero-desc {
@@ -44,13 +44,15 @@
             border-radius: 20px;
             padding: 28px;
             margin-bottom: 16px;
+            border: 1px solid var(--border);
         }
 
         .calc-card-title {
-            font-size: 17px;
-            font-weight: 700;
+            font-size: 18px;
+            font-weight: 800;
             color: var(--text);
             margin-bottom: 6px;
+            letter-spacing: -0.3px;
         }
 
         .calc-card-desc {
@@ -75,12 +77,12 @@
         .calc-select {
             width: 100%;
             padding: 14px 16px;
-            border: 1.5px solid var(--border);
+            border: 1px solid var(--border);
             border-radius: 12px;
             font-size: 15px;
             font-family: inherit;
             color: var(--text);
-            background: var(--bg);
+            background: var(--bg-secondary);
             appearance: none;
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b95a1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -106,9 +108,9 @@
             flex: 1;
             min-width: 48px;
             padding: 12px 8px;
-            border: 1.5px solid var(--border);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            background: var(--bg);
+            background: var(--bg-secondary);
             color: var(--text-secondary);
             font-size: 15px;
             font-weight: 600;
@@ -126,7 +128,7 @@
         .btn-group-item.active {
             background: var(--primary);
             border-color: var(--primary);
-            color: #fff;
+            color: #ffffff;
         }
 
         /* ───────── Result ───────── */
@@ -140,6 +142,7 @@
             padding: 36px;
             text-align: center;
             margin-bottom: 16px;
+            border: 1px solid var(--border);
         }
 
         .comparison-hero-label-top {
@@ -149,17 +152,17 @@
         }
 
         .comparison-hero-value {
-            font-size: 56px;
+            font-size: 60px;
             font-weight: 900;
-            letter-spacing: -2px;
+            letter-spacing: -3px;
             color: var(--primary);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .comparison-hero-sub {
             font-size: 15px;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .stat-row {
@@ -173,20 +176,21 @@
             border-radius: 20px;
             padding: 28px 20px;
             text-align: center;
+            border: 1px solid var(--border);
         }
 
         .stat-card-value {
-            font-size: 26px;
-            font-weight: 800;
+            font-size: 28px;
+            font-weight: 900;
             color: var(--primary);
-            letter-spacing: -0.5px;
+            letter-spacing: -0.8px;
             margin-bottom: 6px;
         }
 
         .stat-card-label {
             font-size: 13px;
             color: var(--text-muted);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         /* ───────── SEO / FAQ ───────── */
@@ -215,6 +219,7 @@
             border-radius: 16px;
             padding: 24px 28px;
             margin-bottom: 12px;
+            border: 1px solid var(--border);
         }
 
         .faq-q {
@@ -238,8 +243,8 @@
 
         /* ───────── Responsive ───────── */
         @media (max-width: 768px) {
-            .hero { padding: 40px 0 0; }
-            .hero h1 { font-size: 28px; letter-spacing: -1px; }
+            .hero { padding: 32px 0 0; }
+            .hero h1 { font-size: 24px; }
 
             .stat-row { grid-template-columns: 1fr; gap: 8px; }
             .stat-card { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; text-align: left; }
@@ -253,7 +258,7 @@
     </style>
 </head>
 <body>
-    <nav th:replace="~{fragments/home-layout :: navbar}"></nav>
+    <nav th:replace="~{fragments/home-layout :: navbar('calculator')}"></nav>
 
     <div class="container">
         <!-- ========== HERO ========== -->
@@ -413,6 +418,8 @@
         <div class="bottom-spacer"></div>
     </div>
 
+    <nav th:replace="~{fragments/home-layout :: bottomTab('calculator')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
 
     <!-- JSON-LD: FAQPage -->

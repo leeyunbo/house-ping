@@ -6,15 +6,15 @@
         /* Hero */
         .hero {
             text-align: center;
-            padding: 56px 20px 32px;
+            padding: 48px 20px 32px;
         }
 
         .hero h1 {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 26px;
+            font-weight: 800;
             color: var(--text);
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.8px;
             line-height: 1.35;
         }
 
@@ -26,714 +26,138 @@
 
         .hero .service-notice {
             display: inline-block;
-            margin-top: 12px;
+            margin-top: 14px;
             font-size: 13px;
             color: var(--text-muted);
-            background: var(--card);
-            padding: 6px 14px;
+            background: var(--bg-secondary);
+            padding: 8px 16px;
             border-radius: 20px;
+        }
+
+        /* Summary Stats */
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            margin-bottom: 32px;
+            background: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .summary-stat {
+            background: var(--card);
+            padding: 24px 16px;
+            text-align: center;
+        }
+
+        .summary-stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 6px;
+        }
+
+        .summary-stat-value.active { color: var(--success); }
+        .summary-stat-value.upcoming { color: var(--primary); }
+        .summary-stat-value.total { color: var(--text); }
+
+        .summary-stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         /* Filters */
         .filters {
             max-width: 960px;
-            margin: 0 auto 28px;
+            margin: 0 auto 32px;
             padding: 0 20px;
             display: flex;
             gap: 8px;
         }
 
         .filter-btn {
-            padding: 8px 18px;
+            padding: 10px 20px;
             border-radius: 20px;
             border: none;
-            background: var(--card);
+            background: var(--bg-secondary);
             color: var(--text-secondary);
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.15s ease;
             text-decoration: none;
         }
 
-        .filter-btn:hover {
-            background: #e8e8e8;
-        }
+        .filter-btn:hover { background: var(--border); }
+        .filter-btn.active { background: var(--text); color: var(--bg); }
 
-        .filter-btn.active {
-            background: var(--text);
-            color: white;
-        }
-
-        /* Section */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-count {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        /* Card Grid */
-        .subscription-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 36px;
-        }
-
-        .subscription-card {
-            background: var(--card);
+        /* Quick Links */
+        .quick-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            margin-top: 40px;
+            background: var(--border);
             border-radius: var(--radius);
-            padding: 20px;
+            overflow: hidden;
+        }
+
+        .quick-link {
+            background: var(--card);
+            padding: 24px 20px;
             text-decoration: none;
             color: inherit;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 16px;
             transition: background 0.15s ease;
         }
 
-        .subscription-card:hover {
-            background: #f8f9fa;
-        }
+        .quick-link:hover { background: var(--bg-secondary); }
 
-        .subscription-card:active {
-            background: #f0f1f3;
-        }
-
-        .card-top {
+        .quick-link-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-bottom: 10px;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
         }
 
-        .card-badges { display: flex; gap: 6px; }
+        .quick-link-icon.calendar { background: var(--primary-light); }
+        .quick-link-icon.calculator { background: var(--success-light); }
+        .quick-link-icon.month { background: rgba(245,158,11,0.1); }
+        .quick-link-icon.next-month { background: rgba(239,68,68,0.08); }
 
-        .card-badge {
-            font-size: 12px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-weight: 600;
+        .quick-link-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
             letter-spacing: -0.2px;
         }
 
-        .badge-active {
-            background: var(--success-light);
-            color: var(--success);
-        }
-
-        .badge-upcoming {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .badge-source {
-            font-size: 11px;
-            padding: 3px 7px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .badge-source.applyhome {
-            background: #f0f4ff;
-            color: #4a7cff;
-        }
-
-        .badge-source.lh {
-            background: #fff4eb;
-            color: #e57219;
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
-            line-height: 1.4;
-            letter-spacing: -0.3px;
-        }
-
-        .card-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .quick-link-desc {
             font-size: 13px;
             color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .card-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .card-meta-dot {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: var(--border);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 80px 24px;
-            color: var(--text-muted);
-        }
-
-        .empty-state p {
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        /* 월별 바로가기 */
-        .monthly-shortcut {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 24px;
-            margin-top: 36px;
-            text-align: center;
-        }
-
-        .monthly-shortcut-title {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-        }
-
-        .month-chips {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .month-chip {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 12px 24px;
-            border-radius: var(--radius-sm);
-            background: var(--bg);
-            text-decoration: none;
-            color: var(--text-secondary);
-            transition: all 0.15s ease;
-        }
-
-        .month-chip:hover {
-            background: #e4e6e9;
-        }
-
-        .month-chip.current {
-            background: var(--primary);
-            color: white;
-        }
-
-        .month-chip-label {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .month-chip-sub {
-            font-size: 11px;
-            opacity: 0.7;
-        }
-
-        /* Calendar Section */
-        .calendar-section {
-            margin-top: 36px;
-        }
-
-        .calendar-container {
-            background: var(--card);
-            padding: 24px;
-            border-radius: var(--radius);
-            position: relative;
-            min-height: 500px;
-        }
-
-        .calendar-loading {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            border-radius: var(--radius);
-            transition: opacity 0.3s ease;
-        }
-
-        .calendar-loading.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .calendar-spinner {
-            width: 32px;
-            height: 32px;
-            border: 2.5px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .calendar-loading p {
-            margin-top: 10px;
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .legend {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .legend-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .legend-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            padding: 3px 8px;
-            background: var(--bg);
-            border-radius: 6px;
-        }
-
-        .legend-divider {
-            width: 1px;
-            height: 20px;
-            background: var(--border);
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-        }
-
-        .legend-color {
-            width: 8px;
-            height: 8px;
-            border-radius: 2px;
-        }
-
-        .legend-color.applyhome-receipt { background: #3182f6; }
-        .legend-color.applyhome-winner { background: #00c471; }
-        .legend-color.lh-receipt { background: #f97316; }
-        .legend-color.lh-winner { background: #a855f7; }
-
-        .legend-notice {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-left: auto;
-        }
-
-        /* FullCalendar */
-        .fc {
-            --fc-border-color: var(--border);
-            --fc-today-bg-color: rgba(49, 130, 246, 0.04);
-            --fc-page-bg-color: transparent;
-        }
-
-        .fc .fc-toolbar-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .fc .fc-button {
-            background: var(--bg);
-            border: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            padding: 8px 14px;
-            border-radius: var(--radius-xs);
-            text-transform: none;
-            font-size: 13px;
-            transition: all 0.15s ease;
-        }
-
-        .fc .fc-button:hover {
-            background: #e4e6e9;
-        }
-
-        .fc .fc-button-primary:not(:disabled).fc-button-active,
-        .fc .fc-button-primary:not(:disabled):active {
-            background: var(--text);
-            color: white;
-        }
-
-        .fc .fc-button-primary:focus {
-            box-shadow: none;
-        }
-
-        .fc .fc-col-header-cell {
-            padding: 8px 0;
-            background: transparent;
-        }
-
-        .fc .fc-col-header-cell-cushion {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .fc .fc-daygrid-day-top {
-            display: flex;
-            justify-content: flex-end;
-            padding: 4px 6px;
-        }
-
-        .fc .fc-daygrid-day-number {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            text-decoration: none;
-            padding: 2px 6px;
-            border-radius: 6px;
-        }
-
-        .fc .fc-day-today .fc-daygrid-day-number {
-            background: var(--primary);
-            color: white;
-            font-weight: 700;
-        }
-
-        .fc .fc-daygrid-event {
-            border-radius: 4px;
-            border: none;
-            padding: 2px 6px;
-            font-size: 11px;
-            font-weight: 500;
-            margin-bottom: 1px;
-            cursor: pointer;
-            transition: opacity 0.15s ease;
-        }
-
-        .fc .fc-daygrid-event:hover {
-            opacity: 0.85;
-        }
-
-        .fc .fc-daygrid-event.expired-event {
-            background: #c9cdd2 !important;
-            opacity: 0.6;
-        }
-
-        .fc .fc-daygrid-more-link {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--primary);
-            padding: 2px 6px;
-        }
-
-        /* Modal */
-        .event-modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: flex-end;
-            padding: 0;
-        }
-
-        .event-modal-overlay.active { display: flex; }
-
-        .event-modal {
-            background: var(--card);
-            padding: 0;
-            border-radius: 20px 20px 0 0;
-            max-width: 480px;
-            width: 100%;
-            max-height: 85vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .event-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 20px 0;
-        }
-
-        .event-modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0;
-            color: var(--text);
-            letter-spacing: -0.3px;
-        }
-
-        .event-modal-close {
-            background: var(--bg);
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s ease;
-        }
-
-        .event-modal-close:hover {
-            background: #e4e6e9;
-        }
-
-        .event-modal-body {
-            padding: 16px 20px 28px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .event-tags {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-        }
-
-        .event-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .event-tag.receipt { background: #ebf4ff; color: #3182f6; }
-        .event-tag.winner { background: #e8faf0; color: #00c471; }
-        .event-tag.lh-receipt { background: #fff4eb; color: #e57219; }
-        .event-tag.lh-winner { background: #f3e8ff; color: #7c3aed; }
-        .event-tag.source-applyhome { background: #ebf4ff; color: #3182f6; }
-        .event-tag.source-lh { background: #fff4eb; color: #e57219; }
-
-        .event-info {
-            display: grid;
-            gap: 12px;
-        }
-
-        .event-info-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .event-info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .event-info-label {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-        }
-
-        .event-info-value {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .event-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 8px 0;
-        }
-
-        .event-btn-analysis {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin-top: 16px;
-            padding: 14px 20px;
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: var(--radius-sm);
-            font-size: 15px;
-            font-weight: 600;
-            transition: background 0.15s ease;
-        }
-
-        .event-btn-analysis:hover {
-            background: var(--primary-dark);
-        }
-
-        .event-btn-analysis.disabled {
-            background: #d1d5db;
-            cursor: not-allowed;
-        }
-
-        .event-btn-analysis.disabled:hover {
-            background: #d1d5db;
-        }
-
-        .event-btn-detail {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            width: 100%;
-            margin-top: 8px;
-            padding: 12px 16px;
-            background: var(--bg);
-            color: var(--text-secondary);
-            text-decoration: none;
-            border-radius: var(--radius-xs);
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.15s ease;
-        }
-
-        .event-btn-detail:hover {
-            background: #e4e6e9;
-        }
-
-        .event-lh-notice {
-            margin-top: 12px;
-            padding: 12px;
-            background: #fff8f0;
-            border-radius: var(--radius-xs);
-            font-size: 13px;
-            color: #b35c14;
-            text-align: center;
-        }
-
-        /* Tool Banner */
-        .tool-banner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 20px 24px;
-            margin-top: 12px;
-            text-decoration: none;
-            color: inherit;
-            transition: background 0.15s ease;
-        }
-
-        .tool-banner:hover { background: #f8f9fa; }
-
-        .tool-banner-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .tool-banner-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: var(--primary-light);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .tool-banner-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .tool-banner-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
-        .tool-banner-arrow {
-            font-size: 18px;
-            color: var(--text-muted);
-            flex-shrink: 0;
+            margin-top: 3px;
         }
 
         /* Responsive */
         @media (max-width: 640px) {
-            .hero { padding: 40px 20px 24px; }
-            .hero h1 { font-size: 24px; }
-            .legend { gap: 12px; }
-            .legend-divider { display: none; }
-            .legend-notice { margin-left: 0; }
-            .fc .fc-toolbar { flex-direction: column; gap: 10px; }
-            .fc .fc-toolbar-title { font-size: 15px; }
-            .month-chip { padding: 10px 18px; }
-            .event-modal { max-width: 100%; }
-        }
-
-        @media (min-width: 641px) {
-            .event-modal-overlay {
-                align-items: center;
-                padding: 20px;
-            }
-            .event-modal {
-                border-radius: var(--radius);
-            }
-            @keyframes slideUp {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
+            .hero { padding: 36px 20px 28px; }
+            .hero h1 { font-size: 22px; }
+            .summary-stat { padding: 20px 12px; }
+            .summary-stat-value { font-size: 24px; }
+            .quick-links { grid-template-columns: 1fr; }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-    <script th:if="${kakaoMapAppKey != null and kakaoMapAppKey != ''}"
-            th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapAppKey} + '&amp;libraries=services'"></script>
 </head>
 <body>
-    <nav th:replace="~{fragments/home-layout :: navbar}"></nav>
+    <nav th:replace="~{fragments/home-layout :: navbar('home')}"></nav>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -741,6 +165,24 @@
         <p>청약 정보와 주변 실거래가를 한눈에 비교 분석하세요</p>
         <p class="service-notice">서울·경기 청약만 모았어요</p>
     </section>
+
+    <!-- Summary Stats -->
+    <div class="container">
+        <div class="summary-stats">
+            <div class="summary-stat">
+                <div class="summary-stat-value active" th:text="${#lists.size(activeSubscriptions)} + '건'">0건</div>
+                <div class="summary-stat-label">접수중</div>
+            </div>
+            <div class="summary-stat">
+                <div class="summary-stat-value upcoming" th:text="${#lists.size(upcomingSubscriptions)} + '건'">0건</div>
+                <div class="summary-stat-label">접수예정</div>
+            </div>
+            <div class="summary-stat">
+                <div class="summary-stat-value total" th:text="${#lists.size(activeSubscriptions) + #lists.size(upcomingSubscriptions)} + '건'">0건</div>
+                <div class="summary-stat-label">전체</div>
+            </div>
+        </div>
+    </div>
 
     <!-- Filters -->
     <div class="filters">
@@ -820,89 +262,41 @@
             <p>현재 접수중이거나 예정된 청약이 없습니다.</p>
         </div>
 
-        <!-- 청약 캘린더 섹션 -->
-        <section class="calendar-section">
-            <div class="section-header">
-                <h2 class="section-title">청약 캘린더</h2>
-            </div>
-            <div class="calendar-container">
-                <div class="calendar-loading" id="calendarLoading">
-                    <div class="calendar-spinner"></div>
-                    <p>캘린더 로딩 중...</p>
-                </div>
-                <div class="legend">
-                    <div class="legend-group">
-                        <span class="legend-title">청약Home</span>
-                        <div class="legend-item">
-                            <div class="legend-color applyhome-receipt"></div>
-                            <span>접수</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color applyhome-winner"></div>
-                            <span>발표</span>
-                        </div>
-                    </div>
-                    <div class="legend-divider"></div>
-                    <div class="legend-group">
-                        <span class="legend-title">LH</span>
-                        <div class="legend-item">
-                            <div class="legend-color lh-receipt"></div>
-                            <span>접수</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color lh-winner"></div>
-                            <span>발표</span>
-                        </div>
-                    </div>
-                    <span class="legend-notice">시세 분석은 청약Home만 제공해요</span>
-                </div>
-                <div id="publicCalendar"></div>
-            </div>
-        </section>
-
-        <!-- 월별 바로가기 -->
-        <section class="monthly-shortcut">
-            <p class="monthly-shortcut-title">월별 청약 일정 보기</p>
-            <div class="month-chips">
-                <a th:href="@{/home/{y}/{m}(y=${prevYear}, m=${prevMonth})}" class="month-chip">
-                    <span class="month-chip-label" th:text="${prevMonth} + '월'">1월</span>
-                </a>
-                <a th:href="@{/home/{y}/{m}(y=${currentYear}, m=${currentMonth})}" class="month-chip current">
-                    <span class="month-chip-label" th:text="${currentMonth} + '월'">2월</span>
-                    <span class="month-chip-sub">이번 달</span>
-                </a>
-                <a th:href="@{/home/{y}/{m}(y=${nextYear}, m=${nextMonth})}" class="month-chip">
-                    <span class="month-chip-label" th:text="${nextMonth} + '월'">3월</span>
-                </a>
-            </div>
-        </section>
-
-        <!-- 가점 계산기 바로가기 -->
-        <a href="/home/calculator" class="tool-banner">
-            <div class="tool-banner-left">
-                <div class="tool-banner-icon">🧮</div>
+        <!-- 빠른 바로가기 -->
+        <section class="quick-links">
+            <a href="/home/calendar" class="quick-link">
+                <div class="quick-link-icon calendar">📅</div>
                 <div>
-                    <div class="tool-banner-title">청약 가점 계산기</div>
-                    <div class="tool-banner-desc">내 청약 가점을 미리 계산해보세요</div>
+                    <div class="quick-link-title">청약 캘린더</div>
+                    <div class="quick-link-desc">일정을 캘린더로 확인</div>
                 </div>
-            </div>
-            <span class="tool-banner-arrow">›</span>
-        </a>
+            </a>
+            <a href="/home/calculator" class="quick-link">
+                <div class="quick-link-icon calculator">🧮</div>
+                <div>
+                    <div class="quick-link-title">가점 계산기</div>
+                    <div class="quick-link-desc">내 가점 미리 계산</div>
+                </div>
+            </a>
+            <a th:href="@{/home/{y}/{m}(y=${currentYear}, m=${currentMonth})}" class="quick-link">
+                <div class="quick-link-icon month">📋</div>
+                <div>
+                    <div class="quick-link-title" th:text="${currentMonth} + '월 청약'">2월 청약</div>
+                    <div class="quick-link-desc">이번달 전체 청약</div>
+                </div>
+            </a>
+            <a th:href="@{/home/{y}/{m}(y=${nextYear}, m=${nextMonth})}" class="quick-link">
+                <div class="quick-link-icon next-month">📆</div>
+                <div>
+                    <div class="quick-link-title" th:text="${nextMonth} + '월 청약'">3월 청약</div>
+                    <div class="quick-link-desc">다음달 청약 미리보기</div>
+                </div>
+            </a>
+        </section>
     </div>
 
-    <!-- 이벤트 상세 모달 -->
-    <div class="event-modal-overlay" id="eventModal">
-        <div class="event-modal">
-            <div class="event-modal-header">
-                <h3 class="event-modal-title" id="eventModalTitle">청약 정보</h3>
-                <button class="event-modal-close" onclick="closeEventModal()">×</button>
-            </div>
-            <div class="event-modal-body" id="eventModalBody">
-                <!-- 동적으로 채워짐 -->
-            </div>
-        </div>
-    </div>
-
+    <nav th:replace="~{fragments/home-layout :: bottomTab('home')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
 
     <!-- JSON-LD 구조화 데이터 -->
@@ -923,172 +317,6 @@
         "url": "https://house-ping.com",
         "logo": "https://house-ping.com/og-image.png"
     }
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const calendarEl = document.getElementById('publicCalendar');
-            if (!calendarEl) return;
-
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'ko',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,dayGridWeek'
-                },
-                buttonText: {
-                    today: '오늘',
-                    month: '월간',
-                    week: '주간'
-                },
-                titleFormat: { year: 'numeric', month: 'long' },
-                loading: function(isLoading) {
-                    const overlay = document.getElementById('calendarLoading');
-                    if (isLoading) {
-                        overlay.classList.remove('hidden');
-                    } else {
-                        overlay.classList.add('hidden');
-                    }
-                },
-                events: function(info, successCallback, failureCallback) {
-                    const start = info.startStr.split('T')[0];
-                    const end = info.endStr.split('T')[0];
-                    fetch(`/home/calendar/events?start=${start}&end=${end}`)
-                        .then(response => response.json())
-                        .then(events => {
-                            successCallback(events);
-                        })
-                        .catch(error => {
-                            console.error('Error fetching events:', error);
-                            failureCallback(error);
-                            document.getElementById('calendarLoading').classList.add('hidden');
-                        });
-                },
-                eventClick: function(info) {
-                    showEventModal(info.event);
-                },
-                eventDidMount: function(info) {
-                    if (info.event.extendedProps.expired) {
-                        info.el.classList.add('expired-event');
-                    }
-                },
-                eventDisplay: 'block',
-                dayMaxEvents: 3,
-                moreLinkText: function(n) { return '+' + n + '개'; },
-                height: 'auto',
-                fixedWeekCount: false
-            });
-            calendar.render();
-        });
-
-        function showEventModal(event) {
-            const props = event.extendedProps;
-            const modalTitle = document.getElementById('eventModalTitle');
-            const modalBody = document.getElementById('eventModalBody');
-
-            const isLH = props.source && props.source.toUpperCase().includes('LH');
-            const eventTypeLabel = props.eventType === 'receipt' ? '접수' : '발표';
-
-            let eventTypeClass;
-            if (isLH) {
-                eventTypeClass = props.eventType === 'receipt' ? 'lh-receipt' : 'lh-winner';
-            } else {
-                eventTypeClass = props.eventType === 'receipt' ? 'receipt' : 'winner';
-            }
-
-            const sourceClass = isLH ? 'source-lh' : 'source-applyhome';
-            const sourceLabel = isLH ? 'LH' : '청약Home';
-
-            modalTitle.textContent = props.houseName || '청약 정보';
-
-            let html = `
-                <div class="event-tags">
-                    <span class="event-tag ${sourceClass}">${sourceLabel}</span>
-                    <span class="event-tag ${eventTypeClass}">${eventTypeLabel}</span>
-                </div>
-
-                <div class="event-info">
-                    <div class="event-info-row">
-                        <div class="event-info-item">
-                            <span class="event-info-label">지역</span>
-                            <span class="event-info-value">${props.area || '-'}</span>
-                        </div>
-                        <div class="event-info-item">
-                            <span class="event-info-label">주택유형</span>
-                            <span class="event-info-value">${props.houseType || '-'}</span>
-                        </div>
-                    </div>
-
-                    <div class="event-info-item">
-                        <span class="event-info-label">공급세대수</span>
-                        <span class="event-info-value">${props.totalSupplyCount ? props.totalSupplyCount.toLocaleString() + '세대' : '-'}</span>
-                    </div>
-
-                    <div class="event-divider"></div>
-
-                    <div class="event-info-item">
-                        <span class="event-info-label">접수기간</span>
-                        <span class="event-info-value">${formatDate(props.receiptStartDate)} ~ ${formatDate(props.receiptEndDate)}</span>
-                    </div>
-
-                    <div class="event-info-item">
-                        <span class="event-info-label">당첨자 발표일</span>
-                        <span class="event-info-value">${formatDate(props.winnerAnnounceDate)}</span>
-                    </div>
-                </div>
-            `;
-
-            // 청약Home만 분석 버튼 활성화
-            if (props.hasAnalysis) {
-                html += `
-                    <a href="/home/analysis/${event.id}" class="event-btn-analysis">
-                        시세 분석 보기
-                    </a>
-                `;
-            } else {
-                html += `
-                    <div class="event-btn-analysis disabled">
-                        시세 분석 (청약Home만 제공)
-                    </div>
-                    <div class="event-lh-notice">
-                        LH 청약은 시세 분석이 제공되지 않습니다
-                    </div>
-                `;
-            }
-
-            if (props.detailUrl) {
-                html += `
-                    <a href="${props.detailUrl}" target="_blank" class="event-btn-detail">
-                        상세 페이지 보기 →
-                    </a>
-                `;
-            }
-
-            modalBody.innerHTML = html;
-            document.getElementById('eventModal').classList.add('active');
-        }
-
-        function closeEventModal() {
-            document.getElementById('eventModal').classList.remove('active');
-        }
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-
-        // ESC 키로 모달 닫기
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeEventModal();
-        });
-
-        // 모달 외부 클릭 시 닫기
-        document.getElementById('eventModal').addEventListener('click', function(e) {
-            if (e.target === this) closeEventModal();
-        });
     </script>
 </body>
 </html>

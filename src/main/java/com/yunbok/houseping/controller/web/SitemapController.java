@@ -27,6 +27,7 @@ public class SitemapController {
 
         // 홈페이지
         appendUrl(sb, BASE_URL + "/home", "daily", "1.0");
+        appendUrl(sb, BASE_URL + "/home/calendar", "weekly", "0.8");
         appendUrl(sb, BASE_URL + "/home/calculator", "monthly", "0.8");
 
         // 월별 페이지: 최근 12개월
