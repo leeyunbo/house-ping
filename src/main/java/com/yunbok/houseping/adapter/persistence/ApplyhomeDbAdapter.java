@@ -29,6 +29,11 @@ public class ApplyhomeDbAdapter implements SubscriptionProvider {
     private static final String SOURCE_PREFIX = SubscriptionSource.APPLYHOME.getValue();
     private final SubscriptionRepository subscriptionRepository;
 
+    @Override
+    public boolean isExternalSource() {
+        return false;
+    }
+
     public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {
         try {
             log.info("[청약Home DB] {} 지역 {} 접수 시작 청약 조회", areaName, targetDate);

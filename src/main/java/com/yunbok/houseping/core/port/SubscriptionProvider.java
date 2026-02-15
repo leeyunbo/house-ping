@@ -23,6 +23,13 @@ public interface SubscriptionProvider {
     }
 
     /**
+     * 외부 API 소스 여부 (false면 DB 캐시 등 내부 소스)
+     */
+    default boolean isExternalSource() {
+        return true;
+    }
+
+    /**
      * 데이터 소스 이름 반환
      */
     default String getSourceName() {

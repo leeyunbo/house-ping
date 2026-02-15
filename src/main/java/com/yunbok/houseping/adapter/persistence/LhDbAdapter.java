@@ -24,6 +24,11 @@ public class LhDbAdapter implements SubscriptionProvider {
     private static final String SOURCE_PREFIX = SubscriptionSource.LH.getValue();
     private final SubscriptionRepository subscriptionRepository;
 
+    @Override
+    public boolean isExternalSource() {
+        return false;
+    }
+
     public List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate) {
         try {
             log.info("[LH DB] Fetching area={}", areaName);

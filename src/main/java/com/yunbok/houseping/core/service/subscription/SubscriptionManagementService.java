@@ -28,6 +28,7 @@ public class SubscriptionManagementService {
         SyncResult totalResult = SyncResult.empty();
         for (String area : config.targetAreas()) {
             for (SubscriptionProvider provider : providers) {
+                if (!provider.isExternalSource()) continue;
                 totalResult = totalResult.merge(syncFromProvider(provider, area));
             }
         }
