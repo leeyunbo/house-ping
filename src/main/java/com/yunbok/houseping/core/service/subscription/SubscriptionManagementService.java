@@ -4,7 +4,6 @@ import com.yunbok.houseping.core.domain.SubscriptionConfig;
 import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import com.yunbok.houseping.support.dto.SyncResult;
 import com.yunbok.houseping.adapter.persistence.SubscriptionPersistenceAdapter;
-import com.yunbok.houseping.core.port.SubscriptionProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,16 +19,16 @@ import java.util.Optional;
 public class SubscriptionManagementService {
 
     private final SubscriptionPersistenceAdapter persistencePort;
-    private final List<SubscriptionProvider> providers;
+    private final List<SubscriptionProviderChain> chains;
     private final SubscriptionConfig config;
 
     @Transactional
     public SyncResult sync() {
         SyncResult totalResult = SyncResult.empty();
         for (String area : config.targetAreas()) {
-            for (SubscriptionProvider provider : providers) {
-                if (!provider.isExternalSource()) continue;
-                totalResult = totalResult.merge(syncFromProvider(provider, area));
+            for (SubscriptionProviderChain chain : chains) {
+                List<SubscriptionInfo> subscriptions = chain.executeAll(area);
+                totalResult = totalResult.merge(saveSubscriptions(subscriptions, chain.getSourceName()));
             }
         }
         log.info("Sync completed: inserted={}, updated={}, skipped={}",
@@ -43,15 +42,6 @@ public class SubscriptionManagementService {
         int deletedCount = persistencePort.deleteOldSubscriptions(cutoffDate);
         log.info("Cleanup completed: deleted={}", deletedCount);
         return deletedCount;
-    }
-
-    private SyncResult syncFromProvider(SubscriptionProvider provider, String area) {
-        try {
-            return saveSubscriptions(provider.fetchAll(area), provider.getSourceName());
-        } catch (Exception e) {
-            log.warn("[{}] area={} failed: {}", provider.getSourceName(), area, e.getMessage());
-            return SyncResult.empty();
-        }
     }
 
     private SyncResult saveSubscriptions(List<SubscriptionInfo> subscriptions, String source) {

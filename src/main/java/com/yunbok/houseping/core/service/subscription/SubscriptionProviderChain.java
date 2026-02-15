@@ -8,4 +8,8 @@ import java.util.List;
 public interface SubscriptionProviderChain {
 
     List<SubscriptionInfo> execute(String areaName, LocalDate targetDate);
+
+    List<SubscriptionInfo> executeAll(String areaName);
+
+    String getSourceName();
 }

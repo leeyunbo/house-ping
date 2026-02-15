@@ -36,6 +36,24 @@ public class FallbackProviderChain implements SubscriptionProviderChain {
         return emptyResultWithWarning();
     }
 
+    public List<SubscriptionInfo> executeAll(String areaName) {
+        for (SubscriptionProvider provider : providers) {
+            if (!provider.isExternalSource()) continue;
+            Optional<List<SubscriptionInfo>> result = tryFetch(
+                    () -> provider.fetchAll(areaName),
+                    provider.getSourceName()
+            );
+            if (result.isPresent()) {
+                return result.get();
+            }
+        }
+        return emptyResultWithWarning();
+    }
+
+    public String getSourceName() {
+        return name;
+    }
+
     private Optional<List<SubscriptionInfo>> tryFetch(
             Supplier<List<SubscriptionInfo>> fetcher, String sourceName) {
         try {

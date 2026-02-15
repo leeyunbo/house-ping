@@ -48,6 +48,13 @@ public class SubscriptionPersistenceAdapter {
         return subscriptionRepository.deleteOldSubscriptions(cutoffDate);
     }
 
+    public List<SubscriptionInfo> findByAreaAndReceiptStartDate(String area, LocalDate receiptStartDate) {
+        return subscriptionRepository.findByAreaAndReceiptStartDate(area, receiptStartDate)
+                .stream()
+                .map(this::toSubscriptionInfo)
+                .toList();
+    }
+
     public Set<String> findHouseManageNosByAreas(List<String> areas) {
         if (areas == null || areas.isEmpty()) {
             return Set.of();
