@@ -30,6 +30,14 @@ public class SitemapController {
         appendUrl(sb, BASE_URL + "/home/calendar", "weekly", "0.8");
         appendUrl(sb, BASE_URL + "/home/calculator", "monthly", "0.8");
 
+        // 가이드 페이지
+        appendUrl(sb, BASE_URL + "/home/guide", "weekly", "0.8");
+        appendUrl(sb, BASE_URL + "/home/guide/special-supply", "monthly", "0.7");
+        appendUrl(sb, BASE_URL + "/home/guide/point-vs-lottery", "monthly", "0.7");
+        appendUrl(sb, BASE_URL + "/home/guide/homeless-criteria", "monthly", "0.7");
+        appendUrl(sb, BASE_URL + "/home/guide/subscription-account", "monthly", "0.7");
+        appendUrl(sb, BASE_URL + "/home/guide/private-vs-public-housing", "monthly", "0.7");
+
         // 월별 페이지: 최근 12개월
         YearMonth now = YearMonth.now();
         for (int i = -6; i <= 6; i++) {

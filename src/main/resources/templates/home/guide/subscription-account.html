@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('청약통장 종류와 가입 방법', '주택청약종합저축, 청약저축, 청약예금, 청약부금 비교. 청약통장 가입 방법, 납입 금액, 1순위 조건까지 청약통장의 모든 것을 정리했습니다.')}"></head>
+<head>
+    <style>
+        .hero {
+            padding: 48px 0 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .hero-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+        .article {
+            padding-top: 40px;
+        }
+        .article h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 16px;
+            margin-top: 48px;
+        }
+        .article h2:first-child { margin-top: 0; }
+        .article p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            word-break: keep-all;
+            margin-bottom: 16px;
+        }
+        .article strong { color: var(--text); font-weight: 700; }
+        .callout {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .callout strong { color: var(--primary); }
+        .compare-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .compare-table th {
+            background: var(--bg-secondary);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+        .compare-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            background: var(--card);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .faq-list { margin-top: 32px; }
+        .faq-item {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        .faq-q { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+        .faq-a { font-size: 14px; color: var(--text-secondary); line-height: 1.8; word-break: keep-all; }
+        .related-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            margin-top: 40px;
+            background: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .related-link {
+            background: var(--card);
+            padding: 20px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.15s ease;
+        }
+        .related-link:hover { background: var(--bg-secondary); }
+        .related-link-title { font-size: 15px; font-weight: 700; color: var(--text); }
+        .related-link-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .bottom-spacer { height: 80px; }
+        @media (max-width: 640px) {
+            .hero { padding: 36px 0 0; }
+            .hero h1 { font-size: 24px; }
+            .compare-table { font-size: 13px; }
+            .compare-table th, .compare-table td { padding: 12px; }
+            .related-links { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar('guide')}"></nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>청약통장 종류와 가입 방법</h1>
+            <p class="hero-desc">청약의 시작, 청약통장에 대해 알아보세요</p>
+        </div>
+
+        <div class="article">
+            <h2>청약통장이란?</h2>
+            <p><strong>청약통장</strong>은 주택 청약에 신청하기 위해 반드시 필요한 저축 상품이에요. 은행에 가입하여 매월 일정 금액을 납입하면, 납입 횟수와 기간에 따라 청약 1순위 자격을 얻을 수 있어요.</p>
+
+            <div class="callout">
+                <strong>현재 가입 가능한 통장:</strong> 일반적으로는 <strong>주택청약종합저축</strong>에 가입하면 돼요. 만 19~34세 무주택자로 연소득 5,000만원 이하라면 우대금리가 적용되는 <strong>청년 주택드림 청약통장</strong>도 가입할 수 있어요.
+            </div>
+
+            <h2>청약통장 종류 비교</h2>
+
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>주택청약종합저축</th>
+                        <th>청년 주택드림</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>가입 대상</strong></td>
+                        <td>누구나</td>
+                        <td>만 19~34세, 무주택, 연소득 5,000만원 이하</td>
+                    </tr>
+                    <tr>
+                        <td><strong>청약 대상</strong></td>
+                        <td>국민주택 + 민영주택 모두</td>
+                        <td>동일 (종합저축 기반)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>납입 방식</strong></td>
+                        <td>월 2만~50만원 자유 납입</td>
+                        <td>월 2만~100만원</td>
+                    </tr>
+                    <tr>
+                        <td><strong>금리</strong></td>
+                        <td>최대 연 3.1% (2년 이상)</td>
+                        <td>기본금리 + 최대 연 1.7%p 우대 (10년간)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>소득공제</strong></td>
+                        <td>연 300만원 한도 (40%)</td>
+                        <td>동일 + 비과세 혜택 가능</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>기존 청약저축·청약예금·청약부금은 2015년 9월 이후 신규 가입이 중단되었어요. 기존 가입자는 종합저축으로 전환할 수 있어요.</p>
+
+            <h2>1순위 자격 조건</h2>
+            <p>청약통장 가입만으로는 부족해요. <strong>1순위 자격</strong>을 충족해야 당첨 확률이 높아져요. 민영주택과 국민주택의 1순위 요건이 다르니 주의하세요.</p>
+
+            <p><strong>민영주택</strong> — 가입 기간 + 면적별 <strong>예치금</strong> 충족이 핵심</p>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>지역</th>
+                        <th>가입 기간</th>
+                        <th>예치금 (서울 기준)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>투기과열지구 / 조정대상지역</strong></td>
+                        <td>2년 이상</td>
+                        <td>85㎡ 이하 300만원 / 102㎡ 이하 600만원 / 135㎡ 이하 1,000만원 / 전 면적 1,500만원</td>
+                    </tr>
+                    <tr>
+                        <td><strong>수도권 (기타)</strong></td>
+                        <td>1년 이상</td>
+                        <td>동일</td>
+                    </tr>
+                    <tr>
+                        <td><strong>비수도권</strong></td>
+                        <td>6개월 이상</td>
+                        <td>지역별 상이 (서울보다 낮음)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>국민주택</strong> — 가입 기간 + <strong>납입 횟수</strong>가 핵심 (경쟁 시 저축총액 순)</p>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>지역</th>
+                        <th>가입 기간</th>
+                        <th>납입 횟수</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>투기과열지구 / 조정대상지역</strong></td>
+                        <td>2년 이상</td>
+                        <td>24회 이상</td>
+                    </tr>
+                    <tr>
+                        <td><strong>수도권 (기타)</strong></td>
+                        <td>1년 이상</td>
+                        <td>12회 이상</td>
+                    </tr>
+                    <tr>
+                        <td><strong>비수도권</strong></td>
+                        <td>6개월 이상</td>
+                        <td>6회 이상</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>가입 방법</h2>
+            <p>주택청약종합저축은 다음과 같이 가입할 수 있어요.</p>
+            <p>1. <strong>시중 은행 방문</strong> — 신분증 지참 후 창구에서 가입<br>
+            2. <strong>은행 앱 / 인터넷뱅킹</strong> — 대부분의 은행에서 비대면 가입 가능<br>
+            3. <strong>필요 서류</strong> — 신분증, 주민등록등본 (미성년자는 법정대리인 동의)</p>
+
+            <div class="callout">
+                <strong>가입 팁:</strong> 가입은 빠를수록 좋아요. 통장 가입기간이 길수록 가점이 높아지고 (<a href="/home/calculator" style="color:var(--primary);">가점 계산기</a>로 확인), 국민주택은 납입 횟수와 저축총액이 당첨 순위에 직접 영향을 줘요. 매월 <strong>25만원씩</strong> 자동이체를 설정해두면 소득공제 한도도 꽉 채울 수 있어요.
+            </div>
+
+            <h2>납입 금액 전략</h2>
+            <p><strong>민영주택</strong> 청약을 주로 노린다면 납입 금액보다 <strong>가입 기간</strong>이 중요해요. 월 2만원이라도 꾸준히 납입하면 돼요.</p>
+            <p><strong>국민주택</strong> 청약을 노린다면 <strong>납입 횟수와 저축총액</strong>이 중요해요. 2024년 11월부터 회차별 납입 인정 금액이 <strong>10만원에서 25만원으로 상향</strong>되었어요. 월 25만원씩 꾸준히 납입하면 저축총액을 빠르게 쌓을 수 있어요. 국민주택과 민영주택의 차이는 <a href="/home/guide/private-vs-public-housing" style="color:var(--primary);">민영주택 vs 국민주택 가이드</a>에서 확인하세요.</p>
+
+            <h2>배우자 통장 합산 제도</h2>
+            <p>2024년 3월 25일부터 <strong>배우자의 청약통장 가입기간 점수</strong>를 본인 가점에 합산할 수 있어요. 배우자 점수의 50%를 합산하되, <strong>최대 3점</strong>까지만 인정돼요. 부부 각각 통장을 유지하는 것이 유리한 이유예요.</p>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-q">청약통장을 해지하면 어떻게 되나요?</div>
+                    <div class="faq-a">해지하면 가입기간과 납입횟수가 모두 초기화돼요. 다시 가입해도 처음부터 시작이에요. 가급적 해지하지 않는 것을 강력히 권장해요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">청약에 당첨되면 통장은 없어지나요?</div>
+                    <div class="faq-a">당첨되면 통장의 효력이 상실되어 재사용이 어려워요. 다만 부적격 당첨이나 사업 취소 등 본인 귀책이 아닌 사유라면 통장 복원 절차를 통해 부활할 수 있어요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">미성년자도 청약통장에 가입할 수 있나요?</div>
+                    <div class="faq-a">네, 가능해요. 법정대리인(부모) 동의를 받아 가입할 수 있어요. 미성년 기간의 납입 인정 기간이 기존 2년(24회)에서 <strong>5년(최대 60회)</strong>으로 확대되었어요 (2024년 이후 납입분부터 적용, 이전 납입분과 합산).</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">월 50만원 넣으면 더 유리한가요?</div>
+                    <div class="faq-a">민영주택은 예치금만 채우면 되므로 납입 금액 자체는 큰 차이가 없어요. 국민주택은 2024년 11월부터 회차별 납입 인정 금액이 <strong>월 25만원</strong>까지로 상향되었어요. 25만원 초과분은 순위 산정에 반영되지 않아요.</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="related-links">
+            <a href="/home/calculator" class="related-link">
+                <div class="related-link-title">가점 계산기 →</div>
+                <div class="related-link-desc">통장 가입기간 점수 확인하기</div>
+            </a>
+            <a href="/home/guide/private-vs-public-housing" class="related-link">
+                <div class="related-link-title">민영 vs 국민주택 →</div>
+                <div class="related-link-desc">통장 활용 전략이 달라요</div>
+            </a>
+            <a href="/home/guide/point-vs-lottery" class="related-link">
+                <div class="related-link-title">가점제 vs 추첨제 →</div>
+                <div class="related-link-desc">통장 기간이 가점에 미치는 영향</div>
+            </a>
+            <a href="/home/guide/special-supply" class="related-link">
+                <div class="related-link-title">특별공급 조건 →</div>
+                <div class="related-link-desc">통장 요건이 포함된 특별공급</div>
+            </a>
+        </section>
+
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <nav th:replace="~{fragments/home-layout :: bottomTab('guide')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "청약통장 종류와 가입 방법 (2025년)",
+        "description": "주택청약종합저축, 청약저축, 청약예금 비교. 가입 방법, 납입 금액, 1순위 조건 총정리",
+        "author": {"@type": "Organization", "name": "Houseping"},
+        "publisher": {"@type": "Organization", "name": "Houseping", "logo": {"@type": "ImageObject", "url": "https://house-ping.com/og-image.png"}},
+        "mainEntityOfPage": "https://house-ping.com/home/guide/subscription-account"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "청약통장을 해지하면 어떻게 되나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "해지하면 가입기간과 납입횟수가 모두 초기화됩니다. 다시 가입해도 처음부터 시작입니다. 가급적 해지하지 않는 것을 강력히 권장합니다."}
+            },
+            {
+                "@type": "Question",
+                "name": "청약에 당첨되면 통장은 없어지나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "당첨되면 통장의 효력이 상실되어 재사용이 어렵습니다. 다만 부적격 당첨이나 사업 취소 등 본인 귀책이 아닌 사유라면 통장 복원 절차를 통해 부활할 수 있습니다."}
+            },
+            {
+                "@type": "Question",
+                "name": "미성년자도 청약통장에 가입할 수 있나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "네, 가능합니다. 법정대리인(부모) 동의를 받아 가입할 수 있습니다. 미성년 기간의 납입 인정 기간이 기존 2년(24회)에서 5년(최대 60회)으로 확대되었습니다 (2024년 이후 납입분부터 적용)."}
+            },
+            {
+                "@type": "Question",
+                "name": "월 50만원 넣으면 더 유리한가요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "민영주택은 예치금만 채우면 되므로 납입 금액 자체는 큰 차이가 없습니다. 국민주택은 2024년 11월부터 회차별 납입 인정 금액이 월 25만원까지로 상향되었습니다. 25만원 초과분은 순위 산정에 반영되지 않습니다."}
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://house-ping.com/home"},
+            {"@type": "ListItem", "position": 2, "name": "청약 가이드", "item": "https://house-ping.com/home/guide"},
+            {"@type": "ListItem", "position": 3, "name": "청약통장 종류와 가입 방법", "item": "https://house-ping.com/home/guide/subscription-account"}
+        ]
+    }
+    </script>
+</body>
+</html>

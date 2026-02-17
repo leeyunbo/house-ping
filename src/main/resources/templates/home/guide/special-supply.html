@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('특별공급 조건 총정리', '2025년 특별공급 자격 조건 총정리. 신혼부부, 생애최초, 다자녀, 노부모부양, 기관추천 특별공급 유형별 소득 기준과 자산 요건을 한눈에 확인하세요.')}"></head>
+<head>
+    <style>
+        .hero {
+            padding: 48px 0 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .hero-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+        .article {
+            padding-top: 40px;
+        }
+        .article h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 16px;
+            margin-top: 48px;
+        }
+        .article h2:first-child { margin-top: 0; }
+        .article p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            word-break: keep-all;
+            margin-bottom: 16px;
+        }
+        .article strong { color: var(--text); font-weight: 700; }
+        .callout {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .callout strong { color: var(--primary); }
+        .compare-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .compare-table th {
+            background: var(--bg-secondary);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+        .compare-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            background: var(--card);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .faq-list { margin-top: 32px; }
+        .faq-item {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        .faq-q {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        .faq-a {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            word-break: keep-all;
+        }
+        .related-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            margin-top: 40px;
+            background: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .related-link {
+            background: var(--card);
+            padding: 20px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.15s ease;
+        }
+        .related-link:hover { background: var(--bg-secondary); }
+        .related-link-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .related-link-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .bottom-spacer { height: 80px; }
+        @media (max-width: 640px) {
+            .hero { padding: 36px 0 0; }
+            .hero h1 { font-size: 24px; }
+            .compare-table { font-size: 13px; }
+            .compare-table th, .compare-table td { padding: 12px; }
+            .related-links { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar('guide')}"></nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>특별공급 조건 총정리</h1>
+            <p class="hero-desc">일반공급보다 경쟁률이 낮은 특별공급,<br>나도 해당될 수 있어요</p>
+        </div>
+
+        <div class="article">
+            <h2>특별공급이란?</h2>
+            <p><strong>특별공급</strong>은 정책적 배려가 필요한 계층에게 주택을 우선 공급하는 제도예요. 일반공급과 별도로 신청하며, 경쟁률이 상대적으로 낮아 당첨 확률이 높은 편이에요. 무주택 세대구성원이면서 각 유형별 자격 조건을 충족해야 신청할 수 있어요.</p>
+
+            <div class="callout">
+                <strong>핵심 포인트:</strong> 특별공급은 생애 1회만 당첨 가능해요 (기관추천 제외). 부부 중 한 명이 당첨되면 배우자도 사용한 것으로 간주돼요.
+            </div>
+
+            <h2>특별공급 유형별 조건</h2>
+
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>유형</th>
+                        <th>주요 자격</th>
+                        <th>소득 기준</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>신혼부부</strong></td>
+                        <td>혼인 7년 이내 또는 예비 신혼부부 (6개월 이내 결혼 예정)</td>
+                        <td>도시근로자 월평균 소득 130% 이하 (맞벌이 200%)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>생애최초</strong></td>
+                        <td>생애 최초 주택 구입자, 5년 이상 소득세 납부</td>
+                        <td>도시근로자 월평균 소득 130% 이하 (맞벌이 200%)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>다자녀</strong></td>
+                        <td>미성년 자녀 3명 이상 (태아 포함)</td>
+                        <td>소득 기준 없음 (자산 기준 적용)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>노부모부양</strong></td>
+                        <td>만 65세 이상 직계존속 3년 이상 부양</td>
+                        <td>소득 기준 없음 (가점제 적용)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>기관추천</strong></td>
+                        <td>국가유공자, 장애인, 장기복무군인 등</td>
+                        <td>기관별 상이</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>신혼부부 특별공급</h2>
+            <p>가장 인기 있는 특별공급 유형이에요. <strong>혼인신고일 기준 7년 이내</strong>인 부부가 대상이며, 2024년부터는 입주자 모집공고일 6개월 이내에 결혼 예정인 <strong>예비 신혼부부</strong>도 신청할 수 있어요.</p>
+            <p>민영주택 기준 소득 기준은 <strong>도시근로자 월평균 소득의 130% 이하</strong>(맞벌이 200% 이하)이며, 우선 공급 대상은 소득 100% 이하예요. 자녀가 있으면 배점에서 유리해요. 공공주택은 기준이 다를 수 있으니 공고문을 확인하세요.</p>
+
+            <h2>생애최초 특별공급</h2>
+            <p>말 그대로 <strong>생애 처음으로 주택을 구입</strong>하는 사람을 위한 제도예요. 과거에 주택을 소유한 적이 한 번도 없어야 하며, <strong>소득세를 5년 이상 납부</strong>한 이력이 있어야 해요.</p>
+            <p>소득 기준은 도시근로자 월평균 소득의 <strong>130% 이하</strong>(맞벌이 200% 이하)로, 맞벌이 기준이 매우 넓어 실질적으로 많은 분들이 해당돼요.</p>
+
+            <h2>다자녀 특별공급</h2>
+            <p><strong>미성년 자녀가 3명 이상</strong>인 가구가 대상이에요. 태아도 포함되며, 입양 자녀도 인정돼요. 소득 기준은 없지만 자산 기준이 적용돼요. 자녀 수, 무주택 기간, 해당 시도 거주 기간 등으로 배점을 산정해요.</p>
+
+            <h2>꼭 알아야 할 공통 요건</h2>
+            <p>모든 특별공급에 공통으로 적용되는 요건이 있어요.</p>
+            <p>1. <strong>무주택 세대구성원</strong>이어야 해요 (<a href="/home/guide/homeless-criteria" style="color:var(--primary);">무주택자 기준 가이드</a> 참고)<br>
+            2. <strong>청약통장 가입</strong>이 필수예요 (<a href="/home/guide/subscription-account" style="color:var(--primary);">청약통장 가이드</a> 참고)<br>
+            3. <strong>자산 기준</strong>을 충족해야 해요 (부동산·자동차 가액 기준이 매년 변동되므로 공고문에서 확인)</p>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-q">특별공급과 일반공급을 동시에 신청할 수 있나요?</div>
+                    <div class="faq-a">같은 주택에 대해 특별공급과 일반공급을 동시에 신청할 수는 없어요. 다만 특별공급에서 떨어진 경우, 같은 단지의 일반공급에 재신청하는 것은 가능해요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">이혼한 경우에도 신혼부부 특별공급이 가능한가요?</div>
+                    <div class="faq-a">재혼한 경우 재혼 기준 혼인신고일부터 7년 이내라면 가능해요. 단, 이전 혼인에서 특별공급 당첨 이력이 있다면 신청할 수 없어요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">예비 신혼부부도 생애최초 특별공급이 되나요?</div>
+                    <div class="faq-a">예비 신혼부부는 신혼부부 특별공급에만 해당돼요. 생애최초 특별공급은 기혼·미혼 관계없이 소득세 납부 이력과 무주택 요건만 충족하면 신청 가능해요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">소득 초과로 특별공급이 안 되면 어떻게 하나요?</div>
+                    <div class="faq-a">일반공급의 가점제 또는 추첨제를 활용하세요. <a href="/home/guide/point-vs-lottery" style="color:var(--primary);">가점제 vs 추첨제 가이드</a>에서 나에게 유리한 방식을 확인할 수 있어요. 또한 <a href="/home/calculator" style="color:var(--primary);">가점 계산기</a>로 미리 점수를 확인해보세요.</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="related-links">
+            <a href="/home/guide/point-vs-lottery" class="related-link">
+                <div class="related-link-title">가점제 vs 추첨제 →</div>
+                <div class="related-link-desc">나에게 유리한 당첨 방식은?</div>
+            </a>
+            <a href="/home/guide/homeless-criteria" class="related-link">
+                <div class="related-link-title">무주택자 기준 →</div>
+                <div class="related-link-desc">내가 무주택자에 해당하는지 확인</div>
+            </a>
+            <a href="/home/guide/subscription-account" class="related-link">
+                <div class="related-link-title">청약통장 가이드 →</div>
+                <div class="related-link-desc">통장 종류와 가입 방법</div>
+            </a>
+            <a href="/home/calculator" class="related-link">
+                <div class="related-link-title">가점 계산기 →</div>
+                <div class="related-link-desc">내 청약 가점 미리 계산하기</div>
+            </a>
+        </section>
+
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <nav th:replace="~{fragments/home-layout :: bottomTab('guide')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "특별공급 조건 총정리 (2025년)",
+        "description": "신혼부부, 생애최초, 다자녀, 노부모부양, 기관추천 특별공급 유형별 자격 조건과 소득 기준을 한눈에 정리",
+        "author": {"@type": "Organization", "name": "Houseping"},
+        "publisher": {"@type": "Organization", "name": "Houseping", "logo": {"@type": "ImageObject", "url": "https://house-ping.com/og-image.png"}},
+        "mainEntityOfPage": "https://house-ping.com/home/guide/special-supply"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "특별공급과 일반공급을 동시에 신청할 수 있나요?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "같은 주택에 대해 특별공급과 일반공급을 동시에 신청할 수는 없습니다. 다만 특별공급에서 떨어진 경우, 같은 단지의 일반공급에 재신청하는 것은 가능합니다."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "이혼한 경우에도 신혼부부 특별공급이 가능한가요?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "재혼한 경우 재혼 기준 혼인신고일부터 7년 이내라면 가능합니다. 단, 이전 혼인에서 특별공급 당첨 이력이 있다면 신청할 수 없습니다."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "예비 신혼부부도 생애최초 특별공급이 되나요?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "예비 신혼부부는 신혼부부 특별공급에만 해당됩니다. 생애최초 특별공급은 기혼·미혼 관계없이 소득세 납부 이력과 무주택 요건만 충족하면 신청 가능합니다."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "소득 초과로 특별공급이 안 되면 어떻게 하나요?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "일반공급의 가점제 또는 추첨제를 활용하세요. 가점제 vs 추첨제 가이드에서 나에게 유리한 방식을 확인할 수 있습니다."
+                }
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://house-ping.com/home"},
+            {"@type": "ListItem", "position": 2, "name": "청약 가이드", "item": "https://house-ping.com/home/guide"},
+            {"@type": "ListItem", "position": 3, "name": "특별공급 조건 총정리", "item": "https://house-ping.com/home/guide/special-supply"}
+        ]
+    }
+    </script>
+</body>
+</html>

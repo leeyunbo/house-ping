@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('청약 가이드', '청약 초보자를 위한 필수 가이드 모음. 특별공급 조건, 가점제 vs 추첨제, 무주택자 기준, 청약통장 종류, 민영주택 vs 국민주택 차이를 쉽게 알아보세요.')}"></head>
+<head>
+    <style>
+        .hero {
+            text-align: center;
+            padding: 48px 20px 32px;
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: -0.8px;
+            line-height: 1.35;
+        }
+
+        .hero p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .guide-card {
+            background: var(--card);
+            padding: 28px 24px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: background 0.15s ease;
+        }
+
+        .guide-card:hover { background: var(--bg-secondary); }
+
+        .guide-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .guide-card-icon.special { background: rgba(249,115,22,0.1); }
+        .guide-card-icon.point { background: var(--primary-light); }
+        .guide-card-icon.homeless { background: var(--success-light); }
+        .guide-card-icon.account { background: rgba(139,92,246,0.1); }
+        .guide-card-icon.housing { background: rgba(239,68,68,0.08); }
+
+        .guide-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+            line-height: 1.4;
+        }
+
+        .guide-card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .guide-card-arrow {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .bottom-spacer { height: 80px; }
+
+        @media (max-width: 640px) {
+            .hero { padding: 36px 20px 28px; }
+            .hero h1 { font-size: 22px; }
+            .guide-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar('guide')}"></nav>
+
+    <section class="hero">
+        <h1>청약 가이드</h1>
+        <p>청약 준비에 필요한 핵심 정보를 쉽게 정리했어요</p>
+    </section>
+
+    <div class="container">
+        <div class="guide-grid">
+            <a href="/home/guide/special-supply" class="guide-card">
+                <div class="guide-card-icon special">🏠</div>
+                <div class="guide-card-title">특별공급 조건 총정리</div>
+                <div class="guide-card-desc">신혼부부, 생애최초, 다자녀 등 특별공급 유형별 자격 조건과 소득 기준</div>
+                <span class="guide-card-arrow">자세히 보기 →</span>
+            </a>
+            <a href="/home/guide/point-vs-lottery" class="guide-card">
+                <div class="guide-card-icon point">⚖️</div>
+                <div class="guide-card-title">가점제 vs 추첨제</div>
+                <div class="guide-card-desc">가점제와 추첨제의 차이, 적용 비율, 나에게 유리한 방식 확인</div>
+                <span class="guide-card-arrow">자세히 보기 →</span>
+            </a>
+            <a href="/home/guide/homeless-criteria" class="guide-card">
+                <div class="guide-card-icon homeless">📋</div>
+                <div class="guide-card-title">무주택자 기준</div>
+                <div class="guide-card-desc">무주택 세대구성원 판단 기준, 예외 사항, 자주 하는 실수</div>
+                <span class="guide-card-arrow">자세히 보기 →</span>
+            </a>
+            <a href="/home/guide/subscription-account" class="guide-card">
+                <div class="guide-card-icon account">💰</div>
+                <div class="guide-card-title">청약통장 종류와 가입 방법</div>
+                <div class="guide-card-desc">주택청약종합저축, 청약저축, 청약예금 비교와 가입 팁</div>
+                <span class="guide-card-arrow">자세히 보기 →</span>
+            </a>
+            <a href="/home/guide/private-vs-public-housing" class="guide-card">
+                <div class="guide-card-icon housing">🏢</div>
+                <div class="guide-card-title">민영주택 vs 국민주택 차이</div>
+                <div class="guide-card-desc">공급 주체, 면적 기준, 청약 자격 요건의 핵심 차이점</div>
+                <span class="guide-card-arrow">자세히 보기 →</span>
+            </a>
+        </div>
+
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <nav th:replace="~{fragments/home-layout :: bottomTab('guide')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <!-- JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "홈",
+                "item": "https://house-ping.com/home"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "청약 가이드",
+                "item": "https://house-ping.com/home/guide"
+            }
+        ]
+    }
+    </script>
+</body>
+</html>

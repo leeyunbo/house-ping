@@ -161,6 +161,31 @@ public class PublicHomeController {
     }
 
     /**
+     * 청약 가이드 목록
+     */
+    @GetMapping("/guide")
+    public String guideIndex(Model model) {
+        model.addAttribute("canonicalPath", "/home/guide");
+        return "home/guide/index";
+    }
+
+    /**
+     * 청약 가이드 상세
+     */
+    @GetMapping("/guide/{slug}")
+    public String guideDetail(@PathVariable String slug, Model model) {
+        List<String> validSlugs = List.of(
+                "special-supply", "point-vs-lottery", "homeless-criteria",
+                "subscription-account", "private-vs-public-housing"
+        );
+        if (!validSlugs.contains(slug)) {
+            return "redirect:/home/guide";
+        }
+        model.addAttribute("canonicalPath", "/home/guide/" + slug);
+        return "home/guide/" + slug;
+    }
+
+    /**
      * 청약 분석 페이지
      */
     @GetMapping("/analysis/{id}")

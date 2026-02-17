@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('가점제 vs 추첨제 비교', '청약 가점제와 추첨제의 차이점, 적용 비율, 유리한 전략을 비교 분석합니다. 민영주택 85㎡ 이하 가점제 비율과 추첨제 당첨 확률까지.')}"></head>
+<head>
+    <style>
+        .hero {
+            padding: 48px 0 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .hero-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+        .article {
+            padding-top: 40px;
+        }
+        .article h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 16px;
+            margin-top: 48px;
+        }
+        .article h2:first-child { margin-top: 0; }
+        .article p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            word-break: keep-all;
+            margin-bottom: 16px;
+        }
+        .article strong { color: var(--text); font-weight: 700; }
+        .callout {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .callout strong { color: var(--primary); }
+        .compare-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .compare-table th {
+            background: var(--bg-secondary);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+        .compare-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            background: var(--card);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .faq-list { margin-top: 32px; }
+        .faq-item {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        .faq-q { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+        .faq-a { font-size: 14px; color: var(--text-secondary); line-height: 1.8; word-break: keep-all; }
+        .related-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            margin-top: 40px;
+            background: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .related-link {
+            background: var(--card);
+            padding: 20px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.15s ease;
+        }
+        .related-link:hover { background: var(--bg-secondary); }
+        .related-link-title { font-size: 15px; font-weight: 700; color: var(--text); }
+        .related-link-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .bottom-spacer { height: 80px; }
+        @media (max-width: 640px) {
+            .hero { padding: 36px 0 0; }
+            .hero h1 { font-size: 24px; }
+            .compare-table { font-size: 13px; }
+            .compare-table th, .compare-table td { padding: 12px; }
+            .related-links { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar('guide')}"></nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>가점제 vs 추첨제</h1>
+            <p class="hero-desc">내 상황에 유리한 당첨 방식은 무엇일까요?</p>
+        </div>
+
+        <div class="article">
+            <h2>가점제와 추첨제란?</h2>
+            <p>민영주택 청약에서 당첨자를 선정하는 두 가지 방식이에요. <strong>가점제</strong>는 무주택 기간, 부양가족 수, 청약통장 가입기간을 합산한 점수(84점 만점)가 높은 순서대로 당첨자를 뽑아요. <strong>추첨제</strong>는 점수와 무관하게 무작위 추첨으로 당첨자를 선정해요.</p>
+
+            <div class="callout">
+                <strong>핵심:</strong> 가점이 높으면 가점제가, 가점이 낮으면 추첨제가 유리해요. <a href="/home/calculator" style="color:var(--primary);">가점 계산기</a>로 내 점수를 먼저 확인해보세요.
+            </div>
+
+            <h2>적용 비율 (민영주택 기준)</h2>
+            <p>투기과열지구, 청약과열지역, 기타 지역에 따라 가점제와 추첨제의 적용 비율이 달라요.</p>
+
+            <p>2025년 10월 15일 부동산 대책으로 비율이 변경되었어요. 특히 투기과열지구 소형 면적에 추첨제가 도입되어 청년층의 당첨 기회가 넓어졌어요.</p>
+
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>지역 / 면적</th>
+                        <th>가점제</th>
+                        <th>추첨제</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>투기과열지구</strong> 60㎡ 이하</td>
+                        <td>40%</td>
+                        <td>60%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>투기과열지구</strong> 60~85㎡</td>
+                        <td>70%</td>
+                        <td>30%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>투기과열지구</strong> 85㎡ 초과</td>
+                        <td>80%</td>
+                        <td>20%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>조정대상지역</strong> 85㎡ 이하</td>
+                        <td>50%</td>
+                        <td>50%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>조정대상지역</strong> 85㎡ 초과</td>
+                        <td>30%</td>
+                        <td>70%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>비규제지역</strong> 85㎡ 이하</td>
+                        <td>40%</td>
+                        <td>60%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>비규제지역</strong> 85㎡ 초과</td>
+                        <td>0%</td>
+                        <td>100%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout">
+                <strong>2025년 변경점:</strong> 기존에 투기과열지구 85㎡ 이하는 100% 가점제였지만, 개편 후 60㎡ 이하는 추첨 60%, 60~85㎡도 추첨 30%가 도입되었어요. 반면 85㎡ 초과 대형은 가점제가 50%→80%로 강화되었어요.
+            </div>
+
+            <h2>가점제가 유리한 사람</h2>
+            <p><strong>가점 55점 이상</strong>이라면 가점제가 유리해요. 특히 무주택 기간이 길고, 부양가족이 많으며, 청약통장 가입기간이 긴 경우 가점이 높아요. 투기과열지구 60~85㎡는 가점제 70%이므로 높은 가점이 유리해요.</p>
+
+            <h2>추첨제가 유리한 사람</h2>
+            <p><strong>가점 40점 미만</strong>의 젊은 층이나 1인 가구라면 추첨제가 더 유리해요. 투기과열지구 60㎡ 이하는 추첨제 60%이므로, 소형 평형을 노려보는 것도 전략이에요. 비규제지역 85㎡ 초과는 100% 추첨제예요.</p>
+
+            <h2>가점제 vs 추첨제 핵심 비교</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>가점제</th>
+                        <th>추첨제</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>선정 방식</strong></td>
+                        <td>가점 점수 순위</td>
+                        <td>무작위 추첨</td>
+                    </tr>
+                    <tr>
+                        <td><strong>유리한 대상</strong></td>
+                        <td>무주택 기간 길고 가족 많은 사람</td>
+                        <td>1인 가구, 젊은 층</td>
+                    </tr>
+                    <tr>
+                        <td><strong>주 적용</strong></td>
+                        <td>60~85㎡ 중형 (투기과열지구 70%)</td>
+                        <td>60㎡ 이하 소형, 85㎡ 초과 대형</td>
+                    </tr>
+                    <tr>
+                        <td><strong>재당첨 제한</strong></td>
+                        <td>10년 (투기과열지구)</td>
+                        <td>동일</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout">
+                <strong>전략 팁:</strong> 가점이 낮다면 <a href="/home/guide/special-supply" style="color:var(--primary);">특별공급</a>도 함께 검토하세요. 생애최초, 신혼부부 등은 가점과 무관하게 소득 기준으로 선정되는 경우가 많아요.
+            </div>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-q">가점제에서 떨어지면 추첨제로 자동 전환되나요?</div>
+                    <div class="faq-a">네, 가점제에서 탈락한 사람은 자동으로 추첨제 대상에 포함돼요. 별도 신청은 필요 없어요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">추첨제도 무주택자만 신청할 수 있나요?</div>
+                    <div class="faq-a">1순위 청약은 무주택자 또는 1주택자(기존 주택 처분 조건)가 신청할 수 있어요. 다만 투기과열지구는 무주택자만 1순위 청약이 가능해요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">국민주택도 가점제가 적용되나요?</div>
+                    <div class="faq-a">국민주택은 가점제가 아닌 순위제(납입 횟수, 기간)로 당첨자를 선정해요. 가점제는 민영주택에만 적용돼요. <a href="/home/guide/private-vs-public-housing" style="color:var(--primary);">민영주택 vs 국민주택 차이</a>를 확인해보세요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">가점 84점 만점은 어떤 조건인가요?</div>
+                    <div class="faq-a">무주택 15년 이상(32점) + 부양가족 6명 이상(35점) + 청약통장 15년 이상(17점) = 84점이에요. <a href="/home/calculator" style="color:var(--primary);">가점 계산기</a>로 내 점수를 확인해보세요.</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="related-links">
+            <a href="/home/calculator" class="related-link">
+                <div class="related-link-title">가점 계산기 →</div>
+                <div class="related-link-desc">내 가점 점수 미리 확인하기</div>
+            </a>
+            <a href="/home/guide/special-supply" class="related-link">
+                <div class="related-link-title">특별공급 조건 →</div>
+                <div class="related-link-desc">가점 낮으면 특별공급을 노려보세요</div>
+            </a>
+            <a href="/home/guide/private-vs-public-housing" class="related-link">
+                <div class="related-link-title">민영 vs 국민주택 →</div>
+                <div class="related-link-desc">주택 유형별 당첨 방식 차이</div>
+            </a>
+            <a href="/home/guide/homeless-criteria" class="related-link">
+                <div class="related-link-title">무주택자 기준 →</div>
+                <div class="related-link-desc">청약 1순위 필수 조건</div>
+            </a>
+        </section>
+
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <nav th:replace="~{fragments/home-layout :: bottomTab('guide')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "가점제 vs 추첨제 비교 분석",
+        "description": "청약 가점제와 추첨제의 차이점, 적용 비율, 유리한 전략을 비교 분석합니다.",
+        "author": {"@type": "Organization", "name": "Houseping"},
+        "publisher": {"@type": "Organization", "name": "Houseping", "logo": {"@type": "ImageObject", "url": "https://house-ping.com/og-image.png"}},
+        "mainEntityOfPage": "https://house-ping.com/home/guide/point-vs-lottery"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "가점제에서 떨어지면 추첨제로 자동 전환되나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "네, 가점제에서 탈락한 사람은 자동으로 추첨제 대상에 포함됩니다. 별도 신청은 필요 없습니다."}
+            },
+            {
+                "@type": "Question",
+                "name": "추첨제도 무주택자만 신청할 수 있나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "1순위 청약은 무주택자 또는 1주택자(기존 주택 처분 조건)가 신청할 수 있습니다. 다만 투기과열지구는 무주택자만 1순위 청약이 가능합니다."}
+            },
+            {
+                "@type": "Question",
+                "name": "국민주택도 가점제가 적용되나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "국민주택은 가점제가 아닌 순위제(납입 횟수, 기간)로 당첨자를 선정합니다. 가점제는 민영주택에만 적용됩니다."}
+            },
+            {
+                "@type": "Question",
+                "name": "가점 84점 만점은 어떤 조건인가요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "무주택 15년 이상(32점) + 부양가족 6명 이상(35점) + 청약통장 15년 이상(17점) = 84점입니다."}
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://house-ping.com/home"},
+            {"@type": "ListItem", "position": 2, "name": "청약 가이드", "item": "https://house-ping.com/home/guide"},
+            {"@type": "ListItem", "position": 3, "name": "가점제 vs 추첨제", "item": "https://house-ping.com/home/guide/point-vs-lottery"}
+        ]
+    }
+    </script>
+</body>
+</html>

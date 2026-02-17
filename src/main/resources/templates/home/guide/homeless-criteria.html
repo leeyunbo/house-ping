@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('무주택자 기준 총정리', '청약 무주택 세대구성원 판단 기준을 쉽게 정리했습니다. 무주택 기간 산정, 주택 소유로 보지 않는 예외 사항, 자주 하는 실수까지 완벽 가이드.')}"></head>
+<head>
+    <style>
+        .hero {
+            padding: 48px 0 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .hero-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+        .article {
+            padding-top: 40px;
+        }
+        .article h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 16px;
+            margin-top: 48px;
+        }
+        .article h2:first-child { margin-top: 0; }
+        .article p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            word-break: keep-all;
+            margin-bottom: 16px;
+        }
+        .article strong { color: var(--text); font-weight: 700; }
+        .article ul {
+            margin: 16px 0;
+            padding-left: 20px;
+        }
+        .article li {
+            font-size: 15px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .callout {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .callout strong { color: var(--primary); }
+        .callout.warning {
+            background: rgba(239,68,68,0.08);
+        }
+        .callout.warning strong { color: var(--danger); }
+        .compare-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .compare-table th {
+            background: var(--bg-secondary);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+        .compare-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            background: var(--card);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .faq-list { margin-top: 32px; }
+        .faq-item {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        .faq-q { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+        .faq-a { font-size: 14px; color: var(--text-secondary); line-height: 1.8; word-break: keep-all; }
+        .related-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            margin-top: 40px;
+            background: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .related-link {
+            background: var(--card);
+            padding: 20px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.15s ease;
+        }
+        .related-link:hover { background: var(--bg-secondary); }
+        .related-link-title { font-size: 15px; font-weight: 700; color: var(--text); }
+        .related-link-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .bottom-spacer { height: 80px; }
+        @media (max-width: 640px) {
+            .hero { padding: 36px 0 0; }
+            .hero h1 { font-size: 24px; }
+            .compare-table { font-size: 13px; }
+            .compare-table th, .compare-table td { padding: 12px; }
+            .related-links { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar('guide')}"></nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>무주택자 기준 총정리</h1>
+            <p class="hero-desc">청약 1순위의 가장 기본적인 조건,<br>무주택 세대구성원을 알아보세요</p>
+        </div>
+
+        <div class="article">
+            <h2>무주택 세대구성원이란?</h2>
+            <p>청약에서 가장 중요한 자격 요건이에요. <strong>무주택 세대구성원</strong>이란 세대원 전원이 주택을 소유하지 않은 세대의 구성원을 말해요. 본인뿐 아니라 <strong>배우자, 세대원 전원이 무주택</strong>이어야 해요.</p>
+
+            <div class="callout">
+                <strong>중요:</strong> 배우자가 주택을 소유하고 있으면, 본인이 무주택이더라도 무주택 세대구성원에 해당하지 않아요. 배우자는 세대 분리를 해도 같은 세대로 간주해요.
+            </div>
+
+            <h2>세대구성원 범위</h2>
+            <p>청약에서 확인하는 세대구성원의 범위는 다음과 같아요.</p>
+            <ul>
+                <li><strong>본인</strong> (신청자)</li>
+                <li><strong>배우자</strong> (세대 분리 여부 무관)</li>
+                <li><strong>직계존속</strong> (부모, 조부모 — 배우자의 직계존속 포함)</li>
+                <li><strong>직계비속</strong> (자녀, 손자녀 — 배우자의 직계비속 포함)</li>
+                <li><strong>직계비속의 배우자</strong> (며느리, 사위)</li>
+            </ul>
+            <p>주민등록등본에 같이 등재되어 있는 사람이 기준이에요. 단, <strong>배우자는 주민등록이 분리되어 있더라도</strong> 항상 같은 세대로 봐요.</p>
+
+            <h2>주택 소유로 보지 않는 경우 (예외)</h2>
+            <p>다음의 경우는 주택을 소유하고 있더라도 <strong>무주택으로 인정</strong>받을 수 있어요.</p>
+
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>예외 사항</th>
+                        <th>조건</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>상속 주택</strong></td>
+                        <td>상속으로 공유 지분을 취득한 경우 (사업승인 후 3개월 이내 처분 조건)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>소형·저가 주택</strong></td>
+                        <td>전용 60㎡ 이하이면서 공시가격 1.3억원 이하 (수도권 기준)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>폐가</strong></td>
+                        <td>사용이 불가능한 폐가 소유</td>
+                    </tr>
+                    <tr>
+                        <td><strong>무허가 건물</strong></td>
+                        <td>건축물대장에 등재되지 않은 무허가 건물</td>
+                    </tr>
+                    <tr>
+                        <td><strong>미혼 자녀의 소유</strong></td>
+                        <td>만 30세 미만 미혼 직계비속이 소유한 주택 (일부 단지 한정)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>주택 일부 지분</strong></td>
+                        <td>분양권 포함 주택 공유 지분이 전체의 50% 이하인 경우 (일부 적용)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout warning">
+                <strong>주의:</strong> 오피스텔은 주택 수에 포함되지 않지만, 주거용 오피스텔로 재산세가 부과되면 주택으로 간주될 수 있어요. 분양권도 2018년 12월 11일 이후 취득분은 주택 수에 포함돼요.
+            </div>
+
+            <h2>무주택 기간 산정 기준</h2>
+            <p>가점제에서 무주택 기간은 <strong>만 30세 생일</strong>부터 기산해요. 단, 만 30세 이전에 결혼한 경우 <strong>혼인신고일</strong>부터 산정해요.</p>
+            <p>과거에 주택을 소유했다가 처분한 경우, <strong>처분한 날</strong>부터 무주택 기간을 다시 계산해요. 즉 중간에 주택을 소유한 적이 있으면 기간이 초기화돼요.</p>
+
+            <h2>자주 하는 실수</h2>
+            <p>1. <strong>배우자 분리세대 무시</strong> — 배우자가 다른 집에 살면서 주택을 소유하고 있어도 같은 세대예요<br>
+            2. <strong>분양권 미포함으로 착각</strong> — 2018.12.11 이후 취득한 분양권은 주택 수에 포함돼요<br>
+            3. <strong>부모 소유 주택 간과</strong> — 부모와 같은 주민등록에 있으면 부모 주택도 영향을 줘요<br>
+            4. <strong>소형 주택 예외 기준 오해</strong> — 60㎡ 이하 + 공시가 1.3억 이하 <strong>모두</strong> 충족해야 해요</p>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-q">부모님이 주택을 소유하고 있으면 나도 유주택자인가요?</div>
+                    <div class="faq-a">부모님과 같은 주민등록등본에 등재되어 있으면, 부모님의 주택 소유가 영향을 줘요. 독립세대(별도 주민등록)를 구성하면 부모님 주택과 무관해져요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">오피스텔을 소유하면 유주택자인가요?</div>
+                    <div class="faq-a">원칙적으로 오피스텔은 주택이 아니에요. 하지만 주거용으로 재산세가 부과되는 오피스텔은 주택으로 간주될 수 있으니 재산세 과세 내역을 확인하세요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">과거에 주택을 팔았는데 무주택 기간은 어떻게 되나요?</div>
+                    <div class="faq-a">주택을 처분(매도, 상속 등)한 날부터 다시 무주택 기간이 시작돼요. 예를 들어 2020년에 처분했다면 2020년부터 무주택 기간을 산정해요. <a href="/home/calculator" style="color:var(--primary);">가점 계산기</a>에서 확인해보세요.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">1순위 조건에서 무주택은 몇 년 이상이어야 하나요?</div>
+                    <div class="faq-a">1순위 자격 자체는 무주택 기간 제한이 없어요. 입주자 모집공고일 현재 무주택이면 돼요. 무주택 기간은 가점 점수에만 영향을 줘요.</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="related-links">
+            <a href="/home/guide/special-supply" class="related-link">
+                <div class="related-link-title">특별공급 조건 →</div>
+                <div class="related-link-desc">무주택 + 소득 조건 확인하기</div>
+            </a>
+            <a href="/home/guide/point-vs-lottery" class="related-link">
+                <div class="related-link-title">가점제 vs 추첨제 →</div>
+                <div class="related-link-desc">무주택 기간 가점 활용 전략</div>
+            </a>
+            <a href="/home/calculator" class="related-link">
+                <div class="related-link-title">가점 계산기 →</div>
+                <div class="related-link-desc">무주택 기간 점수 계산하기</div>
+            </a>
+            <a href="/home/guide/subscription-account" class="related-link">
+                <div class="related-link-title">청약통장 가이드 →</div>
+                <div class="related-link-desc">1순위를 위한 통장 조건</div>
+            </a>
+        </section>
+
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <nav th:replace="~{fragments/home-layout :: bottomTab('guide')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "무주택자 기준 총정리 (2025년)",
+        "description": "청약 무주택 세대구성원 판단 기준, 예외 사항, 무주택 기간 산정 방법을 쉽게 정리",
+        "author": {"@type": "Organization", "name": "Houseping"},
+        "publisher": {"@type": "Organization", "name": "Houseping", "logo": {"@type": "ImageObject", "url": "https://house-ping.com/og-image.png"}},
+        "mainEntityOfPage": "https://house-ping.com/home/guide/homeless-criteria"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "부모님이 주택을 소유하고 있으면 나도 유주택자인가요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "부모님과 같은 주민등록등본에 등재되어 있으면, 부모님의 주택 소유가 영향을 줍니다. 독립세대(별도 주민등록)를 구성하면 부모님 주택과 무관해집니다."}
+            },
+            {
+                "@type": "Question",
+                "name": "오피스텔을 소유하면 유주택자인가요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "원칙적으로 오피스텔은 주택이 아닙니다. 하지만 주거용으로 재산세가 부과되는 오피스텔은 주택으로 간주될 수 있으니 재산세 과세 내역을 확인하세요."}
+            },
+            {
+                "@type": "Question",
+                "name": "과거에 주택을 팔았는데 무주택 기간은 어떻게 되나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "주택을 처분(매도, 상속 등)한 날부터 다시 무주택 기간이 시작됩니다. 예를 들어 2020년에 처분했다면 2020년부터 무주택 기간을 산정합니다."}
+            },
+            {
+                "@type": "Question",
+                "name": "1순위 조건에서 무주택은 몇 년 이상이어야 하나요?",
+                "acceptedAnswer": {"@type": "Answer", "text": "1순위 자격 자체는 무주택 기간 제한이 없습니다. 입주자 모집공고일 현재 무주택이면 됩니다. 무주택 기간은 가점 점수에만 영향을 줍니다."}
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://house-ping.com/home"},
+            {"@type": "ListItem", "position": 2, "name": "청약 가이드", "item": "https://house-ping.com/home/guide"},
+            {"@type": "ListItem", "position": 3, "name": "무주택자 기준", "item": "https://house-ping.com/home/guide/homeless-criteria"}
+        ]
+    }
+    </script>
+</body>
+</html>
