@@ -93,7 +93,7 @@ public class HouseTypeComparisonBuilder {
     /**
      * 주택형에서 면적 추출 (정수 부분만)
      */
-    BigDecimal extractAreaFromHouseType(String houseType) {
+    public BigDecimal extractAreaFromHouseType(String houseType) {
         if (houseType == null) return null;
         try {
             String numStr = houseType.replaceAll("[^0-9].*", "").replaceFirst("^0+", "");

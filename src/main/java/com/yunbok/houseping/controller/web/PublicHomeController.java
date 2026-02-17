@@ -44,13 +44,11 @@ public class PublicHomeController {
     @GetMapping
     public String index(
             @RequestParam(required = false) String area,
-            @RequestParam(required = false) String status,
             Model model) {
 
-        model.addAttribute("home", subscriptionSearchService.getHomeData(area, status));
+        model.addAttribute("home", subscriptionSearchService.getHomeData(area));
         model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);
         model.addAttribute("current", YearMonth.now());
-        model.addAttribute("next", YearMonth.now().plusMonths(1));
         model.addAttribute("canonicalPath", "/home");
 
         return "home/index";

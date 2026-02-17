@@ -6,6 +6,9 @@ import com.yunbok.houseping.core.domain.SubscriptionPrice;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -20,7 +23,9 @@ public class SubscriptionAnalysisResult {
     private final MarketAnalysis marketAnalysis;
     private final List<RealTransaction> recentTransactions;
     private final List<HouseTypeComparison> houseTypeComparisons;
+    private final List<CompetitionRateDetailRow> competitionRates;
     private final String dongName;
+    private final boolean newBuildBased;
 
     /**
      * 분양가 정보 존재 여부
@@ -41,6 +46,40 @@ public class SubscriptionAnalysisResult {
      */
     public boolean hasHouseTypeComparisons() {
         return houseTypeComparisons != null && !houseTypeComparisons.isEmpty();
+    }
+
+    /**
+     * 경쟁률 정보 존재 여부
+     */
+    public boolean hasCompetitionRates() {
+        return competitionRates != null && !competitionRates.isEmpty();
+    }
+
+    /**
+     * 경쟁률 리스트 (null-safe)
+     */
+    public List<CompetitionRateDetailRow> getCompetitionRates() {
+        return competitionRates != null ? competitionRates : Collections.emptyList();
+    }
+
+    /**
+     * 대표 비교 항목 (84㎡ 우선, 없으면 면적 내림차순)
+     */
+    public HouseTypeComparison getRepresentativeComparison() {
+        if (houseTypeComparisons == null || houseTypeComparisons.isEmpty()) {
+            return null;
+        }
+        List<HouseTypeComparison> withProfit = houseTypeComparisons.stream()
+                .filter(c -> c.getEstimatedProfit() != null)
+                .toList();
+        if (withProfit.isEmpty()) {
+            return null;
+        }
+        BigDecimal target = new BigDecimal("84");
+        return withProfit.stream()
+                .min(Comparator.comparing((HouseTypeComparison c) -> c.getSupplyArea().subtract(target).abs())
+                        .thenComparing(c -> c.getSupplyArea().negate()))
+                .orElse(null);
     }
 
     /**

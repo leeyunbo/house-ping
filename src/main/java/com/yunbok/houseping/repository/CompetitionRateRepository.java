@@ -30,4 +30,15 @@ public interface CompetitionRateRepository extends JpaRepository<CompetitionRate
      */
     @Query("SELECT DISTINCT c.houseType FROM CompetitionRateEntity c WHERE c.houseType IS NOT NULL ORDER BY c.houseType")
     List<String> findDistinctHouseTypes();
+
+    /**
+     * 경쟁률 데이터가 있는 고유한 houseManageNo 목록
+     */
+    @Query("SELECT DISTINCT c.houseManageNo FROM CompetitionRateEntity c")
+    List<String> findDistinctHouseManageNos();
+
+    /**
+     * 특정 houseManageNo의 경쟁률 조회
+     */
+    List<CompetitionRateEntity> findByHouseManageNo(String houseManageNo);
 }

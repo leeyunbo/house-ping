@@ -407,6 +407,42 @@
             font-weight: 700;
         }
 
+        /* ───────── Original Link ───────── */
+        .original-link-wrap {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .original-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+
+        .original-link-btn:hover { background: var(--border); }
+
+        .original-link-icon { font-size: 12px; }
+
+        /* ───────── LH Notice ───────── */
+        .note-box.lh-notice {
+            text-align: center;
+            padding: 32px 24px;
+            margin-top: 32px;
+        }
+
+        .lh-notice-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
         /* ───────── Bottom Spacer ───────── */
         .bottom-spacer {
             height: 80px;
@@ -481,8 +517,8 @@
         </p>
 
         <!-- ========== INSIGHT BANNER ========== -->
-        <th:block th:if="${analysis.houseTypeComparisons != null and !analysis.houseTypeComparisons.isEmpty() and analysis.houseTypeComparisons[0].estimatedProfit != null}">
-            <div th:with="c=${analysis.houseTypeComparisons[0]}"
+        <th:block th:if="${analysis.representativeComparison != null}">
+            <div th:with="c=${analysis.representativeComparison}"
                  class="insight-banner"
                  th:classappend="${c.estimatedProfit > 0} ? 'positive' : 'negative'">
                 <div class="insight-icon">
@@ -556,10 +592,19 @@
                     <div class="info-item" th:if="${subscription.detailUrl}">
                         <span class="info-item-label">상세정보</span>
                         <span class="info-item-value">
-                            <a th:href="${subscription.detailUrl}" target="_blank">바로가기 →</a>
+                            <a th:href="${subscription.detailUrl}" target="_blank" rel="noopener noreferrer">바로가기 →</a>
                         </span>
                     </div>
                 </div>
+            </div>
+
+            <!-- 원문 보기 버튼 -->
+            <div th:if="${subscription.detailUrl}" class="original-link-wrap">
+                <a th:href="${subscription.detailUrl}" target="_blank" rel="noopener noreferrer"
+                   class="original-link-btn">
+                    원문 보기
+                    <span class="original-link-icon">↗</span>
+                </a>
             </div>
 
             <!-- 위치 -->
@@ -574,160 +619,208 @@
                 </div>
             </div>
 
+            <!-- LH 분양 주택 안내 -->
+            <th:block th:if="${subscription.source != null and subscription.source.toUpperCase().contains('LH')}">
+                <div class="note-box lh-notice">
+                    LH 분양 주택의 분양가·시세 분석은 아직 지원하지 않아요.<br>
+                    <span class="lh-notice-sub">기본 정보와 일정을 확인하고, 원문에서 상세 내용을 확인해 주세요.</span>
+                </div>
+            </th:block>
+
             <!-- 분양가 -->
-            <div style="margin-top: 32px;">
-                <h3 class="sub-title">분양가</h3>
-                <div class="table-card" th:if="${analysis.prices != null and !analysis.prices.isEmpty()}">
+            <th:block th:if="${subscription.source == null or !subscription.source.toUpperCase().contains('LH')}">
+                <div style="margin-top: 32px;">
+                    <h3 class="sub-title">분양가</h3>
+                    <div class="table-card" th:if="${analysis.prices != null and !analysis.prices.isEmpty()}">
+                        <div class="tbl-scroll">
+                            <table class="tbl">
+                                <thead>
+                                    <tr>
+                                        <th>주택형</th>
+                                        <th>공급면적</th>
+                                        <th>세대수</th>
+                                        <th>분양가</th>
+                                        <th>평당가</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p : ${analysis.prices}">
+                                        <td th:text="${p.houseType} ?: '-'">59A</td>
+                                        <td th:text="${p.supplyArea != null} ? ${#numbers.formatDecimal(p.supplyArea, 1, 2)} + '㎡' : '-'">84.12㎡</td>
+                                        <td th:text="${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0) > 0} ? ${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0)} + '세대' : '-'">100세대</td>
+                                        <td class="accent">
+                                            <span th:if="${p.topAmount != null and p.topAmount >= 10000}"
+                                                  th:text="${#numbers.formatDecimal(p.topAmount / 10000.0, 1, 1)} + '억'">5.2억</span>
+                                            <span th:if="${p.topAmount != null and p.topAmount < 10000}"
+                                                  th:text="${#numbers.formatInteger(p.topAmount, 0, 'COMMA')} + '만'">5,000만</span>
+                                            <span th:if="${p.topAmount == null}">-</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${p.pricePerPyeong != null}"
+                                                  th:text="${#numbers.formatInteger(p.pricePerPyeong, 0, 'COMMA')} + '만/평'">2,100만/평</span>
+                                            <span th:if="${p.pricePerPyeong == null}">-</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="table-card" th:if="${analysis.prices == null or analysis.prices.isEmpty()}">
+                        <div class="empty">분양가 정보가 아직 없어요.</div>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- 경쟁률 -->
+            <div th:if="${analysis.hasCompetitionRates()}" style="margin-top: 32px;">
+                <h3 class="sub-title">경쟁률</h3>
+                <div class="table-card">
                     <div class="tbl-scroll">
                         <table class="tbl">
                             <thead>
                                 <tr>
                                     <th>주택형</th>
-                                    <th>공급면적</th>
-                                    <th>세대수</th>
-                                    <th>분양가</th>
-                                    <th>평당가</th>
+                                    <th>순위</th>
+                                    <th>지역</th>
+                                    <th>공급</th>
+                                    <th>접수</th>
+                                    <th>경쟁률</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="p : ${analysis.prices}">
-                                    <td th:text="${p.houseType} ?: '-'">59A</td>
-                                    <td th:text="${p.supplyArea != null} ? ${#numbers.formatDecimal(p.supplyArea, 1, 2)} + '㎡' : '-'">84.12㎡</td>
-                                    <td th:text="${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0) > 0} ? ${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0)} + '세대' : '-'">100세대</td>
-                                    <td class="accent">
-                                        <span th:if="${p.topAmount != null and p.topAmount >= 10000}"
-                                              th:text="${#numbers.formatDecimal(p.topAmount / 10000.0, 1, 1)} + '억'">5.2억</span>
-                                        <span th:if="${p.topAmount != null and p.topAmount < 10000}"
-                                              th:text="${#numbers.formatInteger(p.topAmount, 0, 'COMMA')} + '만'">5,000만</span>
-                                        <span th:if="${p.topAmount == null}">-</span>
-                                    </td>
-                                    <td>
-                                        <span th:if="${p.pricePerPyeong != null}"
-                                              th:text="${#numbers.formatInteger(p.pricePerPyeong, 0, 'COMMA')} + '만/평'">2,100만/평</span>
-                                        <span th:if="${p.pricePerPyeong == null}">-</span>
-                                    </td>
+                                <tr th:each="r : ${analysis.competitionRates}">
+                                    <td th:text="${r.houseType ?: '-'}">84A</td>
+                                    <td th:text="${r.rank != null ? r.rank + '순위' : '-'}">1순위</td>
+                                    <td th:text="${r.residenceArea ?: '-'}">해당지역</td>
+                                    <td th:text="${r.supplyCount != null ? #numbers.formatInteger(r.supplyCount, 0, 'COMMA') : '-'}">100</td>
+                                    <td th:text="${r.requestCount != null ? #numbers.formatInteger(r.requestCount, 0, 'COMMA') : '-'}">500</td>
+                                    <td class="accent" th:text="${r.competitionRate != null ? r.competitionRate + ':1' : '-'}">5.00:1</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="table-card" th:if="${analysis.prices == null or analysis.prices.isEmpty()}">
-                    <div class="empty">분양가 정보가 아직 없어요.</div>
-                </div>
             </div>
         </div>
 
-        <!-- ========== 시세 대비 분석 ========== -->
-        <div class="section" th:if="${analysis.houseTypeComparisons != null and !analysis.houseTypeComparisons.isEmpty()}">
-            <h2 class="section-title">시세 대비 분석<span class="muted" th:if="${analysis.dongName}" th:text="${analysis.dongName}">역삼동</span></h2>
-
-            <!-- 대표 차익 -->
-            <th:block th:if="${analysis.houseTypeComparisons[0].estimatedProfit != null}">
-                <div class="comparison-hero" th:with="c=${analysis.houseTypeComparisons[0]}">
-                    <div class="comparison-hero-value"
-                         th:classappend="${c.estimatedProfit >= 10000} ? 'green' : (${c.estimatedProfit > 0} ? 'yellow' : 'red')"
-                         th:text="${c.estimatedProfitFormatted}">+2억</div>
-                    <div class="comparison-hero-label">
-                        <span th:text="${c.houseType}">59A</span> 기준 예상 차익
-                    </div>
-                </div>
-            </th:block>
-
-            <!-- 평형별 비교 -->
-            <div class="table-card">
-                <div class="tbl-scroll">
-                    <table class="tbl">
-                        <thead>
-                            <tr>
-                                <th>평형</th>
-                                <th>분양가</th>
-                                <th>주변시세</th>
-                                <th>예상차익</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="c : ${analysis.houseTypeComparisons}">
-                                <td>
-                                    <div th:text="${c.houseType}">59A</div>
-                                    <div class="type-sub" th:text="${c.supplyArea != null ? #numbers.formatDecimal(c.supplyArea, 1, 0) + '㎡' : ''}">84㎡</div>
-                                </td>
-                                <td th:text="${c.supplyPriceFormatted}">5.5억</td>
-                                <td class="accent" th:text="${c.marketPriceFormatted}">7.2억</td>
-                                <td th:classappend="${c.estimatedProfit != null and c.estimatedProfit >= 10000} ? 'green' : (${c.estimatedProfit != null and c.estimatedProfit > 0} ? 'yellow' : 'red')"
-                                    th:text="${c.estimatedProfitFormatted}">+1.7억</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="note-box">
-                    <ul>
-                        <li>동일 동 내 유사 면적(±10㎡) 최근 실거래가 기준</li>
-                        <li><strong>신축 프리미엄 미반영</strong> — 실제 신축 시세는 더 높을 수 있어요</li>
-                        <li>실거래가 데이터가 부족한 경우 가장 유사한 면적 거래를 참고했어요</li>
-                    </ul>
+        <!-- ========== 시세 대비 분석 (LH 제외) ========== -->
+        <th:block th:if="${subscription.source == null or !subscription.source.toUpperCase().contains('LH')}">
+            <div class="section" th:if="${!analysis.newBuildBased}">
+                <h2 class="section-title">시세 대비 분석<span class="muted" th:if="${analysis.dongName}" th:text="${analysis.dongName}">역삼동</span></h2>
+                <div class="table-card">
+                    <div class="empty">주변에 최근 5년 내 준공된 아파트 거래가 없어 시세 비교를 제공하지 않아요.</div>
                 </div>
             </div>
-        </div>
+            <div class="section" th:if="${analysis.houseTypeComparisons != null and !analysis.houseTypeComparisons.isEmpty()}">
+                <h2 class="section-title">시세 대비 분석<span class="muted" th:if="${analysis.dongName}" th:text="${analysis.dongName}">역삼동</span></h2>
 
-        <!-- ========== 주변 시세 ========== -->
-        <div class="section">
-            <h2 class="section-title">주변 시세<span class="muted">최근 3개월</span></h2>
+                <!-- 대표 차익 -->
+                <th:block th:if="${analysis.representativeComparison != null}">
+                    <div class="comparison-hero" th:with="c=${analysis.representativeComparison}">
+                        <div class="comparison-hero-value"
+                             th:classappend="${c.estimatedProfit >= 10000} ? 'green' : (${c.estimatedProfit > 0} ? 'yellow' : 'red')"
+                             th:text="${c.estimatedProfitFormatted}">+2억</div>
+                        <div class="comparison-hero-label">
+                            <span th:text="${c.houseType}">59A</span> 기준 예상 차익
+                        </div>
+                    </div>
+                </th:block>
 
-            <div th:if="${analysis.marketAnalysis != null}">
-                <div class="stat-row">
-                    <div class="stat-card">
-                        <div class="stat-card-label">평균 평당가</div>
-                        <div class="stat-card-value" th:text="${#numbers.formatInteger(analysis.marketAnalysis.averagePricePerPyeong, 0, 'COMMA')} + '만'">0만</div>
+                <!-- 평형별 비교 -->
+                <div class="table-card">
+                    <div class="tbl-scroll">
+                        <table class="tbl">
+                            <thead>
+                                <tr>
+                                    <th>평형</th>
+                                    <th>분양가</th>
+                                    <th>주변시세</th>
+                                    <th>예상차익</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="c : ${analysis.houseTypeComparisons}">
+                                    <td>
+                                        <div th:text="${c.houseType}">59A</div>
+                                        <div class="type-sub" th:text="${c.supplyArea != null ? #numbers.formatDecimal(c.supplyArea, 1, 0) + '㎡' : ''}">84㎡</div>
+                                    </td>
+                                    <td th:text="${c.supplyPriceFormatted}">5.5억</td>
+                                    <td class="accent" th:text="${c.marketPriceFormatted}">7.2억</td>
+                                    <td th:classappend="${c.estimatedProfit != null and c.estimatedProfit >= 10000} ? 'green' : (${c.estimatedProfit != null and c.estimatedProfit > 0} ? 'yellow' : 'red')"
+                                        th:text="${c.estimatedProfitFormatted}">+1.7억</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-card-label">최고 거래가</div>
-                        <div class="stat-card-value" th:text="${analysis.marketAnalysis.maxAmountFormatted}">0억</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-label">거래 건수</div>
-                        <div class="stat-card-value" th:text="${analysis.marketAnalysis.transactionCount} + '건'">0건</div>
+
+                    <div class="note-box">
+                        <ul>
+                            <li>동일 동 내 <strong>최근 5년 내 준공 아파트</strong> 유사 면적 거래 기준</li>
+                            <li>실거래가 데이터가 부족한 경우 가장 유사한 면적 거래를 참고했어요</li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- SEO 주변시세 텍스트 -->
-                <p class="market-note-seo">
-                    <th:block th:if="${analysis.dongName}"><span th:text="${analysis.dongName}">역삼동</span> 일대 </th:block>최근
-                    3개월간 <span class="num" th:text="${analysis.marketAnalysis.transactionCount}">10</span>건의 아파트 실거래가 있었고,
-                    평균 평당가는 <span class="num" th:text="${#numbers.formatInteger(analysis.marketAnalysis.averagePricePerPyeong, 0, 'COMMA')}">2,100</span>만원,
-                    최고 거래가는 <span class="num" th:text="${analysis.marketAnalysis.maxAmountFormatted}">10억</span>이에요.
-                </p>
             </div>
 
-            <div th:if="${analysis.marketAnalysis == null}" class="table-card">
-                <div class="empty">주변 실거래 데이터가 아직 없어요.</div>
-            </div>
-        </div>
+            <!-- ========== 주변 시세 ========== -->
+            <div class="section">
+                <h2 class="section-title">주변 시세<span class="muted">최근 3개월</span></h2>
 
-        <!-- ========== 최근 거래 ========== -->
-        <div class="section" th:if="${analysis.recentTransactions != null and !analysis.recentTransactions.isEmpty()}">
-            <h2 class="section-title">최근 거래 내역</h2>
-            <div class="table-card">
-                <div class="tx-list">
-                    <div th:each="tx : ${analysis.recentTransactions}" class="tx-item">
-                        <div>
-                            <div class="tx-name" th:text="${tx.aptName}">아파트명</div>
-                            <div class="tx-meta">
-                                <span th:text="${tx.exclusiveArea} + '㎡'">84㎡</span>
-                                <span th:if="${tx.floor}"> · <span th:text="${tx.floor} + '층'">10층</span></span>
-                                <span th:if="${tx.dealDate}"> · <span th:text="${#temporals.format(tx.dealDate, 'yyyy.MM.dd')}">2025.01.01</span></span>
+                <div th:if="${analysis.marketAnalysis != null}">
+                    <div class="stat-row">
+                        <div class="stat-card">
+                            <div class="stat-card-label">평균 평당가</div>
+                            <div class="stat-card-value" th:text="${#numbers.formatInteger(analysis.marketAnalysis.averagePricePerPyeong, 0, 'COMMA')} + '만'">0만</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-label">최고 거래가</div>
+                            <div class="stat-card-value" th:text="${analysis.marketAnalysis.maxAmountFormatted}">0억</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-label">거래 건수</div>
+                            <div class="stat-card-value" th:text="${analysis.marketAnalysis.transactionCount} + '건'">0건</div>
+                        </div>
+                    </div>
+
+                    <!-- SEO 주변시세 텍스트 -->
+                    <p class="market-note-seo">
+                        <th:block th:if="${analysis.dongName}"><span th:text="${analysis.dongName}">역삼동</span> 일대 </th:block>최근
+                        3개월간 <span class="num" th:text="${analysis.marketAnalysis.transactionCount}">10</span>건의 아파트 실거래가 있었고,
+                        평균 평당가는 <span class="num" th:text="${#numbers.formatInteger(analysis.marketAnalysis.averagePricePerPyeong, 0, 'COMMA')}">2,100</span>만원,
+                        최고 거래가는 <span class="num" th:text="${analysis.marketAnalysis.maxAmountFormatted}">10억</span>이에요.
+                    </p>
+                </div>
+
+                <div th:if="${analysis.marketAnalysis == null}" class="table-card">
+                    <div class="empty">주변 실거래 데이터가 아직 없어요.</div>
+                </div>
+            </div>
+
+            <!-- ========== 최근 거래 ========== -->
+            <div class="section" th:if="${analysis.recentTransactions != null and !analysis.recentTransactions.isEmpty()}">
+                <h2 class="section-title">최근 거래 내역</h2>
+                <div class="table-card">
+                    <div class="tx-list">
+                        <div th:each="tx : ${analysis.recentTransactions}" class="tx-item">
+                            <div>
+                                <div class="tx-name" th:text="${tx.aptName}">아파트명</div>
+                                <div class="tx-meta">
+                                    <span th:text="${tx.exclusiveArea} + '㎡'">84㎡</span>
+                                    <span th:if="${tx.floor}"> · <span th:text="${tx.floor} + '층'">10층</span></span>
+                                    <span th:if="${tx.dealDate}"> · <span th:text="${#temporals.format(tx.dealDate, 'yyyy.MM.dd')}">2025.01.01</span></span>
+                                </div>
+                            </div>
+                            <div class="tx-price">
+                                <span th:if="${tx.dealAmount >= 10000}"
+                                      th:text="${#numbers.formatDecimal(tx.dealAmount / 10000.0, 1, 1)} + '억'">10억</span>
+                                <span th:if="${tx.dealAmount < 10000}"
+                                      th:text="${#numbers.formatInteger(tx.dealAmount, 0, 'COMMA')} + '만'">5,000만</span>
                             </div>
                         </div>
-                        <div class="tx-price">
-                            <span th:if="${tx.dealAmount >= 10000}"
-                                  th:text="${#numbers.formatDecimal(tx.dealAmount / 10000.0, 1, 1)} + '억'">10억</span>
-                            <span th:if="${tx.dealAmount < 10000}"
-                                  th:text="${#numbers.formatInteger(tx.dealAmount, 0, 'COMMA')} + '만'">5,000만</span>
-                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </th:block>
 
         <div class="bottom-spacer"></div>
     </div>
@@ -827,28 +920,70 @@
                             });
                             infowindow.open(map, marker);
                         }, 100);
-                    } else if (!isRetry) {
-                        const baseAddr = extractBaseAddress(addr);
-                        if (baseAddr && baseAddr !== addr) {
-                            searchAddress(baseAddr, true);
-                        } else {
-                            mapLoading.innerHTML = '<span>위치를 찾을 수 없습니다</span>';
-                        }
                     } else {
-                        mapLoading.innerHTML = '<span>위치를 찾을 수 없습니다</span>';
+                        var fallback = fallbackAddresses(address);
+                        tryFallback(fallback, 0);
                     }
                 });
             }
 
+            function tryFallback(list, idx) {
+                if (idx >= list.length) {
+                    mapLoading.innerHTML = '<span>위치를 찾을 수 없습니다</span>';
+                    return;
+                }
+                searchAddressDirect(list[idx], function(ok) {
+                    if (!ok) tryFallback(list, idx + 1);
+                });
+            }
+
+            function searchAddressDirect(addr, callback) {
+                geocoder.addressSearch(addr, function(result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                        mapLoading.style.display = 'none';
+                        mapContainer.style.display = 'block';
+                        setTimeout(function() {
+                            map.relayout();
+                            map.setCenter(coords);
+                            var marker = new kakao.maps.Marker({ map: map, position: coords });
+                            var infowindow = new kakao.maps.InfoWindow({
+                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
+                            });
+                            infowindow.open(map, marker);
+                        }, 100);
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                });
+            }
+
+            function fallbackAddresses(address) {
+                var results = [];
+                // 1순위: 괄호 안 주소에서 동/리까지 추출
+                var parenMatch = address.match(/\(([^)]+)\)/);
+                if (parenMatch) {
+                    var inner = parenMatch[1].trim();
+                    var dongAddr = extractBaseAddress(inner);
+                    if (dongAddr) results.push(dongAddr);
+                    if (inner !== dongAddr) results.push(inner);
+                }
+                // 2순위: 전체 주소에서 동/리까지 추출
+                var baseAddr = extractBaseAddress(address.replace(/\([^)]*\)/g, ''));
+                if (baseAddr) results.push(baseAddr);
+                return results;
+            }
+
             function extractBaseAddress(address) {
                 if (!address) return null;
-                const words = address.trim().split(/\s+/);
-                const suffixes = ['동', '리', '읍', '면', '가', '로'];
+                var words = address.trim().split(/\s+/);
+                var suffixes = ['동', '리', '읍', '면', '가', '로'];
 
-                for (let i = 0; i < words.length; i++) {
-                    const word = words[i];
-                    for (const suffix of suffixes) {
-                        if (word.endsWith(suffix) && word.length > 1) {
+                for (var i = 0; i < words.length; i++) {
+                    var word = words[i];
+                    for (var j = 0; j < suffixes.length; j++) {
+                        if (word.endsWith(suffixes[j]) && word.length > 1) {
                             return words.slice(0, i + 1).join(' ');
                         }
                     }

@@ -4,6 +4,9 @@ import com.yunbok.houseping.adapter.persistence.RealTransactionQueryAdapter;
 import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
 import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
+import com.yunbok.houseping.entity.CompetitionRateEntity;
+import com.yunbok.houseping.repository.CompetitionRateRepository;
+import com.yunbok.houseping.support.dto.CompetitionRateDetailRow;
 import com.yunbok.houseping.support.dto.HouseTypeComparison;
 import com.yunbok.houseping.support.dto.MarketAnalysis;
 import com.yunbok.houseping.support.dto.SubscriptionAnalysisResult;
@@ -13,7 +16,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -29,6 +36,7 @@ public class SubscriptionAnalysisService {
     private final SubscriptionPriceQueryAdapter subscriptionPriceQueryPort;
     private final RealTransactionQueryAdapter realTransactionQueryPort;
     private final RealTransactionFetchPort realTransactionFetchPort;
+    private final CompetitionRateRepository competitionRateRepository;
 
     private final AddressHelper addressParser;
     private final HouseTypeComparisonBuilder comparisonBuilder;
@@ -48,21 +56,71 @@ public class SubscriptionAnalysisService {
         List<RealTransaction> dongTransactions = addressParser.filterByDongName(allTransactions, dongName);
         log.info("동 필터링: {} → {}건 → {}건", dongName, allTransactions.size(), dongTransactions.size());
 
-        // 분양가 정보 조회
-        List<SubscriptionPrice> prices = subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo());
+        // 신축 필터링 (최근 5년 내 준공)
+        int newBuildYearThreshold = LocalDate.now().getYear() - 4;
+        List<RealTransaction> newBuildTx = dongTransactions.stream()
+                .filter(t -> t.getBuildYear() != null && t.getBuildYear() >= newBuildYearThreshold)
+                .toList();
+        boolean newBuildBased = !newBuildTx.isEmpty();
+        log.info("신축 필터링: {}년 이후 준공 {}건, 기준={}", newBuildYearThreshold, newBuildTx.size(), newBuildBased ? "신축" : "비교 미제공");
 
-        // 분석 수행
-        List<HouseTypeComparison> comparisons = comparisonBuilder.build(prices, dongTransactions);
+        // 분양가 정보 조회
+        List<SubscriptionPrice> prices = subscription.getHouseManageNo() != null
+                ? subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo())
+                : List.of();
+
+        // 분석 수행 (신축 거래 있을 때만 시세 비교 제공)
+        List<HouseTypeComparison> comparisons = newBuildBased
+                ? comparisonBuilder.build(prices, newBuildTx) : List.of();
         MarketAnalysis marketAnalysis = marketAnalyzer.analyze(dongTransactions);
+
+        // 경쟁률 로드
+        List<CompetitionRateDetailRow> competitionRates = loadCompetitionRates(subscription.getHouseManageNo());
 
         return SubscriptionAnalysisResult.builder()
                 .subscription(subscription)
                 .prices(prices)
                 .dongName(dongName)
+                .newBuildBased(newBuildBased)
                 .recentTransactions(dongTransactions.stream().limit(10).toList())
                 .marketAnalysis(marketAnalysis)
                 .houseTypeComparisons(comparisons)
+                .competitionRates(competitionRates)
                 .build();
+    }
+
+    private List<CompetitionRateDetailRow> loadCompetitionRates(String houseManageNo) {
+        if (houseManageNo == null || houseManageNo.isBlank()) {
+            return List.of();
+        }
+        List<CompetitionRateEntity> rates = competitionRateRepository.findByHouseManageNo(houseManageNo);
+        if (rates.isEmpty()) {
+            return List.of();
+        }
+        return rates.stream()
+                .map(r -> CompetitionRateDetailRow.builder()
+                        .houseType(r.getHouseType())
+                        .residenceArea(r.getResidenceArea())
+                        .rank(r.getRank())
+                        .supplyCount(r.getSupplyCount())
+                        .requestCount(r.getRequestCount())
+                        .competitionRate(effectiveRate(r))
+                        .build())
+                .sorted(Comparator.comparing(CompetitionRateDetailRow::getHouseType, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(CompetitionRateDetailRow::getRank, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(d -> "해당지역".equals(d.getResidenceArea()) ? 0 : 1))
+                .toList();
+    }
+
+    private BigDecimal effectiveRate(CompetitionRateEntity r) {
+        if (r.getCompetitionRate() != null) {
+            return r.getCompetitionRate();
+        }
+        if (r.getSupplyCount() != null && r.getSupplyCount() > 0 && r.getRequestCount() != null) {
+            return BigDecimal.valueOf(r.getRequestCount())
+                    .divide(BigDecimal.valueOf(r.getSupplyCount()), 2, RoundingMode.HALF_UP);
+        }
+        return null;
     }
 
     /**

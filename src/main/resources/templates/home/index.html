@@ -60,7 +60,7 @@
 
         .summary-stat-value.active { color: var(--success); }
         .summary-stat-value.upcoming { color: var(--primary); }
-        .summary-stat-value.total { color: var(--text); }
+        .summary-stat-value.announced { color: var(--accent); }
 
         .summary-stat-label {
             font-size: 13px;
@@ -71,7 +71,7 @@
         /* Filters */
         .filters {
             max-width: 960px;
-            margin: 0 auto 32px;
+            margin: 0 auto 16px;
             padding: 0 20px;
             display: flex;
             gap: 8px;
@@ -92,6 +92,48 @@
 
         .filter-btn:hover { background: var(--border); }
         .filter-btn.active { background: var(--text); color: var(--bg); }
+
+        /* Top Rate */
+        .card-top-rate {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        /* Price Badge */
+        .price-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            line-height: 1;
+        }
+        .price-badge.badge-cheap { background: var(--success-light); color: var(--success); }
+        .price-badge.badge-expensive { background: rgba(239,68,68,0.08); color: var(--danger); }
+        .price-badge.badge-unknown { background: var(--bg-secondary); color: var(--text-muted); }
+
+        /* Toggle More */
+        .toggle-more-btn {
+            display: none;
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            border: 1px dashed var(--border);
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .toggle-more-btn:hover { background: var(--bg-secondary); }
+
+        @media (max-width: 640px) {
+            .toggle-more-btn { display: block; }
+            .upcoming-extra { display: none; }
+            .upcoming-extra.show { display: block; }
+        }
 
         /* Quick Links */
         .quick-links {
@@ -132,7 +174,6 @@
         .quick-link-icon.calculator { background: var(--success-light); }
         .quick-link-icon.guide { background: rgba(139,92,246,0.1); }
         .quick-link-icon.month { background: rgba(245,158,11,0.1); }
-        .quick-link-icon.next-month { background: rgba(239,68,68,0.08); }
 
         .quick-link-title {
             font-size: 15px;
@@ -179,16 +220,17 @@
                 <div class="summary-stat-label">접수예정</div>
             </div>
             <div class="summary-stat">
-                <div class="summary-stat-value total" th:text="${#lists.size(home.activeSubscriptions) + #lists.size(home.upcomingSubscriptions)} + '건'">0건</div>
-                <div class="summary-stat-label">전체</div>
+                <div class="summary-stat-value announced" th:text="${#lists.size(home.announcedSubscriptions)} + '건'">0건</div>
+                <div class="summary-stat-label">발표</div>
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Area Filters -->
     <div class="filters">
         <a th:href="@{/home}" class="filter-btn" th:classappend="${home.selectedArea == null} ? 'active' : ''">전체</a>
-        <a th:each="area : ${home.areas}" th:href="@{/home(area=${area})}" class="filter-btn"
+        <a th:each="area : ${home.areas}"
+           th:href="@{/home(area=${area})}" class="filter-btn"
            th:classappend="${home.selectedArea == area} ? 'active' : ''" th:text="${area}">서울</a>
     </div>
 
@@ -199,29 +241,32 @@
                 <h2 class="section-title">접수중 <span class="section-count" th:text="${#lists.size(home.activeSubscriptions)}">0</span></h2>
             </div>
             <div class="subscription-grid">
-                <a th:each="s : ${home.activeSubscriptions}"
-                   th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
-                   th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
+                <a th:each="v : ${home.activeSubscriptions}"
+                   th:href="@{/home/analysis/{id}(id=${v.subscription.id})}"
                    class="subscription-card">
                     <div class="card-top">
                         <span class="card-badge badge-active">접수중</span>
+                        <span class="price-badge"
+                              th:classappend="${v.priceBadge.colorClass}"
+                              th:text="${v.priceBadge.label}"
+                              th:title="${v.priceBadge.tooltip}">판단보류</span>
                         <span class="badge-source"
-                              th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'lh' : 'applyhome'"
-                              th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
+                              th:classappend="${v.subscription.source != null and v.subscription.source.toUpperCase().contains('LH')} ? 'lh' : 'applyhome'"
+                              th:text="${v.subscription.source != null and v.subscription.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
                     </div>
-                    <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
+                    <h3 class="card-title" th:text="${v.subscription.houseName}">청약 아파트명</h3>
                     <div class="card-meta">
-                        <span class="card-meta-item" th:text="${s.area}">서울</span>
-                        <span th:if="${s.receiptStartDate != null}" class="card-meta-dot"></span>
-                        <span th:if="${s.receiptStartDate != null}" class="card-meta-item">
-                            <span th:text="${#temporals.format(s.receiptStartDate, 'M/d')}">1/1</span>
-                            <span th:if="${s.receiptEndDate != null}">
-                                ~ <span th:text="${#temporals.format(s.receiptEndDate, 'M/d')}">1/5</span>
+                        <span class="card-meta-item" th:text="${v.subscription.area}">서울</span>
+                        <span th:if="${v.subscription.receiptStartDate != null}" class="card-meta-dot"></span>
+                        <span th:if="${v.subscription.receiptStartDate != null}" class="card-meta-item">
+                            <span th:text="${#temporals.format(v.subscription.receiptStartDate, 'M/d')}">1/1</span>
+                            <span th:if="${v.subscription.receiptEndDate != null}">
+                                ~ <span th:text="${#temporals.format(v.subscription.receiptEndDate, 'M/d')}">1/5</span>
                             </span>
                         </span>
-                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}" class="card-meta-dot"></span>
-                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}"
-                              class="card-meta-item" th:text="${s.totalSupplyCount} + '세대'">100세대</span>
+                        <span th:if="${v.subscription.totalSupplyCount != null and v.subscription.totalSupplyCount > 0}" class="card-meta-dot"></span>
+                        <span th:if="${v.subscription.totalSupplyCount != null and v.subscription.totalSupplyCount > 0}"
+                              class="card-meta-item" th:text="${v.subscription.totalSupplyCount} + '세대'">100세대</span>
                     </div>
                 </a>
             </div>
@@ -232,35 +277,74 @@
             <div class="section-header">
                 <h2 class="section-title">접수예정 <span class="section-count" th:text="${#lists.size(home.upcomingSubscriptions)}">0</span></h2>
             </div>
-            <div class="subscription-grid">
-                <a th:each="s : ${home.upcomingSubscriptions}"
-                   th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
-                   th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
-                   class="subscription-card">
+            <div class="subscription-grid" id="upcomingGrid">
+                <a th:each="v, vStat : ${home.upcomingSubscriptions}"
+                   th:href="@{/home/analysis/{id}(id=${v.subscription.id})}"
+                   class="subscription-card"
+                   th:classappend="${vStat.index >= 5} ? 'upcoming-extra'">
                     <div class="card-top">
                         <span class="card-badge badge-upcoming">접수예정</span>
+                        <span class="price-badge"
+                              th:classappend="${v.priceBadge.colorClass}"
+                              th:text="${v.priceBadge.label}"
+                              th:title="${v.priceBadge.tooltip}">판단보류</span>
                         <span class="badge-source"
-                              th:classappend="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'lh' : 'applyhome'"
-                              th:text="${s.source != null and s.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
+                              th:classappend="${v.subscription.source != null and v.subscription.source.toUpperCase().contains('LH')} ? 'lh' : 'applyhome'"
+                              th:text="${v.subscription.source != null and v.subscription.source.toUpperCase().contains('LH')} ? 'LH' : '청약Home'">청약Home</span>
                     </div>
-                    <h3 class="card-title" th:text="${s.houseName}">청약 아파트명</h3>
+                    <h3 class="card-title" th:text="${v.subscription.houseName}">청약 아파트명</h3>
                     <div class="card-meta">
-                        <span class="card-meta-item" th:text="${s.area}">서울</span>
-                        <span th:if="${s.receiptStartDate != null}" class="card-meta-dot"></span>
-                        <span th:if="${s.receiptStartDate != null}" class="card-meta-item">
-                            접수 <span th:text="${#temporals.format(s.receiptStartDate, 'M/d')}">1/1</span>
+                        <span class="card-meta-item" th:text="${v.subscription.area}">서울</span>
+                        <span th:if="${v.subscription.receiptStartDate != null}" class="card-meta-dot"></span>
+                        <span th:if="${v.subscription.receiptStartDate != null}" class="card-meta-item">
+                            접수 <span th:text="${#temporals.format(v.subscription.receiptStartDate, 'M/d')}">1/1</span>
                         </span>
-                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}" class="card-meta-dot"></span>
-                        <span th:if="${s.totalSupplyCount != null and s.totalSupplyCount > 0}"
-                              class="card-meta-item" th:text="${s.totalSupplyCount} + '세대'">100세대</span>
+                        <span th:if="${v.subscription.totalSupplyCount != null and v.subscription.totalSupplyCount > 0}" class="card-meta-dot"></span>
+                        <span th:if="${v.subscription.totalSupplyCount != null and v.subscription.totalSupplyCount > 0}"
+                              class="card-meta-item" th:text="${v.subscription.totalSupplyCount} + '세대'">100세대</span>
+                    </div>
+                </a>
+            </div>
+            <button th:if="${#lists.size(home.upcomingSubscriptions) > 5}"
+                    class="toggle-more-btn" id="toggleUpcomingBtn"
+                    th:text="'더보기 (총 ' + ${#lists.size(home.upcomingSubscriptions)} + '건)'">더보기</button>
+        </section>
+
+        <!-- 발표 청약 -->
+        <section th:if="${!home.announcedSubscriptions.isEmpty()}">
+            <div class="section-header">
+                <h2 class="section-title">발표 <span class="section-count" th:text="${#lists.size(home.announcedSubscriptions)}">0</span></h2>
+            </div>
+            <div class="subscription-grid">
+                <a th:each="v : ${home.announcedSubscriptions}"
+                   th:href="@{/home/analysis/{id}(id=${v.subscription.id})}"
+                   class="subscription-card">
+                    <div class="card-top">
+                        <span class="card-badge badge-closed">발표</span>
+                        <span th:if="${v.topRate != null}" class="card-top-rate"
+                              th:text="'최고 ' + ${v.topRate} + ':1'">최고 5.2:1</span>
+                    </div>
+                    <h3 class="card-title" th:text="${v.subscription.houseName}">청약 아파트명</h3>
+                    <div class="card-meta">
+                        <span class="card-meta-item" th:text="${v.subscription.area}">서울</span>
+                        <span th:if="${v.subscription.receiptStartDate != null}" class="card-meta-dot"></span>
+                        <span th:if="${v.subscription.receiptStartDate != null}" class="card-meta-item">
+                            <span th:text="${#temporals.format(v.subscription.receiptStartDate, 'M/d')}">1/1</span>
+                            <span th:if="${v.subscription.receiptEndDate != null}">
+                                ~ <span th:text="${#temporals.format(v.subscription.receiptEndDate, 'M/d')}">1/5</span>
+                            </span>
+                        </span>
+                        <span th:if="${v.subscription.totalSupplyCount != null and v.subscription.totalSupplyCount > 0}" class="card-meta-dot"></span>
+                        <span th:if="${v.subscription.totalSupplyCount != null and v.subscription.totalSupplyCount > 0}"
+                              class="card-meta-item" th:text="${v.subscription.totalSupplyCount} + '세대'">100세대</span>
                     </div>
                 </a>
             </div>
         </section>
 
         <!-- 청약 없음 -->
-        <div th:if="${home.activeSubscriptions.isEmpty() and home.upcomingSubscriptions.isEmpty()}" class="empty-state">
-            <p>현재 접수중이거나 예정된 청약이 없습니다.</p>
+        <div th:if="${home.activeSubscriptions.isEmpty() and home.upcomingSubscriptions.isEmpty() and home.announcedSubscriptions.isEmpty()}" class="empty-state">
+            <p>현재 표시할 청약이 없습니다.</p>
         </div>
 
         <!-- 빠른 바로가기 -->
@@ -293,19 +377,29 @@
                     <div class="quick-link-desc">이번달 전체 청약</div>
                 </div>
             </a>
-            <a th:href="@{/home/{y}/{m}(y=${next.year}, m=${next.monthValue})}" class="quick-link">
-                <div class="quick-link-icon next-month">📆</div>
-                <div>
-                    <div class="quick-link-title" th:text="${next.monthValue} + '월 청약'">3월 청약</div>
-                    <div class="quick-link-desc">다음달 청약 미리보기</div>
-                </div>
-            </a>
         </section>
     </div>
 
     <nav th:replace="~{fragments/home-layout :: bottomTab('home')}"></nav>
     <script th:replace="~{fragments/home-layout :: themeScript}"></script>
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script>
+        (function() {
+            var btn = document.getElementById('toggleUpcomingBtn');
+            if (!btn) return;
+            var expanded = false;
+            var totalText = btn.textContent;
+            btn.addEventListener('click', function() {
+                expanded = !expanded;
+                var extras = document.querySelectorAll('.upcoming-extra');
+                extras.forEach(function(el) {
+                    if (expanded) { el.classList.add('show'); } else { el.classList.remove('show'); }
+                });
+                btn.textContent = expanded ? '접기' : totalText;
+            });
+        })();
+    </script>
 
     <!-- JSON-LD 구조화 데이터 -->
     <script type="application/ld+json">
