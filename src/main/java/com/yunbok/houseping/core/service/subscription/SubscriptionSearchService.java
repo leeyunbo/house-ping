@@ -5,6 +5,8 @@ import com.yunbok.houseping.core.domain.SubscriptionPrice;
 import com.yunbok.houseping.core.domain.SubscriptionStatus;
 import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
 import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
+import com.yunbok.houseping.support.dto.HomePageResult;
+import com.yunbok.houseping.support.dto.MonthlyPageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,7 @@ import java.util.Optional;
  */
 @Service
 @RequiredArgsConstructor
-public class SubscriptionQueryService {
+public class SubscriptionSearchService {
 
     private static final List<String> SUPPORTED_AREAS = List.of("서울", "경기");
 
@@ -48,6 +50,32 @@ public class SubscriptionQueryService {
                 .toList();
     }
 
+    public HomePageResult getHomeData(String area, String status) {
+        List<Subscription> subscriptions = findActiveAndUpcomingSubscriptions(area);
+
+        List<Subscription> active;
+        List<Subscription> upcoming;
+
+        if ("active".equals(status)) {
+            active = filterActiveSubscriptions(subscriptions);
+            upcoming = List.of();
+        } else if ("upcoming".equals(status)) {
+            active = List.of();
+            upcoming = filterUpcomingSubscriptions(subscriptions);
+        } else {
+            active = filterActiveSubscriptions(subscriptions);
+            upcoming = filterUpcomingSubscriptions(subscriptions);
+        }
+
+        return HomePageResult.builder()
+                .activeSubscriptions(active)
+                .upcomingSubscriptions(upcoming)
+                .areas(SUPPORTED_AREAS)
+                .selectedArea(area)
+                .selectedStatus(status)
+                .build();
+    }
+
     public List<Subscription> filterActiveSubscriptions(List<Subscription> subscriptions) {
         return subscriptions.stream()
                 .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE)
@@ -58,6 +86,18 @@ public class SubscriptionQueryService {
         return subscriptions.stream()
                 .filter(s -> s.getStatus() == SubscriptionStatus.UPCOMING)
                 .toList();
+    }
+
+    public MonthlyPageResult getMonthlyData(int year, int month) {
+        List<Subscription> subscriptions = findByMonth(year, month);
+        return MonthlyPageResult.builder()
+                .subscriptions(subscriptions)
+                .activeSubscriptions(filterActiveSubscriptions(subscriptions))
+                .upcomingSubscriptions(filterUpcomingSubscriptions(subscriptions))
+                .closedSubscriptions(subscriptions.stream()
+                        .filter(s -> s.getStatus() == SubscriptionStatus.CLOSED)
+                        .toList())
+                .build();
     }
 
     public List<Subscription> findByMonth(int year, int month) {

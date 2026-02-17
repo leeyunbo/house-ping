@@ -42,4 +42,23 @@ public class SubscriptionAnalysisResult {
     public boolean hasHouseTypeComparisons() {
         return houseTypeComparisons != null && !houseTypeComparisons.isEmpty();
     }
+
+    /**
+     * SEO 페이지 설명
+     */
+    public String getPageDescription() {
+        StringBuilder desc = new StringBuilder();
+        desc.append(subscription.getHouseName()).append(" 청약 분석 - ").append(subscription.getArea());
+        if (subscription.getTotalSupplyCount() != null) {
+            desc.append(", ").append(subscription.getTotalSupplyCount()).append("세대");
+        }
+        if (subscription.getReceiptStartDate() != null) {
+            desc.append(", 접수기간 ").append(subscription.getReceiptStartDate());
+            if (subscription.getReceiptEndDate() != null) {
+                desc.append("~").append(subscription.getReceiptEndDate());
+            }
+        }
+        desc.append(". 분양가, 주변 시세 비교 분석");
+        return desc.toString();
+    }
 }

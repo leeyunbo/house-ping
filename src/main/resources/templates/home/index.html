@@ -171,15 +171,15 @@
     <div class="container">
         <div class="summary-stats">
             <div class="summary-stat">
-                <div class="summary-stat-value active" th:text="${#lists.size(activeSubscriptions)} + '건'">0건</div>
+                <div class="summary-stat-value active" th:text="${#lists.size(home.activeSubscriptions)} + '건'">0건</div>
                 <div class="summary-stat-label">접수중</div>
             </div>
             <div class="summary-stat">
-                <div class="summary-stat-value upcoming" th:text="${#lists.size(upcomingSubscriptions)} + '건'">0건</div>
+                <div class="summary-stat-value upcoming" th:text="${#lists.size(home.upcomingSubscriptions)} + '건'">0건</div>
                 <div class="summary-stat-label">접수예정</div>
             </div>
             <div class="summary-stat">
-                <div class="summary-stat-value total" th:text="${#lists.size(activeSubscriptions) + #lists.size(upcomingSubscriptions)} + '건'">0건</div>
+                <div class="summary-stat-value total" th:text="${#lists.size(home.activeSubscriptions) + #lists.size(home.upcomingSubscriptions)} + '건'">0건</div>
                 <div class="summary-stat-label">전체</div>
             </div>
         </div>
@@ -187,19 +187,19 @@
 
     <!-- Filters -->
     <div class="filters">
-        <a th:href="@{/home}" class="filter-btn" th:classappend="${selectedArea == null} ? 'active' : ''">전체</a>
-        <a th:each="area : ${areas}" th:href="@{/home(area=${area})}" class="filter-btn"
-           th:classappend="${selectedArea == area} ? 'active' : ''" th:text="${area}">서울</a>
+        <a th:href="@{/home}" class="filter-btn" th:classappend="${home.selectedArea == null} ? 'active' : ''">전체</a>
+        <a th:each="area : ${home.areas}" th:href="@{/home(area=${area})}" class="filter-btn"
+           th:classappend="${home.selectedArea == area} ? 'active' : ''" th:text="${area}">서울</a>
     </div>
 
     <div class="container">
         <!-- 접수중 청약 -->
-        <section th:if="${!activeSubscriptions.isEmpty()}">
+        <section th:if="${!home.activeSubscriptions.isEmpty()}">
             <div class="section-header">
-                <h2 class="section-title">접수중 <span class="section-count" th:text="${#lists.size(activeSubscriptions)}">0</span></h2>
+                <h2 class="section-title">접수중 <span class="section-count" th:text="${#lists.size(home.activeSubscriptions)}">0</span></h2>
             </div>
             <div class="subscription-grid">
-                <a th:each="s : ${activeSubscriptions}"
+                <a th:each="s : ${home.activeSubscriptions}"
                    th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
                    th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
                    class="subscription-card">
@@ -228,12 +228,12 @@
         </section>
 
         <!-- 접수예정 청약 -->
-        <section th:if="${!upcomingSubscriptions.isEmpty()}">
+        <section th:if="${!home.upcomingSubscriptions.isEmpty()}">
             <div class="section-header">
-                <h2 class="section-title">접수예정 <span class="section-count" th:text="${#lists.size(upcomingSubscriptions)}">0</span></h2>
+                <h2 class="section-title">접수예정 <span class="section-count" th:text="${#lists.size(home.upcomingSubscriptions)}">0</span></h2>
             </div>
             <div class="subscription-grid">
-                <a th:each="s : ${upcomingSubscriptions}"
+                <a th:each="s : ${home.upcomingSubscriptions}"
                    th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
                    th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
                    class="subscription-card">
@@ -259,7 +259,7 @@
         </section>
 
         <!-- 청약 없음 -->
-        <div th:if="${activeSubscriptions.isEmpty() and upcomingSubscriptions.isEmpty()}" class="empty-state">
+        <div th:if="${home.activeSubscriptions.isEmpty() and home.upcomingSubscriptions.isEmpty()}" class="empty-state">
             <p>현재 접수중이거나 예정된 청약이 없습니다.</p>
         </div>
 
@@ -286,17 +286,17 @@
                     <div class="quick-link-desc">청약 핵심 정보 모음</div>
                 </div>
             </a>
-            <a th:href="@{/home/{y}/{m}(y=${currentYear}, m=${currentMonth})}" class="quick-link">
+            <a th:href="@{/home/{y}/{m}(y=${current.year}, m=${current.monthValue})}" class="quick-link">
                 <div class="quick-link-icon month">📋</div>
                 <div>
-                    <div class="quick-link-title" th:text="${currentMonth} + '월 청약'">2월 청약</div>
+                    <div class="quick-link-title" th:text="${current.monthValue} + '월 청약'">2월 청약</div>
                     <div class="quick-link-desc">이번달 전체 청약</div>
                 </div>
             </a>
-            <a th:href="@{/home/{y}/{m}(y=${nextYear}, m=${nextMonth})}" class="quick-link">
+            <a th:href="@{/home/{y}/{m}(y=${next.year}, m=${next.monthValue})}" class="quick-link">
                 <div class="quick-link-icon next-month">📆</div>
                 <div>
-                    <div class="quick-link-title" th:text="${nextMonth} + '월 청약'">3월 청약</div>
+                    <div class="quick-link-title" th:text="${next.monthValue} + '월 청약'">3월 청약</div>
                     <div class="quick-link-desc">다음달 청약 미리보기</div>
                 </div>
             </a>

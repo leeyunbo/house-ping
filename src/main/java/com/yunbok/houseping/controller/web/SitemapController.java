@@ -1,7 +1,7 @@
 package com.yunbok.houseping.controller.web;
 
 import com.yunbok.houseping.core.domain.Subscription;
-import com.yunbok.houseping.core.service.subscription.SubscriptionQueryService;
+import com.yunbok.houseping.core.service.subscription.SubscriptionSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,7 @@ public class SitemapController {
 
     private static final String BASE_URL = "https://house-ping.com";
 
-    private final SubscriptionQueryService subscriptionQueryService;
+    private final SubscriptionSearchService subscriptionSearchService;
 
     @GetMapping(value = "/sitemap.xml", produces = "application/xml;charset=UTF-8")
     @ResponseBody
@@ -32,11 +32,9 @@ public class SitemapController {
 
         // 가이드 페이지
         appendUrl(sb, BASE_URL + "/home/guide", "weekly", "0.8");
-        appendUrl(sb, BASE_URL + "/home/guide/special-supply", "monthly", "0.7");
-        appendUrl(sb, BASE_URL + "/home/guide/point-vs-lottery", "monthly", "0.7");
-        appendUrl(sb, BASE_URL + "/home/guide/homeless-criteria", "monthly", "0.7");
-        appendUrl(sb, BASE_URL + "/home/guide/subscription-account", "monthly", "0.7");
-        appendUrl(sb, BASE_URL + "/home/guide/private-vs-public-housing", "monthly", "0.7");
+        for (GuideSlug guide : GuideSlug.values()) {
+            appendUrl(sb, BASE_URL + "/home/guide/" + guide.getSlug(), "monthly", "0.7");
+        }
 
         // 월별 페이지: 최근 12개월
         YearMonth now = YearMonth.now();
@@ -47,7 +45,7 @@ public class SitemapController {
         }
 
         // 분석 페이지: 전체 청약
-        List<Subscription> allSubscriptions = subscriptionQueryService.findAll();
+        List<Subscription> allSubscriptions = subscriptionSearchService.findAll();
         for (Subscription s : allSubscriptions) {
             if (s.getId() != null) {
                 appendUrl(sb, BASE_URL + "/home/analysis/" + s.getId(), "weekly", "0.6");

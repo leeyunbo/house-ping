@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/home-layout :: head(${subscription.houseName + ' 청약 분석'}, ${pageDescription})}"></head>
+<head th:replace="~{fragments/home-layout :: head(${subscription.houseName + ' 청약 분석'}, ${analysis.pageDescription})}"></head>
 <head>
     <style>
         /* ───────── Hero ───────── */
@@ -448,8 +448,8 @@
 
             <div>
                 <span class="hero-status"
-                      th:classappend="${statusLabel == '접수중'} ? 'active' : (${statusLabel == '접수예정'} ? 'upcoming' : 'closed')"
-                      th:text="${statusLabel}">접수중</span>
+                      th:classappend="${subscription.statusLabel == '접수중'} ? 'active' : (${subscription.statusLabel == '접수예정'} ? 'upcoming' : 'closed')"
+                      th:text="${subscription.statusLabel}">접수중</span>
             </div>
 
             <h1 th:text="${subscription.houseName}">청약 아파트명</h1>
@@ -481,8 +481,8 @@
         </p>
 
         <!-- ========== INSIGHT BANNER ========== -->
-        <th:block th:if="${houseTypeComparisons != null and !houseTypeComparisons.isEmpty() and houseTypeComparisons[0].estimatedProfit != null}">
-            <div th:with="c=${houseTypeComparisons[0]}"
+        <th:block th:if="${analysis.houseTypeComparisons != null and !analysis.houseTypeComparisons.isEmpty() and analysis.houseTypeComparisons[0].estimatedProfit != null}">
+            <div th:with="c=${analysis.houseTypeComparisons[0]}"
                  class="insight-banner"
                  th:classappend="${c.estimatedProfit > 0} ? 'positive' : 'negative'">
                 <div class="insight-icon">
@@ -577,7 +577,7 @@
             <!-- 분양가 -->
             <div style="margin-top: 32px;">
                 <h3 class="sub-title">분양가</h3>
-                <div class="table-card" th:if="${prices != null and !prices.isEmpty()}">
+                <div class="table-card" th:if="${analysis.prices != null and !analysis.prices.isEmpty()}">
                     <div class="tbl-scroll">
                         <table class="tbl">
                             <thead>
@@ -590,7 +590,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="p : ${prices}">
+                                <tr th:each="p : ${analysis.prices}">
                                     <td th:text="${p.houseType} ?: '-'">59A</td>
                                     <td th:text="${p.supplyArea != null} ? ${#numbers.formatDecimal(p.supplyArea, 1, 2)} + '㎡' : '-'">84.12㎡</td>
                                     <td th:text="${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0) > 0} ? ${(p.supplyCount ?: 0) + (p.specialSupplyCount ?: 0)} + '세대' : '-'">100세대</td>
@@ -611,19 +611,19 @@
                         </table>
                     </div>
                 </div>
-                <div class="table-card" th:if="${prices == null or prices.isEmpty()}">
+                <div class="table-card" th:if="${analysis.prices == null or analysis.prices.isEmpty()}">
                     <div class="empty">분양가 정보가 아직 없어요.</div>
                 </div>
             </div>
         </div>
 
         <!-- ========== 시세 대비 분석 ========== -->
-        <div class="section" th:if="${houseTypeComparisons != null and !houseTypeComparisons.isEmpty()}">
-            <h2 class="section-title">시세 대비 분석<span class="muted" th:if="${dongName}" th:text="${dongName}">역삼동</span></h2>
+        <div class="section" th:if="${analysis.houseTypeComparisons != null and !analysis.houseTypeComparisons.isEmpty()}">
+            <h2 class="section-title">시세 대비 분석<span class="muted" th:if="${analysis.dongName}" th:text="${analysis.dongName}">역삼동</span></h2>
 
             <!-- 대표 차익 -->
-            <th:block th:if="${houseTypeComparisons[0].estimatedProfit != null}">
-                <div class="comparison-hero" th:with="c=${houseTypeComparisons[0]}">
+            <th:block th:if="${analysis.houseTypeComparisons[0].estimatedProfit != null}">
+                <div class="comparison-hero" th:with="c=${analysis.houseTypeComparisons[0]}">
                     <div class="comparison-hero-value"
                          th:classappend="${c.estimatedProfit >= 10000} ? 'green' : (${c.estimatedProfit > 0} ? 'yellow' : 'red')"
                          th:text="${c.estimatedProfitFormatted}">+2억</div>
@@ -646,7 +646,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="c : ${houseTypeComparisons}">
+                            <tr th:each="c : ${analysis.houseTypeComparisons}">
                                 <td>
                                     <div th:text="${c.houseType}">59A</div>
                                     <div class="type-sub" th:text="${c.supplyArea != null ? #numbers.formatDecimal(c.supplyArea, 1, 0) + '㎡' : ''}">84㎡</div>
@@ -674,42 +674,42 @@
         <div class="section">
             <h2 class="section-title">주변 시세<span class="muted">최근 3개월</span></h2>
 
-            <div th:if="${marketAnalysis != null}">
+            <div th:if="${analysis.marketAnalysis != null}">
                 <div class="stat-row">
                     <div class="stat-card">
                         <div class="stat-card-label">평균 평당가</div>
-                        <div class="stat-card-value" th:text="${#numbers.formatInteger(marketAnalysis.averagePricePerPyeong, 0, 'COMMA')} + '만'">0만</div>
+                        <div class="stat-card-value" th:text="${#numbers.formatInteger(analysis.marketAnalysis.averagePricePerPyeong, 0, 'COMMA')} + '만'">0만</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-card-label">최고 거래가</div>
-                        <div class="stat-card-value" th:text="${marketAnalysis.maxAmountFormatted}">0억</div>
+                        <div class="stat-card-value" th:text="${analysis.marketAnalysis.maxAmountFormatted}">0억</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-card-label">거래 건수</div>
-                        <div class="stat-card-value" th:text="${marketAnalysis.transactionCount} + '건'">0건</div>
+                        <div class="stat-card-value" th:text="${analysis.marketAnalysis.transactionCount} + '건'">0건</div>
                     </div>
                 </div>
 
                 <!-- SEO 주변시세 텍스트 -->
                 <p class="market-note-seo">
-                    <th:block th:if="${dongName}"><span th:text="${dongName}">역삼동</span> 일대 </th:block>최근
-                    3개월간 <span class="num" th:text="${marketAnalysis.transactionCount}">10</span>건의 아파트 실거래가 있었고,
-                    평균 평당가는 <span class="num" th:text="${#numbers.formatInteger(marketAnalysis.averagePricePerPyeong, 0, 'COMMA')}">2,100</span>만원,
-                    최고 거래가는 <span class="num" th:text="${marketAnalysis.maxAmountFormatted}">10억</span>이에요.
+                    <th:block th:if="${analysis.dongName}"><span th:text="${analysis.dongName}">역삼동</span> 일대 </th:block>최근
+                    3개월간 <span class="num" th:text="${analysis.marketAnalysis.transactionCount}">10</span>건의 아파트 실거래가 있었고,
+                    평균 평당가는 <span class="num" th:text="${#numbers.formatInteger(analysis.marketAnalysis.averagePricePerPyeong, 0, 'COMMA')}">2,100</span>만원,
+                    최고 거래가는 <span class="num" th:text="${analysis.marketAnalysis.maxAmountFormatted}">10억</span>이에요.
                 </p>
             </div>
 
-            <div th:if="${marketAnalysis == null}" class="table-card">
+            <div th:if="${analysis.marketAnalysis == null}" class="table-card">
                 <div class="empty">주변 실거래 데이터가 아직 없어요.</div>
             </div>
         </div>
 
         <!-- ========== 최근 거래 ========== -->
-        <div class="section" th:if="${recentTransactions != null and !recentTransactions.isEmpty()}">
+        <div class="section" th:if="${analysis.recentTransactions != null and !analysis.recentTransactions.isEmpty()}">
             <h2 class="section-title">최근 거래 내역</h2>
             <div class="table-card">
                 <div class="tx-list">
-                    <div th:each="tx : ${recentTransactions}" class="tx-item">
+                    <div th:each="tx : ${analysis.recentTransactions}" class="tx-item">
                         <div>
                             <div class="tx-name" th:text="${tx.aptName}">아파트명</div>
                             <div class="tx-meta">

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/home-layout :: head(${pageTitle}, ${pageDescription})}"></head>
+<head th:replace="~{fragments/home-layout :: head(${current.year} + '년 ' + ${current.monthValue} + '월 청약 일정', ${current.year} + '년 ' + ${current.monthValue} + '월 아파트 청약 일정, 접수 기간, 공급 세대수 정보')}"></head>
 <head>
     <style>
         .page-header {
@@ -75,26 +75,26 @@
     <nav th:replace="~{fragments/home-layout :: navbar('')}"></nav>
 
     <section class="page-header">
-        <h1 th:text="${year} + '년 ' + ${month} + '월 청약 일정'">2026년 2월 청약 일정</h1>
-        <p th:text="${year} + '년 ' + ${month} + '월에 접수 시작하는 청약 정보입니다'">해당 월 청약 정보</p>
+        <h1 th:text="${current.year} + '년 ' + ${current.monthValue} + '월 청약 일정'">2026년 2월 청약 일정</h1>
+        <p th:text="${current.year} + '년 ' + ${current.monthValue} + '월에 접수 시작하는 청약 정보입니다'">해당 월 청약 정보</p>
     </section>
 
     <div class="month-nav">
-        <a th:href="@{/home/{y}/{m}(y=${prevYear}, m=${prevMonth})}"
-           th:text="${prevMonth} + '월'">1월</a>
-        <span class="current" th:text="${month} + '월'">2월</span>
-        <a th:href="@{/home/{y}/{m}(y=${nextYear}, m=${nextMonth})}"
-           th:text="${nextMonth} + '월'">3월</a>
+        <a th:href="@{/home/{y}/{m}(y=${prev.year}, m=${prev.monthValue})}"
+           th:text="${prev.monthValue} + '월'">1월</a>
+        <span class="current" th:text="${current.monthValue} + '월'">2월</span>
+        <a th:href="@{/home/{y}/{m}(y=${next.year}, m=${next.monthValue})}"
+           th:text="${next.monthValue} + '월'">3월</a>
     </div>
 
     <div class="container">
         <!-- 접수중 -->
-        <section th:if="${!activeSubscriptions.isEmpty()}">
+        <section th:if="${!monthly.activeSubscriptions.isEmpty()}">
             <div class="section-header">
-                <h2 class="section-title">접수중 <span class="section-count" th:text="${#lists.size(activeSubscriptions)}">0</span></h2>
+                <h2 class="section-title">접수중 <span class="section-count" th:text="${#lists.size(monthly.activeSubscriptions)}">0</span></h2>
             </div>
             <div class="subscription-grid">
-                <a th:each="s : ${activeSubscriptions}"
+                <a th:each="s : ${monthly.activeSubscriptions}"
                    th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
                    th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
                    class="subscription-card">
@@ -120,12 +120,12 @@
         </section>
 
         <!-- 접수예정 -->
-        <section th:if="${!upcomingSubscriptions.isEmpty()}">
+        <section th:if="${!monthly.upcomingSubscriptions.isEmpty()}">
             <div class="section-header">
-                <h2 class="section-title">접수예정 <span class="section-count" th:text="${#lists.size(upcomingSubscriptions)}">0</span></h2>
+                <h2 class="section-title">접수예정 <span class="section-count" th:text="${#lists.size(monthly.upcomingSubscriptions)}">0</span></h2>
             </div>
             <div class="subscription-grid">
-                <a th:each="s : ${upcomingSubscriptions}"
+                <a th:each="s : ${monthly.upcomingSubscriptions}"
                    th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
                    th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
                    class="subscription-card">
@@ -150,12 +150,12 @@
         </section>
 
         <!-- 마감 -->
-        <section th:if="${!closedSubscriptions.isEmpty()}">
+        <section th:if="${!monthly.closedSubscriptions.isEmpty()}">
             <div class="section-header">
-                <h2 class="section-title">마감 <span class="section-count muted" th:text="${#lists.size(closedSubscriptions)}">0</span></h2>
+                <h2 class="section-title">마감 <span class="section-count muted" th:text="${#lists.size(monthly.closedSubscriptions)}">0</span></h2>
             </div>
             <div class="subscription-grid">
-                <a th:each="s : ${closedSubscriptions}"
+                <a th:each="s : ${monthly.closedSubscriptions}"
                    th:href="${s.source != null and s.source.toUpperCase().contains('LH')} ? ${s.detailUrl} : @{/home/analysis/{id}(id=${s.id})}"
                    th:target="${s.source != null and s.source.toUpperCase().contains('LH')} ? '_blank' : '_self'"
                    class="subscription-card">
@@ -181,8 +181,8 @@
         </section>
 
         <!-- 청약 없음 -->
-        <div th:if="${subscriptions.isEmpty()}" class="empty-state">
-            <p th:text="${year} + '년 ' + ${month} + '월 청약 정보가 없습니다'">해당 월 청약 정보가 없습니다</p>
+        <div th:if="${monthly.subscriptions.isEmpty()}" class="empty-state">
+            <p th:text="${current.year} + '년 ' + ${current.monthValue} + '월 청약 정보가 없습니다'">해당 월 청약 정보가 없습니다</p>
             <a href="/home" class="back-link">홈으로 돌아가기</a>
         </div>
     </div>
@@ -206,8 +206,8 @@
             {
                 "@type": "ListItem",
                 "position": 2,
-                "name": /*[[${pageTitle}]]*/ "월별 청약 일정",
-                "item": /*[[${'https://house-ping.com/home/' + year + '/' + month}]]*/ ""
+                "name": /*[[${current.year + '년 ' + current.monthValue + '월 청약 일정'}]]*/ "월별 청약 일정",
+                "item": /*[[${'https://house-ping.com/home/' + current.year + '/' + current.monthValue}]]*/ ""
             }
         ]
     }
