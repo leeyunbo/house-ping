@@ -29,15 +29,13 @@ Houseping은 **청약 분양가와 주변 실거래가를 비교 분석**하여,
 
 ## 주요 기능
 
-### 공개 페이지
-
-| 기능 | 설명 |
-|------|------|
-| **청약 목록** | 서울/경기 임박한 청약 정보 확인 |
-| **시세 비교 분석** | 평형별 분양가 vs 주변 실거래가 비교, 예상 차익 계산 |
-| **실거래가 조회** | 동 단위 최근 3개월 실거래 데이터 |
-| **가점 계산게** | 가점 계산 |
-| **청약 가이드** | 청약 주요 정보 가이드 |
+- **청약 목록** — 청약Home·LH 통합 수집, 마감/시작 임박순 정렬
+- **가격 배지** — 신축 실거래 중앙값 기반 분양가 수준 3-state 판정 (시세대비↓/↑/비교불가)
+- **시세 비교 분석** — 평형별 분양가 vs 동일 동 신축(5년) 실거래가 비교, 예상 차익 계산
+- **실거래가 조회** — 법정동코드 파싱 → 국토부 API 캐시 → 동 단위 필터링
+- **경쟁률 조회** — 발표 후 타입·순위·지역별 경쟁률
+- **가점 계산기** — 청약 가점 항목별 계산
+- **청약 가이드** — 청약 절차·용어 가이드 6페이지
 
 ## 기술 스택
 
@@ -54,26 +52,25 @@ Houseping은 **청약 분양가와 주변 실거래가를 비교 분석**하여,
 
 ```
 com.yunbok.houseping
-├── domain                          # 핵심 비즈니스 로직
-│   ├── model                       # 도메인 모델
-│   ├── service                     # 도메인 서비스
-│   └── port
-│       ├── in                      # 인바운드 포트 (UseCase)
-│       └── out                     # 아웃바운드 포트 (Repository, Provider)
+├── core                            # 비즈니스 로직
+│   ├── domain                      # 도메인 모델
+│   ├── port                        # 포트 인터페이스 (NotificationSender, SubscriptionProvider 등)
+│   └── service                     # 도메인 서비스 (subscription, notification, auth 등)
 │
-├── adapter
-│   ├── in
-│   │   ├── web                     # REST Controller
-│   │   │   ├── home                # 공개 페이지
-│   │   │   └── admin               # 관리자 페이지
-│   │   └── scheduler               # 스케줄러
-│   └── out
-│       ├── api                     # 외부 API (청약Home, 실거래가)
-│       ├── web                     # 웹 파싱 (LH 캘린더)
-│       ├── persistence             # DB 어댑터
-│       └── notification            # 알림 (Slack, Telegram)
+├── adapter                         # 외부 시스템 어댑터
+│   ├── api                         # 외부 API (청약Home, LH, 국토부 실거래가)
+│   ├── persistence                 # DB 조회 어댑터
+│   └── notification                # 알림 (Slack, Telegram)
 │
-└── infrastructure                  # 설정, Entity, 유틸리티
+├── controller                      # 웹 계층
+│   ├── web                         # 공개 페이지, 관리자 페이지
+│   └── api                         # REST API
+│
+├── entity                          # JPA Entity
+├── repository                      # Spring Data JPA Repository
+├── scheduler                       # Quartz 스케줄러
+├── config                          # 설정 (Security, WebClient, ProviderChain 등)
+└── support                         # DTO, 유틸리티, 예외
 ```
 
 ## 시작하기
@@ -121,33 +118,18 @@ NAVER_CLIENT_SECRET=your_client_secret
 
 ## 아키텍처
 
-### ~~Hexagonal Architecture~~ ![Deprecated](https://img.shields.io/badge/status-deprecated-red)
-- ~~houseping 서비스는 외부 시스템과의 상호작용이 굉장히 다양하며 변경이 많은 서비스입니다.~~
-- ~~따라서  헥사고날  아키텍처를 채택하여 외부 의존성과  변경이 적은 비즈니스 로직을 분리하여 테스트 용이성과 확장성을 확보했습니다.~~
+초기 헥사고날 아키텍처에서 출발했으나, 도메인 영역이 좁아 완벽한 DIP 적용의 실익이 적다고 판단하여 실용적 레이어드로 전환했습니다.
+변경 가능성이 높은 외부 연동(청약 API, 알림)에만 Port/Adapter를 유지하고, Repository 등은 직접 의존합니다.
 
 ```
-[Adapter In]                [Domain]                 [Adapter Out]
-  Controller  ─────▶  UseCase / Service  ◀─────      Repository
-  Scheduler                   │                      API Client
-                              │                      Notification
-                         Domain Model
-```
-
-### Layered Architecture
-- 초기에는 헥사고날 아키텍처를 채택했으나, 도메인 영역이 좁아 완벽한 DIP 적용의 실익이 적다고 판단
-- 변경 가능성이 높은 외부 연동(청약 API, 알림 API)에만 Port/Adapter 적용
-- 변경이 발생하지 않는 영역(Repository 등)은 직접 의존
-
-```
-  [External]              [Core]                    [External]
-   Controller  ─────▶   Service    ◀─────             Adapter
-   Scheduler             Port                      (API, DB, 알림)
-                         Domain
+  Controller  ─────▶   Service    ◀─────   Adapter (API, 알림)
+  Scheduler              Port               Persistence
+                        Domain              Repository (직접 의존)
 ```
 
 ### 확장 포인트
 
-| 확장 | 구현 방법                                                                     |
-|------|---------------------------------------------------------------------------|
-| 알림 채널 추가 | `NotificationSender` 인터페이스 구현 후, 설정 추가                                    |
-| 데이터 소스 추가 | `SubscriptionProvider` 구현 후 해당되는 체인(`SubscriptionProviderChainConfig`)에 등록 |
+| 확장 | 구현 방법 |
+|------|-----------|
+| 알림 채널 추가 | `NotificationSender` 인터페이스 구현 후 설정 추가 |
+| 데이터 소스 추가 | `SubscriptionProvider` 구현 후 `FallbackProviderChain`에 등록 |
