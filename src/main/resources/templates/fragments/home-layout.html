@@ -26,6 +26,7 @@
     <meta name="twitter:description" th:attr="content=${description != null ? description : '청약 일정, 경쟁률, 시세 분석을 한눈에'}">
     <meta name="twitter:image" content="https://house-ping.com/og-image.png">
 
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="canonical" th:attr="href='https://house-ping.com' + ${canonicalPath ?: '/home'}">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -119,6 +120,15 @@
             text-decoration: none;
             color: var(--text);
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
         }
 
         .nav-right {
@@ -343,6 +353,14 @@
             padding: 48px 24px 32px;
             color: var(--text-muted);
             font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .footer-source {
+            font-size: 11px;
+            color: var(--text-muted);
+            opacity: 0.7;
+            margin-top: 8px;
         }
 
         /* ── Mobile ── */
@@ -358,7 +376,13 @@
 <!-- Navbar Fragment -->
 <nav th:fragment="navbar(activePage)" class="navbar">
     <div class="navbar-inner">
-        <a href="/home" class="logo">Houseping</a>
+        <a href="/home" class="logo">
+            <svg class="logo-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="20" fill="#3182f6"/>
+                <path d="M50 20L20 45V80H40V60H60V80H80V45L50 20Z" fill="white"/>
+            </svg>
+            Houseping
+        </a>
         <div class="nav-right">
             <div class="nav-links">
                 <a href="/home" class="nav-link" th:classappend="${activePage == 'home'} ? ' active' : ''">홈</a>
@@ -412,7 +436,17 @@ function toggleTheme() {
 
 <!-- Footer Fragment -->
 <footer th:fragment="footer" class="footer">
-    <p>&copy; 2026 Houseping</p>
+    <p>
+        <svg width="16" height="16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: -2px; margin-right: 4px;">
+            <rect width="100" height="100" rx="20" fill="#3182f6"/>
+            <path d="M50 20L20 45V80H40V60H60V80H80V45L50 20Z" fill="white"/>
+        </svg>
+        &copy; 2026 Houseping
+    </p>
+    <p class="footer-source">
+        본 서비스는 청약Home·LH·국토교통부 공공데이터를 활용하며, 정보의 정확성을 보장하지 않습니다.<br>
+        투자 및 청약 판단의 책임은 이용자에게 있습니다.
+    </p>
 </footer>
 </body>
 </html>

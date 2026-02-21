@@ -133,8 +133,7 @@ public class PublicHomeController {
         SubscriptionAnalysisResult analysis = subscriptionAnalysisService.analyze(id);
         Subscription subscription = analysis.getSubscription();
 
-        model.addAttribute("analysis", analysis)
-        ;
+        model.addAttribute("analysis", analysis);
         model.addAttribute("subscription", subscription);
         model.addAttribute("canonicalPath", "/home/analysis/" + id);
         model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);
