@@ -1,6 +1,7 @@
 package com.yunbok.houseping.scheduler;
 
-import com.yunbok.houseping.adapter.api.RealTransactionApiAdapter;
+import com.yunbok.houseping.infrastructure.api.RealTransactionApiClient;
+import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.service.region.RegionCodeService;
 import com.yunbok.houseping.entity.SubscriptionEntity;
@@ -28,7 +29,8 @@ public class RealTransactionScheduler {
 
     private final SubscriptionRepository subscriptionRepository;
     private final RegionCodeService regionCodeUseCase;
-    private final RealTransactionApiAdapter realTransactionApiAdapter;
+    private final RealTransactionApiClient realTransactionApiAdapter;
+    private final SchedulerErrorSlackClient errorNotifier;
 
     /**
      * 매일 새벽 4시에 접수예정 청약 지역의 실거래가 수집
@@ -80,6 +82,7 @@ public class RealTransactionScheduler {
             log.info("[실거래가 스케줄러] 수집 완료 - 성공: {}개 지역, 실패: {}개 지역", successCount, failCount);
         } catch (Exception e) {
             log.error("[실거래가 스케줄러] 수집 중 오류", e);
+            errorNotifier.sendError("실거래가 수집", e);
         }
     }
 }

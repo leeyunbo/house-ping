@@ -3,8 +3,8 @@ package com.yunbok.houseping.core.service.notification;
 import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.support.dto.NotificationTarget;
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
-import com.yunbok.houseping.adapter.persistence.NotificationSubscriptionPersistenceAdapter;
+import com.yunbok.houseping.core.domain.Subscription;
+import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionStore;
 import com.yunbok.houseping.core.port.NotificationSender;
 import com.yunbok.houseping.repository.NotificationHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class DailyNotificationServiceTest {
     private SubscriptionCollector subscriptionCollector;
 
     @Mock
-    private NotificationSubscriptionPersistenceAdapter persistencePort;
+    private NotificationSubscriptionStore persistencePort;
 
     @Mock
     private NotificationSender notificationSender;
@@ -73,7 +73,7 @@ class DailyNotificationServiceTest {
                     tomorrow, tomorrow.plusDays(5), 200, "https://example.com/2"
             );
 
-            SubscriptionInfo newSubscription = mock(SubscriptionInfo.class);
+            Subscription newSubscription = mock(Subscription.class);
 
             when(persistencePort.findPendingReceiptEndTargets(today))
                     .thenReturn(List.of(endTarget));

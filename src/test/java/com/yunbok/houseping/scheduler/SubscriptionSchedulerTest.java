@@ -1,7 +1,9 @@
 package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
-import com.yunbok.houseping.adapter.api.ApplyhomeApiAdapter;
+import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
+import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
+import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
 import com.yunbok.houseping.support.dto.SyncResult;
 
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
@@ -30,7 +32,7 @@ class SubscriptionSchedulerTest {
     private SubscriptionPriceRepository priceRepository;
 
     @Mock
-    private ApplyhomeApiAdapter applyhomeApiAdapter;
+    private ApplyhomeApiClient applyhomeApiAdapter;
 
     private SubscriptionScheduler scheduler;
 
@@ -40,7 +42,8 @@ class SubscriptionSchedulerTest {
                 managementUseCase,
                 subscriptionRepository,
                 priceRepository,
-                applyhomeApiAdapter
+                applyhomeApiAdapter,
+                new SchedulerErrorSlackClient("", new SlackMessageFormatter())
         );
     }
 

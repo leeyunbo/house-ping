@@ -1,6 +1,6 @@
 package com.yunbok.houseping.support.dto;
 
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.core.domain.Subscription;
 
 import java.time.LocalDate;
 
@@ -17,19 +17,19 @@ public record SubscriptionDto(
         String contact,
         Integer totalSupplyCount
 ) {
-    public static SubscriptionDto from(SubscriptionInfo info) {
+    public static SubscriptionDto from(Subscription subscription) {
         return new SubscriptionDto(
-                info.getHouseName(),
-                info.getHouseType(),
-                info.getArea(),
-                info.getAnnounceDate(),
-                info.getReceiptStartDate(),
-                info.getReceiptEndDate(),
-                info.getWinnerAnnounceDate(),
-                info.getDetailUrl(),
-                info.getHomepageUrl(),
-                info.getContact(),
-                info.getTotalSupplyCount()
+                subscription.getHouseName(),
+                subscription.getHouseType(),
+                subscription.getArea(),
+                subscription.getAnnounceDate(),
+                subscription.getReceiptStartDate(),
+                subscription.getReceiptEndDate(),
+                subscription.getWinnerAnnounceDate(),
+                subscription.getDetailUrl(),
+                subscription.getHomepageUrl(),
+                subscription.getContact(),
+                subscription.getTotalSupplyCount()
         );
     }
 }

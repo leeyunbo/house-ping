@@ -1,9 +1,9 @@
 package com.yunbok.houseping.core.service.subscription;
 
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionConfig;
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import com.yunbok.houseping.support.dto.SyncResult;
-import com.yunbok.houseping.adapter.persistence.SubscriptionPersistenceAdapter;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SubscriptionManagementService {
 
-    private final SubscriptionPersistenceAdapter persistencePort;
+    private final SubscriptionStore subscriptionStore;
     private final List<SubscriptionProviderChain> chains;
     private final SubscriptionConfig config;
 
@@ -27,7 +27,7 @@ public class SubscriptionManagementService {
         SyncResult totalResult = SyncResult.empty();
         for (String area : config.targetAreas()) {
             for (SubscriptionProviderChain chain : chains) {
-                List<SubscriptionInfo> subscriptions = chain.executeAll(area);
+                List<Subscription> subscriptions = chain.executeAll(area);
                 totalResult = totalResult.merge(saveSubscriptions(subscriptions, chain.getSourceName()));
             }
         }
@@ -39,21 +39,21 @@ public class SubscriptionManagementService {
     @Transactional
     public int cleanup() {
         LocalDate cutoffDate = LocalDate.now().minusYears(5);
-        int deletedCount = persistencePort.deleteOldSubscriptions(cutoffDate);
+        int deletedCount = subscriptionStore.deleteOldSubscriptions(cutoffDate);
         log.info("Cleanup completed: deleted={}", deletedCount);
         return deletedCount;
     }
 
-    private SyncResult saveSubscriptions(List<SubscriptionInfo> subscriptions, String source) {
+    private SyncResult saveSubscriptions(List<Subscription> subscriptions, String source) {
         int inserted = 0, updated = 0;
-        for (SubscriptionInfo info : subscriptions) {
-            Optional<SubscriptionInfo> existing = persistencePort
-                    .findBySourceAndHouseNameAndReceiptStartDate(source, info.getHouseName(), info.getReceiptStartDate());
+        for (Subscription subscription : subscriptions) {
+            Optional<Subscription> existing = subscriptionStore
+                    .findBySourceAndHouseNameAndReceiptStartDate(source, subscription.getHouseName(), subscription.getReceiptStartDate());
             if (existing.isPresent()) {
-                persistencePort.update(info, source);
+                subscriptionStore.update(subscription, source);
                 updated++;
             } else {
-                persistencePort.save(info, source);
+                subscriptionStore.save(subscription, source);
                 inserted++;
             }
         }

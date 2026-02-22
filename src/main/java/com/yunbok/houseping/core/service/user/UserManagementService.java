@@ -1,7 +1,7 @@
 package com.yunbok.houseping.core.service.user;
 
 import com.yunbok.houseping.core.domain.User;
-import com.yunbok.houseping.adapter.persistence.UserPersistenceAdapter;
+import com.yunbok.houseping.infrastructure.persistence.UserStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserManagementService {
 
-    private final UserPersistenceAdapter userPersistencePort;
+    private final UserStore userPersistencePort;
 
     public List<User> getAllUsers() {
         return userPersistencePort.findAll();

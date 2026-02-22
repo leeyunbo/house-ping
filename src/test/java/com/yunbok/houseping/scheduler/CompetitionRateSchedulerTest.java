@@ -10,6 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
+import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
+
 import static org.mockito.Mockito.*;
 
 @DisplayName("CompetitionRateScheduler - 경쟁률 수집 스케줄러")
@@ -23,7 +26,7 @@ class CompetitionRateSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        scheduler = new CompetitionRateScheduler(collectorUseCase);
+        scheduler = new CompetitionRateScheduler(collectorUseCase, new SchedulerErrorSlackClient("", new SlackMessageFormatter()));
     }
 
     @Nested

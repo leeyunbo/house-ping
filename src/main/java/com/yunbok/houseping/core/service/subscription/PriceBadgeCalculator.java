@@ -1,7 +1,7 @@
 package com.yunbok.houseping.core.service.subscription;
 
-import com.yunbok.houseping.adapter.persistence.RealTransactionQueryAdapter;
-import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
+import com.yunbok.houseping.infrastructure.persistence.RealTransactionStore;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceStore;
 import com.yunbok.houseping.core.domain.RealTransaction;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionPrice;
@@ -23,8 +23,8 @@ public class PriceBadgeCalculator {
 
     private static final BigDecimal AREA_TOLERANCE = new BigDecimal("5");
 
-    private final SubscriptionPriceQueryAdapter subscriptionPriceQueryPort;
-    private final RealTransactionQueryAdapter realTransactionQueryPort;
+    private final SubscriptionPriceStore subscriptionPriceQueryPort;
+    private final RealTransactionStore realTransactionQueryPort;
     private final AddressHelper addressHelper;
     private final HouseTypeComparisonBuilder comparisonBuilder;
 
@@ -34,7 +34,7 @@ public class PriceBadgeCalculator {
      * <ol>
      *   <li>LH 청약이거나 관리번호·주소가 없으면 {@code UNKNOWN}</li>
      *   <li>대표 평형(84㎡ 기준, ±5㎡ 허용)의 분양가를 선택</li>
-     *   <li>같은 동 내 최근 4년 이내 신축 실거래가 중 유사 면적(±5㎡)의 중앙값을 시세로 산출</li>
+     *   <li>같은 동 내 최근 3년 이내 신축 실거래가 중 유사 면적(±5㎡)의 중앙값을 시세로 산출</li>
      *   <li>분양가 &lt; 시세의 95% → {@code CHEAP}</li>
      *   <li>분양가 &gt; 시세의 105% → {@code EXPENSIVE}</li>
      *   <li>그 외 → {@code UNKNOWN}</li>
@@ -72,7 +72,7 @@ public class PriceBadgeCalculator {
         List<RealTransaction> allTransactions = realTransactionQueryPort.findByLawdCd(lawdCd);
         List<RealTransaction> dongTransactions = addressHelper.filterByDongName(allTransactions, dongName);
 
-        int newBuildYearThreshold = LocalDate.now().getYear() - 4;
+        int newBuildYearThreshold = LocalDate.now().getYear() - 2;
         List<RealTransaction> newBuildTx = dongTransactions.stream()
                 .filter(t -> t.getBuildYear() != null && t.getBuildYear() >= newBuildYearThreshold)
                 .toList();

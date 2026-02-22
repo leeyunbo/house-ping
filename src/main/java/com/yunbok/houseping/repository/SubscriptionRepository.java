@@ -131,4 +131,15 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
      */
     @Query("SELECT s FROM SubscriptionEntity s WHERE s.area LIKE %:area1% OR s.area LIKE %:area2% ORDER BY s.receiptStartDate DESC")
     List<SubscriptionEntity> findByAreaLikeOrAreaLike(@Param("area1") String area1, @Param("area2") String area2);
+
+    /**
+     * 접수 기간이 주어진 기간과 겹치는 청약 조회
+     */
+    @Query("SELECT s FROM SubscriptionEntity s " +
+           "WHERE s.receiptStartDate <= :weekEnd " +
+           "AND (s.receiptEndDate >= :weekStart OR s.receiptEndDate IS NULL) " +
+           "ORDER BY s.receiptStartDate ASC")
+    List<SubscriptionEntity> findByReceiptPeriodOverlapping(
+            @Param("weekStart") LocalDate weekStart,
+            @Param("weekEnd") LocalDate weekEnd);
 }

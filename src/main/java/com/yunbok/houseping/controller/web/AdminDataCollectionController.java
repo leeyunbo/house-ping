@@ -1,6 +1,6 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.adapter.api.ApplyhomeApiAdapter;
+import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
@@ -31,7 +31,7 @@ public class AdminDataCollectionController {
 
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionPriceRepository subscriptionPriceRepository;
-    private final ApplyhomeApiAdapter applyhomeApiAdapter;
+    private final ApplyhomeApiClient applyhomeApiAdapter;
     private final RealTransactionScheduler realTransactionScheduler;
 
     /**

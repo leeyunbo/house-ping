@@ -1,6 +1,6 @@
 package com.yunbok.houseping.support.dto;
 
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.core.domain.Subscription;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 public record DailyNotificationReport(
         List<NotificationTarget> receiptEndToday,
         List<NotificationTarget> receiptStartTomorrow,
-        List<SubscriptionInfo> newSubscriptions
+        List<Subscription> newSubscriptions
 ) {
     public boolean isEmpty() {
         return receiptEndToday.isEmpty()

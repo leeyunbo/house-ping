@@ -54,7 +54,7 @@ class PublicHomeControllerTest {
         @DisplayName("home/index 뷰 이름을 반환한다")
         void returnsCorrectViewName() {
             // given
-            when(subscriptionSearchService.getHomeData(null, null))
+            when(subscriptionSearchService.getHomeData(null))
                     .thenReturn(HomePageResult.builder()
                             .activeSubscriptions(List.of())
                             .upcomingSubscriptions(List.of())
@@ -62,7 +62,7 @@ class PublicHomeControllerTest {
                             .build());
 
             // when
-            String viewName = controller.index(null, null, model);
+            String viewName = controller.index(null, model);
 
             // then
             assertThat(viewName).isEqualTo("home/index");
@@ -77,10 +77,10 @@ class PublicHomeControllerTest {
                     .upcomingSubscriptions(List.of())
                     .areas(List.of("서울", "경기"))
                     .build();
-            when(subscriptionSearchService.getHomeData(null, null)).thenReturn(homeData);
+            when(subscriptionSearchService.getHomeData(null)).thenReturn(homeData);
 
             // when
-            controller.index(null, null, model);
+            controller.index(null, model);
 
             // then
             verify(model).addAttribute("home", homeData);
@@ -90,7 +90,7 @@ class PublicHomeControllerTest {
         @DisplayName("지역 필터가 있으면 해당 지역으로 조회한다")
         void filtersByArea() {
             // given
-            when(subscriptionSearchService.getHomeData("서울", null))
+            when(subscriptionSearchService.getHomeData("서울"))
                     .thenReturn(HomePageResult.builder()
                             .activeSubscriptions(List.of())
                             .upcomingSubscriptions(List.of())
@@ -99,10 +99,10 @@ class PublicHomeControllerTest {
                             .build());
 
             // when
-            controller.index("서울", null, model);
+            controller.index("서울", model);
 
             // then
-            verify(subscriptionSearchService).getHomeData("서울", null);
+            verify(subscriptionSearchService).getHomeData("서울");
         }
     }
 

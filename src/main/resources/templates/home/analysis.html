@@ -708,7 +708,7 @@
             <div class="section" th:if="${!analysis.newBuildBased}">
                 <h2 class="section-title">시세 대비 분석<span class="muted" th:if="${analysis.dongName}" th:text="${analysis.dongName}">역삼동</span></h2>
                 <div class="table-card">
-                    <div class="empty">주변에 최근 5년 내 준공된 아파트 거래가 없어 시세 비교를 제공하지 않아요.</div>
+                    <div class="empty">주변에 최근 3년 내 준공된 아파트 거래가 없어 시세 비교를 제공하지 않아요.</div>
                 </div>
             </div>
             <div class="section" th:if="${analysis.houseTypeComparisons != null and !analysis.houseTypeComparisons.isEmpty()}">
@@ -755,7 +755,7 @@
 
                     <div class="note-box">
                         <ul>
-                            <li>동일 동 내 <strong>최근 5년 내 준공 아파트</strong> 유사 면적 거래 기준</li>
+                            <li>동일 동 내 <strong>최근 3년 내 준공 아파트</strong> 유사 면적 거래 기준</li>
                             <li>실거래가 데이터가 부족한 경우 가장 유사한 면적 거래를 참고했어요</li>
                         </ul>
                     </div>

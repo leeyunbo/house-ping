@@ -4,12 +4,12 @@ import com.yunbok.houseping.core.service.subscription.SubscriptionService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 
 import com.yunbok.houseping.support.dto.*;
-import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.infrastructure.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.SyncResult;
 
 
-import com.yunbok.houseping.adapter.formatter.SubscriptionMessageFormatter;
+import com.yunbok.houseping.infrastructure.formatter.SubscriptionMessageFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -54,7 +54,7 @@ class SubscriptionControllerTest {
         @DisplayName("수집 성공 시 수집 건수를 반환한다")
         void returnsCollectCount() {
             // given
-            List<SubscriptionInfo> subscriptions = List.of(
+            List<Subscription> subscriptions = List.of(
                     createSubscription("힐스테이트 강남"),
                     createSubscription("래미안 판교")
             );
@@ -79,7 +79,7 @@ class SubscriptionControllerTest {
         void returnsSubscriptionsForDate() {
             // given
             LocalDate testDate = LocalDate.of(2025, 1, 15);
-            List<SubscriptionInfo> subscriptions = List.of(createSubscription("테스트 아파트"));
+            List<Subscription> subscriptions = List.of(createSubscription("테스트 아파트"));
 
             when(subscriptionUseCase.collect(testDate, false)).thenReturn(subscriptions);
             when(messageFormatter.formatBatchSummary(any())).thenReturn("요약 메시지");
@@ -152,10 +152,10 @@ class SubscriptionControllerTest {
         }
     }
 
-    private SubscriptionInfo createSubscription(String houseName) {
+    private Subscription createSubscription(String houseName) {
         return ApplyHomeSubscriptionInfo.builder()
                 .houseName(houseName)
                 .area("서울")
-                .build();
+                .build().toSubscription();
     }
 }

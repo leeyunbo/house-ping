@@ -1,7 +1,9 @@
 package com.yunbok.houseping.controller.web;
 
 import com.yunbok.houseping.core.domain.BlogPost;
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.service.blog.BlogPublishService;
+import com.yunbok.houseping.core.service.subscription.SubscriptionSearchService;
 import com.yunbok.houseping.entity.BlogCardImageEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class PublicBlogController {
 
     private final BlogPublishService blogPublishService;
+    private final SubscriptionSearchService subscriptionSearchService;
 
     @GetMapping
     public String blogList(Model model) {
@@ -34,9 +37,10 @@ public class PublicBlogController {
     @GetMapping("/{id}")
     public String blogDetail(@PathVariable Long id, Model model) {
         BlogPost post = blogPublishService.findById(id);
-        List<BlogCardImageEntity> cards = blogPublishService.findCardImages(id);
+        List<Subscription> subscriptions = subscriptionSearchService.findSubscriptionsForWeek(
+                post.getWeekStartDate(), post.getWeekEndDate());
         model.addAttribute("post", post);
-        model.addAttribute("cards", cards);
+        model.addAttribute("subscriptions", subscriptions);
         return "home/blog/detail";
     }
 

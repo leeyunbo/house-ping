@@ -269,7 +269,7 @@ class AdminCompetitionRateQueryServiceTest {
 
         @Test
         @DisplayName("청약 정보를 조인하여 주택명과 지역을 반환한다")
-        void joinsSubscriptionInfo() {
+        void joinsSubscription() {
             // given
             AdminCompetitionRateSearchCriteria criteria = new AdminCompetitionRateSearchCriteria(
                     null, null, null, null, null, null, null, null, 0, 20);

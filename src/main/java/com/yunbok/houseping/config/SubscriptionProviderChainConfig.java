@@ -1,10 +1,10 @@
 package com.yunbok.houseping.config;
 
-import com.yunbok.houseping.adapter.api.ApplyhomeApiAdapter;
-import com.yunbok.houseping.adapter.api.LhApiAdapter;
-import com.yunbok.houseping.adapter.persistence.ApplyhomeDbAdapter;
-import com.yunbok.houseping.adapter.persistence.LhDbAdapter;
-import com.yunbok.houseping.adapter.api.LhWebAdapter;
+import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
+import com.yunbok.houseping.infrastructure.api.LhApiClient;
+import com.yunbok.houseping.infrastructure.persistence.ApplyhomeDbStore;
+import com.yunbok.houseping.infrastructure.persistence.LhDbStore;
+import com.yunbok.houseping.infrastructure.api.LhWebScraperClient;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.core.service.subscription.FallbackProviderChain;
@@ -29,9 +29,9 @@ public class SubscriptionProviderChainConfig {
     @Bean
     @LhSource
     public List<SubscriptionProvider> lhProviders(
-            @Autowired(required = false) LhApiAdapter lhApiAdapter,
-            @Autowired(required = false) LhWebAdapter lhWebAdapter,
-            @Autowired(required = false) LhDbAdapter lhDbAdapter) {
+            @Autowired(required = false) LhApiClient lhApiAdapter,
+            @Autowired(required = false) LhWebScraperClient lhWebAdapter,
+            @Autowired(required = false) LhDbStore lhDbAdapter) {
         List<SubscriptionProvider> providers = new ArrayList<>();
         Optional.ofNullable(lhWebAdapter).ifPresent(providers::add);
         Optional.ofNullable(lhApiAdapter).ifPresent(providers::add);
@@ -42,8 +42,8 @@ public class SubscriptionProviderChainConfig {
     @Bean
     @ApplyhomeSource
     public List<SubscriptionProvider> applyhomeProviders(
-            @Autowired(required = false) ApplyhomeApiAdapter applyhomeApiAdapter,
-            @Autowired(required = false) ApplyhomeDbAdapter applyhomeDbAdapter) {
+            @Autowired(required = false) ApplyhomeApiClient applyhomeApiAdapter,
+            @Autowired(required = false) ApplyhomeDbStore applyhomeDbAdapter) {
         List<SubscriptionProvider> providers = new ArrayList<>();
         Optional.ofNullable(applyhomeApiAdapter).ifPresent(providers::add);
         Optional.ofNullable(applyhomeDbAdapter).ifPresent(providers::add);

@@ -2,9 +2,9 @@ package com.yunbok.houseping.core.service.competition;
 
 import com.yunbok.houseping.core.domain.CompetitionRate;
 import com.yunbok.houseping.core.domain.SubscriptionConfig;
-import com.yunbok.houseping.adapter.persistence.CompetitionRateDbAdapter;
+import com.yunbok.houseping.infrastructure.persistence.CompetitionRateDbStore;
 import com.yunbok.houseping.core.port.CompetitionRateProvider;
-import com.yunbok.houseping.adapter.persistence.SubscriptionPersistenceAdapter;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CompetitionRateCollectorService {
 
-    private final CompetitionRateDbAdapter competitionRatePort;
-    private final SubscriptionPersistenceAdapter subscriptionPort;
+    private final CompetitionRateDbStore competitionRatePort;
+    private final SubscriptionStore subscriptionPort;
     private final Optional<CompetitionRateProvider> competitionRateProvider;
     private final SubscriptionConfig config;
 
@@ -45,37 +45,47 @@ public class CompetitionRateCollectorService {
 
         log.info("[경쟁률 수집] 시작 - 대상 지역: {}", config.targetAreas());
 
-        // 1. 서울/경기 지역의 house_manage_no 목록 조회
-        Set<String> targetHouseManageNos = subscriptionPort.findHouseManageNosByAreas(config.targetAreas());
-        log.info("[경쟁률 수집] 대상 지역 청약 건수: {}", targetHouseManageNos.size());
-
-        if (targetHouseManageNos.isEmpty()) {
+        Set<String> targetHouseManageNumbers = findTargetHouseManageNumbers();
+        if (targetHouseManageNumbers.isEmpty()) {
             log.warn("[경쟁률 수집] 대상 지역에 청약 데이터가 없습니다. 먼저 청약 데이터를 동기화하세요.");
             return 0;
         }
 
-        // 2. API에서 전체 조회
-        List<CompetitionRate> allRates = competitionRateProvider.get().fetchAll();
-        log.info("[경쟁률 수집] API 조회 완료 - 전체 {}건", allRates.size());
+        List<CompetitionRate> allRates = fetchAllRates();
+        List<CompetitionRate> newRates = filterNewRates(allRates, targetHouseManageNumbers);
 
-        // 3. 서울/경기 지역만 필터링 + 중복 제외
-        List<CompetitionRate> filteredRates = allRates.stream()
+        return saveRates(newRates);
+    }
+
+    private Set<String> findTargetHouseManageNumbers() {
+        Set<String> nos = subscriptionPort.findHouseManageNosByAreas(config.targetAreas());
+        log.info("[경쟁률 수집] 대상 지역 청약 건수: {}", nos.size());
+        return nos;
+    }
+
+    private List<CompetitionRate> fetchAllRates() {
+        List<CompetitionRate> rates = competitionRateProvider.get().fetchAll();
+        log.info("[경쟁률 수집] API 조회 완료 - 전체 {}건", rates.size());
+        return rates;
+    }
+
+    private List<CompetitionRate> filterNewRates(List<CompetitionRate> allRates, Set<String> targetHouseManageNos) {
+        List<CompetitionRate> newRates = allRates.stream()
                 .filter(rate -> targetHouseManageNos.contains(rate.getHouseManageNo()))
                 .filter(rate -> !competitionRatePort.existsByHouseManageNoAndPblancNo(
                         rate.getHouseManageNo(), rate.getPblancNo()))
                 .toList();
+        log.info("[경쟁률 수집] 필터링 후 신규 데이터: {}건", newRates.size());
+        return newRates;
+    }
 
-        log.info("[경쟁률 수집] 필터링 후 신규 데이터: {}건", filteredRates.size());
-
-        if (filteredRates.isEmpty()) {
+    private int saveRates(List<CompetitionRate> rates) {
+        if (rates.isEmpty()) {
             log.info("[경쟁률 수집] 신규 데이터 없음");
             return 0;
         }
-
-        // 4. DB 저장
-        competitionRatePort.saveAll(filteredRates);
-        log.info("[경쟁률 수집] 완료 - {}건 저장", filteredRates.size());
-
-        return filteredRates.size();
+        competitionRatePort.saveAll(rates);
+        log.info("[경쟁률 수집] 완료 - {}건 저장", rates.size());
+        return rates.size();
     }
 }

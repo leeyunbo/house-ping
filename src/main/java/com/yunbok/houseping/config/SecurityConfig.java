@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -58,7 +59,7 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/auth/logout")
                 .logoutSuccessUrl("/auth/login?logout")
-                .logoutRequestMatcher(org.springframework.security.web.util.matcher.RegexRequestMatcher.regexMatcher("/auth/logout"))
+                .logoutRequestMatcher(RegexRequestMatcher.regexMatcher("/auth/logout"))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
             );

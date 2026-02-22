@@ -1,6 +1,6 @@
 package com.yunbok.houseping.core.port;
 
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.core.domain.Subscription;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,12 +13,12 @@ public interface SubscriptionProvider {
     /**
      * 특정 지역, 특정 날짜의 청약 데이터 조회
      */
-    List<SubscriptionInfo> fetch(String areaName, LocalDate targetDate);
+    List<Subscription> fetch(String areaName, LocalDate targetDate);
 
     /**
      * 특정 지역의 전체 청약 데이터 조회 (DB 동기화용)
      */
-    default List<SubscriptionInfo> fetchAll(String areaName) {
+    default List<Subscription> fetchAll(String areaName) {
         return List.of();
     }
 

@@ -119,6 +119,7 @@ telegram:
 slack:
   webhook:
     url: ${SLACK_WEBHOOK_URL}
+    error-url: ${SLACK_ERROR_WEBHOOK_URL:}
 
 # 카카오맵 설정
 kakao:
@@ -144,11 +145,12 @@ management:
     health:
       show-details: always
   metrics:
-    export:
-      prometheus:
-        enabled: true
     tags:
       application: ${spring.application.name}
+  Prometheus:
+    metrics:
+      export:
+        enabled: true
 
 ---
 # 로컬 개발 프로필

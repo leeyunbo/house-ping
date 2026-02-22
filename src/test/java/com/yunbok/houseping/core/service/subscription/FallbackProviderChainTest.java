@@ -1,7 +1,7 @@
 package com.yunbok.houseping.core.service.subscription;
 
-import com.yunbok.houseping.adapter.dto.ApplyHomeSubscriptionInfo;
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.infrastructure.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,7 +36,7 @@ class FallbackProviderChainTest {
         @DisplayName("첫 번째 Provider가 성공하면 그 결과를 반환한다")
         void returnsFirstSuccessfulResult() {
             // given
-            List<SubscriptionInfo> expected = List.of(createSubscription("아파트1"));
+            List<Subscription> expected = List.of(createSubscription("아파트1"));
             when(primaryProvider.fetch(anyString(), any())).thenReturn(expected);
             when(primaryProvider.getSourceName()).thenReturn("Primary");
 
@@ -45,7 +45,7 @@ class FallbackProviderChainTest {
             );
 
             // when
-            List<SubscriptionInfo> result = chain.execute("서울", LocalDate.now());
+            List<Subscription> result = chain.execute("서울", LocalDate.now());
 
             // then
             assertThat(result).hasSize(1);
@@ -60,7 +60,7 @@ class FallbackProviderChainTest {
             when(primaryProvider.fetch(anyString(), any())).thenThrow(new RuntimeException("실패"));
             when(primaryProvider.getSourceName()).thenReturn("Primary");
 
-            List<SubscriptionInfo> expected = List.of(createSubscription("아파트1"));
+            List<Subscription> expected = List.of(createSubscription("아파트1"));
             when(fallbackProvider.fetch(anyString(), any())).thenReturn(expected);
             when(fallbackProvider.getSourceName()).thenReturn("Fallback");
 
@@ -69,7 +69,7 @@ class FallbackProviderChainTest {
             );
 
             // when
-            List<SubscriptionInfo> result = chain.execute("서울", LocalDate.now());
+            List<Subscription> result = chain.execute("서울", LocalDate.now());
 
             // then
             assertThat(result).hasSize(1);
@@ -91,7 +91,7 @@ class FallbackProviderChainTest {
             );
 
             // when
-            List<SubscriptionInfo> result = chain.execute("서울", LocalDate.now());
+            List<Subscription> result = chain.execute("서울", LocalDate.now());
 
             // then
             assertThat(result).isEmpty();
@@ -104,7 +104,7 @@ class FallbackProviderChainTest {
             when(primaryProvider.fetch(anyString(), any())).thenReturn(null);
             when(primaryProvider.getSourceName()).thenReturn("Primary");
 
-            List<SubscriptionInfo> expected = List.of(createSubscription("아파트1"));
+            List<Subscription> expected = List.of(createSubscription("아파트1"));
             when(fallbackProvider.fetch(anyString(), any())).thenReturn(expected);
             when(fallbackProvider.getSourceName()).thenReturn("Fallback");
 
@@ -113,7 +113,7 @@ class FallbackProviderChainTest {
             );
 
             // when
-            List<SubscriptionInfo> result = chain.execute("서울", LocalDate.now());
+            List<Subscription> result = chain.execute("서울", LocalDate.now());
 
             // then
             assertThat(result).hasSize(1);
@@ -132,7 +132,7 @@ class FallbackProviderChainTest {
             );
 
             // when
-            List<SubscriptionInfo> result = chain.execute("서울", LocalDate.now());
+            List<Subscription> result = chain.execute("서울", LocalDate.now());
 
             // then
             assertThat(result).isEmpty();
@@ -146,19 +146,19 @@ class FallbackProviderChainTest {
             FallbackProviderChain chain = new FallbackProviderChain(List.of(), "TestChain");
 
             // when
-            List<SubscriptionInfo> result = chain.execute("서울", LocalDate.now());
+            List<Subscription> result = chain.execute("서울", LocalDate.now());
 
             // then
             assertThat(result).isEmpty();
         }
     }
 
-    private SubscriptionInfo createSubscription(String name) {
+    private Subscription createSubscription(String name) {
         return ApplyHomeSubscriptionInfo.builder()
                 .houseName(name)
                 .area("서울")
                 .houseType("APT")
                 .receiptStartDate(LocalDate.now())
-                .build();
+                .build().toSubscription();
     }
 }

@@ -18,8 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @ConditionalOnProperty(
         name = "feature.subscription.applyhome-competition-enabled",
-        havingValue = "true",
-        matchIfMissing = false
+        havingValue = "true"
 )
 public class CompetitionRateController {
 

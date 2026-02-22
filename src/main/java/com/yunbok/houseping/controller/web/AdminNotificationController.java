@@ -1,7 +1,7 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.adapter.formatter.SlackMessageFormatter;
-import com.yunbok.houseping.adapter.formatter.TelegramMessageFormatter;
+import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
+import com.yunbok.houseping.infrastructure.formatter.TelegramMessageFormatter;
 import com.yunbok.houseping.core.service.notification.DailyNotificationService;
 import com.yunbok.houseping.repository.NotificationSubscriptionRepository;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;

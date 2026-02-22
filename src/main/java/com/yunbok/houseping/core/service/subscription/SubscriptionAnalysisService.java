@@ -1,8 +1,8 @@
 package com.yunbok.houseping.core.service.subscription;
 
-import com.yunbok.houseping.adapter.persistence.RealTransactionQueryAdapter;
-import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
-import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
+import com.yunbok.houseping.infrastructure.persistence.RealTransactionStore;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceStore;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
@@ -32,9 +32,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionAnalysisService {
 
-    private final SubscriptionQueryAdapter subscriptionQueryPort;
-    private final SubscriptionPriceQueryAdapter subscriptionPriceQueryPort;
-    private final RealTransactionQueryAdapter realTransactionQueryPort;
+    private final SubscriptionStore subscriptionQueryPort;
+    private final SubscriptionPriceStore subscriptionPriceQueryPort;
+    private final RealTransactionStore realTransactionQueryPort;
     private final RealTransactionFetchPort realTransactionFetchPort;
     private final CompetitionRateRepository competitionRateRepository;
 
@@ -56,8 +56,8 @@ public class SubscriptionAnalysisService {
         List<RealTransaction> dongTransactions = addressParser.filterByDongName(allTransactions, dongName);
         log.info("동 필터링: {} → {}건 → {}건", dongName, allTransactions.size(), dongTransactions.size());
 
-        // 신축 필터링 (최근 5년 내 준공)
-        int newBuildYearThreshold = LocalDate.now().getYear() - 4;
+        // 신축 필터링 (최근 3년 내 준공)
+        int newBuildYearThreshold = LocalDate.now().getYear() - 2;
         List<RealTransaction> newBuildTx = dongTransactions.stream()
                 .filter(t -> t.getBuildYear() != null && t.getBuildYear() >= newBuildYearThreshold)
                 .toList();

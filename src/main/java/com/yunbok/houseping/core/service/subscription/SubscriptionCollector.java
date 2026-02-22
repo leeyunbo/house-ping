@@ -1,8 +1,8 @@
 package com.yunbok.houseping.core.service.subscription;
 
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionConfig;
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
-import com.yunbok.houseping.adapter.persistence.SubscriptionPersistenceAdapter;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,11 +16,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionCollector {
 
-    private final SubscriptionPersistenceAdapter persistenceAdapter;
+    private final SubscriptionStore subscriptionStore;
     private final SubscriptionConfig config;
 
-    public List<SubscriptionInfo> collectFromAllAreas(LocalDate targetDate) {
-        List<SubscriptionInfo> allSubscriptions = new ArrayList<>();
+    public List<Subscription> collectFromAllAreas(LocalDate targetDate) {
+        List<Subscription> allSubscriptions = new ArrayList<>();
         for (String area : config.targetAreas()) {
             allSubscriptions.addAll(collectFromArea(area, targetDate));
         }
@@ -28,7 +28,7 @@ public class SubscriptionCollector {
         return allSubscriptions;
     }
 
-    public List<SubscriptionInfo> collectFromArea(String area, LocalDate targetDate) {
-        return persistenceAdapter.findByAreaAndReceiptStartDate(area, targetDate);
+    public List<Subscription> collectFromArea(String area, LocalDate targetDate) {
+        return subscriptionStore.findByAreaAndReceiptStartDate(area, targetDate);
     }
 }

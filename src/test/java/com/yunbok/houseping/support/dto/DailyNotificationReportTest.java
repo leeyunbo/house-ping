@@ -1,7 +1,7 @@
 package com.yunbok.houseping.support.dto;
 
-import com.yunbok.houseping.adapter.dto.LhSubscriptionInfo;
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
+import com.yunbok.houseping.infrastructure.dto.LhSubscriptionInfo;
+import com.yunbok.houseping.core.domain.Subscription;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -66,7 +66,7 @@ class DailyNotificationReportTest {
         @DisplayName("newSubscriptions에 데이터가 있으면 false를 반환한다")
         void returnsFalseWhenNewSubscriptionsNotEmpty() {
             // given
-            SubscriptionInfo subscription = LhSubscriptionInfo.builder()
+            Subscription subscription = LhSubscriptionInfo.builder()
                     .houseName("테스트")
                     .houseType("아파트")
                     .area("서울")
@@ -75,7 +75,7 @@ class DailyNotificationReportTest {
                     .receiptEndDate(LocalDate.now().plusDays(5))
                     .detailUrl("https://example.com")
                     .subscriptionStatus("접수중")
-                    .build();
+                    .build().toSubscription();
             DailyNotificationReport report = new DailyNotificationReport(
                     List.of(), List.of(), List.of(subscription)
             );
@@ -101,7 +101,7 @@ class DailyNotificationReportTest {
                     2L, 200L, "테스트2", "경기",
                     LocalDate.now().plusDays(1), LocalDate.now().plusDays(5), 200, "https://example.com/2"
             );
-            SubscriptionInfo subscription = LhSubscriptionInfo.builder()
+            Subscription subscription = LhSubscriptionInfo.builder()
                     .houseName("테스트3")
                     .houseType("아파트")
                     .area("인천")
@@ -110,7 +110,7 @@ class DailyNotificationReportTest {
                     .receiptEndDate(LocalDate.now().plusDays(5))
                     .detailUrl("https://example.com/3")
                     .subscriptionStatus("접수중")
-                    .build();
+                    .build().toSubscription();
 
             DailyNotificationReport report = new DailyNotificationReport(
                     List.of(target1),

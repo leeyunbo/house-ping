@@ -10,6 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
+import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
+
 import static org.mockito.Mockito.*;
 
 @DisplayName("DailyNotificationScheduler - 일일 종합 알림 스케줄러")
@@ -23,7 +26,7 @@ class DailyNotificationSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        scheduler = new DailyNotificationScheduler(dailyNotificationUseCase);
+        scheduler = new DailyNotificationScheduler(dailyNotificationUseCase, new SchedulerErrorSlackClient("", new SlackMessageFormatter()));
     }
 
     @Nested

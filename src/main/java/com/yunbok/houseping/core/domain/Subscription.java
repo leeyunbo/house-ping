@@ -1,6 +1,5 @@
 package com.yunbok.houseping.core.domain;
 
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,7 +11,7 @@ import java.time.LocalDate;
  */
 @Getter
 @Builder
-public class Subscription implements SubscriptionInfo {
+public class Subscription {
 
     private final Long id;
     private final String source;
@@ -32,7 +31,6 @@ public class Subscription implements SubscriptionInfo {
     private final String address;
     private final String zipCode;
 
-    @Override
     public String getDisplayMessage() {
         StringBuilder sb = new StringBuilder();
         sb.append("[").append(area).append("] ").append(houseName);
@@ -50,9 +48,38 @@ public class Subscription implements SubscriptionInfo {
         return sb.toString();
     }
 
-    @Override
     public String getSimpleDisplayMessage() {
         return String.format("[%s] %s", area, houseName);
+    }
+
+    public boolean isReceiptInProgress() {
+        LocalDate today = LocalDate.now();
+        LocalDate start = getReceiptStartDate();
+        LocalDate end = getReceiptEndDate();
+        return start != null && !today.isBefore(start)
+            && (end == null || !today.isAfter(end));
+    }
+
+    public boolean isUpcoming() {
+        LocalDate today = LocalDate.now();
+        LocalDate start = getReceiptStartDate();
+        return start != null && today.isBefore(start);
+    }
+
+    public boolean isExpired() {
+        LocalDate today = LocalDate.now();
+        LocalDate end = getReceiptEndDate();
+        return end != null && today.isAfter(end);
+    }
+
+    public boolean isValid() {
+        return getHouseName() != null && !getHouseName().isBlank()
+            && getArea() != null && !getArea().isBlank();
+    }
+
+    public boolean isLargeSupply() {
+        Integer count = getTotalSupplyCount();
+        return count != null && count >= 100;
     }
 
     /**

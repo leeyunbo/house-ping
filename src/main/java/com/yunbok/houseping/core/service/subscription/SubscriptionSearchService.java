@@ -3,8 +3,8 @@ package com.yunbok.houseping.core.service.subscription;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionPrice;
 import com.yunbok.houseping.core.domain.SubscriptionStatus;
-import com.yunbok.houseping.adapter.persistence.SubscriptionPriceQueryAdapter;
-import com.yunbok.houseping.adapter.persistence.SubscriptionQueryAdapter;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceStore;
+import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.support.dto.AnnouncedSubscriptionView;
@@ -36,8 +36,8 @@ public class SubscriptionSearchService {
 
     private static final List<String> SUPPORTED_AREAS = List.of("서울", "경기");
 
-    private final SubscriptionQueryAdapter subscriptionQueryPort;
-    private final SubscriptionPriceQueryAdapter subscriptionPriceQueryPort;
+    private final SubscriptionStore subscriptionQueryPort;
+    private final SubscriptionPriceStore subscriptionPriceQueryPort;
     private final CompetitionRateRepository competitionRateRepository;
     private final PriceBadgeCalculator priceBadgeCalculator;
 
@@ -175,6 +175,23 @@ public class SubscriptionSearchService {
                         .filter(s -> s.getStatus() == SubscriptionStatus.CLOSED)
                         .toList())
                 .build();
+    }
+
+    public List<Subscription> findSubscriptionsForWeek(LocalDate weekStart, LocalDate weekEnd) {
+        return subscriptionQueryPort.findByReceiptPeriodOverlapping(weekStart, weekEnd).stream()
+                .filter(s -> s.getArea() != null && SUPPORTED_AREAS.stream()
+                        .anyMatch(supported -> s.getArea().contains(supported)))
+                .sorted(Comparator.comparing(Subscription::getReceiptStartDate, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+    }
+
+    public List<SubscriptionCardView> getSubscriptionCardsForWeek(LocalDate weekStart, LocalDate weekEnd) {
+        return findSubscriptionsForWeek(weekStart, weekEnd).stream()
+                .map(s -> SubscriptionCardView.builder()
+                        .subscription(s)
+                        .priceBadge(priceBadgeCalculator.computePriceBadge(s))
+                        .build())
+                .toList();
     }
 
     public List<Subscription> findByMonth(int year, int month) {

@@ -1,9 +1,9 @@
 package com.yunbok.houseping.core.service.notification;
 
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.support.dto.NotificationTarget;
-import com.yunbok.houseping.adapter.dto.SubscriptionInfo;
-import com.yunbok.houseping.adapter.persistence.NotificationSubscriptionPersistenceAdapter;
+import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionStore;
 import com.yunbok.houseping.core.port.NotificationSender;
 import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
 import com.yunbok.houseping.entity.NotificationHistoryEntity;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class DailyNotificationService {
 
     private final SubscriptionCollector subscriptionCollector;
-    private final NotificationSubscriptionPersistenceAdapter persistencePort;
+    private final NotificationSubscriptionStore persistencePort;
     private final Optional<NotificationSender> notificationSender;
     private final NotificationHistoryRepository historyRepository;
 
@@ -42,7 +42,7 @@ public class DailyNotificationService {
 
         List<NotificationTarget> receiptEndToday = persistencePort.findPendingReceiptEndTargets(today);
         List<NotificationTarget> receiptStartTomorrow = persistencePort.findPendingReceiptStartTargets(tomorrow);
-        List<SubscriptionInfo> newSubscriptions = subscriptionCollector.collectFromAllAreas(today);
+        List<Subscription> newSubscriptions = subscriptionCollector.collectFromAllAreas(today);
 
         return new DailyNotificationReport(
                 receiptEndToday,
