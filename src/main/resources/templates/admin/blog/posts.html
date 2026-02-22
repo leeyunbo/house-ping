@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Houseping - 발행 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fff1f2 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .meta {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav a:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .nav a.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .flash-message {
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: var(--bg);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-published {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-draft {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid transparent;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state p {
+            font-size: 15px;
+        }
+
+        .post-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .post-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 20px; }
+            h1 { font-size: 22px; }
+            .table-wrapper { overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div>
+        <h1>발행 관리</h1>
+        <p class="meta">블로그 포스트 발행 현황</p>
+    </div>
+    <div class="user-info">
+        <span class="user-name" sec:authentication="name">관리자</span>
+        <a href="/auth/logout" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="nav">
+    <a href="/admin/dashboard">대시보드</a>
+    <a href="/admin/subscriptions">청약 데이터</a>
+    <a href="/admin/subscriptions/calendar">청약 캘린더</a>
+    <a href="/admin/competition-rates">경쟁률 데이터</a>
+    <a href="/admin/users" sec:authorize="hasRole('MASTER')">회원 관리</a>
+    <a href="/admin/system" sec:authorize="hasRole('MASTER')">시스템 관리</a>
+    <a href="/admin/blog/weekly">블로그</a>
+    <a href="/admin/blog/posts" class="active">발행 관리</a>
+</div>
+
+<div class="container">
+    <div th:if="${message}" class="flash-message" th:text="${message}"></div>
+
+    <div class="section-card">
+        <div class="table-wrapper">
+            <table th:if="${!posts.isEmpty()}">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>제목</th>
+                    <th>기간</th>
+                    <th>상태</th>
+                    <th>발행일</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="post : ${posts}">
+                    <td th:text="${post.id}">1</td>
+                    <td>
+                        <a th:href="@{/home/blog/{id}(id=${post.id})}" class="post-link"
+                           th:text="${post.title}" target="_blank">제목</a>
+                    </td>
+                    <td>
+                        <span th:text="${#temporals.format(post.weekStartDate, 'M/d')}">1/1</span>
+                        ~
+                        <span th:text="${#temporals.format(post.weekEndDate, 'M/d')}">1/7</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-published"
+                              th:if="${post.status.name() == 'PUBLISHED'}">발행됨</span>
+                        <span class="status-badge status-draft"
+                              th:if="${post.status.name() == 'DRAFT'}">임시저장</span>
+                    </td>
+                    <td>
+                        <span th:if="${post.publishedAt}"
+                              th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd HH:mm')}">2026-01-01</span>
+                        <span th:unless="${post.publishedAt}" style="color: var(--text-muted);">-</span>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <form th:if="${post.status.name() == 'PUBLISHED'}"
+                                  th:action="@{/admin/blog/posts/{id}/unpublish(id=${post.id})}"
+                                  method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-outline"
+                                        onclick="return confirm('게시를 중단하시겠습니까?')">게시 중단</button>
+                            </form>
+                            <form th:action="@{/admin/blog/posts/{id}/delete(id=${post.id})}"
+                                  method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger"
+                                        onclick="return confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')">삭제</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div th:if="${posts.isEmpty()}" class="empty-state">
+                <p>아직 발행된 포스트가 없습니다.</p>
+                <p style="margin-top: 8px;"><a href="/admin/blog/weekly" class="post-link">블로그 콘텐츠 생성하기</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

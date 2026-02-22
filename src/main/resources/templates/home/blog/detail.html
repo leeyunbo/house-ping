@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head(${post.title}, ${post.title} + ' - 하우스핑 청약 블로그')}"></head>
+<head>
+    <style>
+        .blog-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .blog-header {
+            padding: 40px 0 24px;
+        }
+
+        .blog-header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.4;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+        }
+
+        .blog-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .blog-meta-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            opacity: 0.4;
+        }
+
+        .blog-content {
+            padding-bottom: 40px;
+        }
+
+        .blog-intro {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .card-section {
+            margin-bottom: 36px;
+        }
+
+        .card-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        .card-image {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+        }
+
+        .card-narrative {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+        }
+
+        .blog-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 32px 0;
+        }
+
+        .blog-footer-text {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .blog-disclaimer {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .naver-copy-section {
+            margin: 32px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .naver-copy-section p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .btn-naver {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #03c75a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .btn-naver:hover {
+            background: #02b351;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: color 0.15s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--text);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+<nav th:replace="~{fragments/home-layout :: navbar('blog')}"></nav>
+
+<div class="blog-container">
+    <div class="blog-header">
+        <a href="/home/blog" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            블로그 목록
+        </a>
+        <h1 th:text="${post.title}">제목</h1>
+        <div class="blog-meta">
+            <span th:if="${post.publishedAt}" th:text="${#temporals.format(post.publishedAt, 'yyyy년 M월 d일')}">2026년 1월 1일</span>
+            <span class="blog-meta-dot"></span>
+            <span>
+                <span th:text="${#temporals.format(post.weekStartDate, 'M/d')}">1/1</span>
+                ~
+                <span th:text="${#temporals.format(post.weekEndDate, 'M/d')}">1/7</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="blog-content">
+        <p class="blog-intro">안녕하세요, 하우스핑입니다.<br>이번 주 서울/경기 지역에서 눈여겨볼 청약을 정리해 드립니다.</p>
+
+        <div th:each="card : ${cards}" class="card-section">
+            <h2>
+                <span th:text="${card.rank}">1</span>.
+                <span th:text="${card.houseName}">단지명</span>
+            </h2>
+            <img th:src="@{/home/blog/{postId}/card/{rank}.png(postId=${post.id}, rank=${card.rank})}"
+                 th:alt="${card.houseName}"
+                 class="card-image" loading="lazy"/>
+            <div class="card-narrative"
+                 th:text="${#strings.replace(card.narrativeText, '[카드 이미지]', '')}">서술 텍스트</div>
+        </div>
+
+        <hr class="blog-divider"/>
+        <p class="blog-footer-text">
+            더 자세한 분석은 <a href="/home" style="color: var(--primary); text-decoration: none; font-weight: 600;">house-ping.com</a>에서 확인하세요.
+        </p>
+        <p class="blog-disclaimer">
+            ※ 본 콘텐츠는 청약Home·LH·국토교통부 공공데이터를 기반으로 작성되었으며, 정보의 정확성을 보장하지 않습니다.
+            시세 및 예상 차익은 주변 실거래가를 참고한 추정치이며, 실제와 다를 수 있습니다.
+            투자 및 청약 판단의 책임은 본인에게 있습니다.
+        </p>
+
+        <div class="naver-copy-section" th:if="${post.contentHtml}">
+            <p>네이버 블로그에 올리시려면 아래 버튼을 눌러 복사하세요</p>
+            <button class="btn-naver" onclick="copyNaverHtml()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                네이버 블로그에 복사
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">클립보드에 복사되었습니다</div>
+
+<footer th:replace="~{fragments/home-layout :: footer}"></footer>
+<nav th:replace="~{fragments/home-layout :: bottomTab('blog')}"></nav>
+<script th:replace="~{fragments/home-layout :: themeScript}"></script>
+
+<script th:inline="javascript">
+function copyNaverHtml() {
+    var postId = [[${post.id}]];
+    fetch('/home/blog/' + postId + '/naver-html')
+        .then(function(res) { return res.text(); })
+        .then(function(html) {
+            var blob = new Blob([html], { type: 'text/html' });
+            var plainBlob = new Blob([html], { type: 'text/plain' });
+            var item = new ClipboardItem({
+                'text/html': blob,
+                'text/plain': plainBlob
+            });
+            navigator.clipboard.write([item]).then(function() {
+                showToast();
+            });
+        })
+        .catch(function(err) {
+            console.error('복사 실패:', err);
+            alert('복사에 실패했습니다. 브라우저에서 클립보드 권한을 확인해 주세요.');
+        });
+}
+
+function showToast() {
+    var toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 2000);
+}
+</script>
+</body>
+</html>

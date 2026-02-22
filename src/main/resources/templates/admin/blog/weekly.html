@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Houseping - 블로그 콘텐츠</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fff1f2 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .meta {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav a:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .nav a.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .controls label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .controls select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .section-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .blog-text-preview {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.8;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-outline {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 24px;
+        }
+
+        .card-entry {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .card-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-rank {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-image-wrapper {
+            margin-bottom: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .card-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--text);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 20px; }
+            .card-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div>
+        <h1>블로그 콘텐츠</h1>
+        <p class="meta">주간 TOP N 청약 블로그 콘텐츠 생성</p>
+    </div>
+    <div class="user-info">
+        <span class="user-name" sec:authentication="name">관리자</span>
+        <a href="/auth/logout" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="nav">
+    <a href="/admin/dashboard">대시보드</a>
+    <a href="/admin/subscriptions">청약 데이터</a>
+    <a href="/admin/subscriptions/calendar">청약 캘린더</a>
+    <a href="/admin/competition-rates">경쟁률 데이터</a>
+    <a href="/admin/users" sec:authorize="hasRole('MASTER')">회원 관리</a>
+    <a href="/admin/system" sec:authorize="hasRole('MASTER')">시스템 관리</a>
+    <a href="/admin/blog/weekly" class="active">블로그</a>
+    <a href="/admin/blog/posts">발행 관리</a>
+</div>
+
+<div class="container">
+    <!-- Controls -->
+    <div class="controls">
+        <label for="topN">TOP N 개수:</label>
+        <select id="topN" onchange="location.href='/admin/blog/weekly?topN=' + this.value">
+            <option value="3" th:selected="${topN == 3}">3개</option>
+            <option value="5" th:selected="${topN == 5}">5개</option>
+            <option value="7" th:selected="${topN == 7}">7개</option>
+            <option value="10" th:selected="${topN == 10}">10개</option>
+        </select>
+    </div>
+
+    <!-- Blog Text Preview -->
+    <div class="section-card">
+        <div class="section-title">블로그 텍스트 미리보기</div>
+        <div class="blog-text-preview" id="blogText" th:text="${result.blogText}"></div>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="copyText()">복사하기</button>
+            <form th:action="@{/admin/blog/publish}" method="post" style="display:inline;">
+                <input type="hidden" name="topN" th:value="${topN}"/>
+                <button type="submit" class="btn btn-success" onclick="return confirm('이 콘텐츠를 블로그에 발행하시겠습니까?')">발행하기</button>
+            </form>
+            <form th:action="@{/admin/blog/generate-ai}" method="post" style="display:inline;">
+                <input type="hidden" name="topN" th:value="${topN}"/>
+                <button type="submit" class="btn btn-primary" onclick="return confirm('AI로 블로그 DRAFT를 생성하시겠습니까?')">AI 블로그 생성</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Card Images -->
+    <div class="section-card">
+        <div class="section-title">카드 이미지</div>
+        <div class="card-grid">
+            <div class="card-entry" th:each="entry : ${entries}">
+                <div class="card-entry-header">
+                    <span class="card-rank" th:text="'#' + ${entry.rank()}">1</span>
+                    <span class="card-name" th:text="${entry.houseName()}">단지명</span>
+                </div>
+                <div class="card-image-wrapper">
+                    <img th:src="'data:image/png;base64,' + ${entry.cardImageBase64()}" alt="카드 이미지"/>
+                </div>
+                <div class="btn-group">
+                    <a class="btn btn-success"
+                       th:href="'/admin/blog/card/' + ${entry.subscriptionId()} + '?topN=' + ${topN}">다운로드</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">클립보드에 복사되었습니다</div>
+
+<script>
+function copyText() {
+    const text = document.getElementById('blogText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast();
+    }).catch(() => {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast();
+    });
+}
+
+function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>

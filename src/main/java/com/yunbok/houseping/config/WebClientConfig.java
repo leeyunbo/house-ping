@@ -104,6 +104,20 @@ public class WebClientConfig {
     }
 
     /**
+     * Claude API용 WebClient
+     */
+    @Bean
+    public WebClient claudeWebClient(@Value("${claude.api.key:}") String apiKey) {
+        return WebClient.builder()
+                .baseUrl("https://api.anthropic.com")
+                .defaultHeader("x-api-key", apiKey)
+                .defaultHeader("anthropic-version", "2023-06-01")
+                .defaultHeader("Content-Type", "application/json")
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
+    }
+
+    /**
      * 국토교통부 실거래가 API용 WebClient
      * XML 응답을 Jackson으로 파싱
      */

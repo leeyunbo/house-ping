@@ -68,6 +68,8 @@ feature:
   notification:
     telegram-enabled: false       # 텔레그램 알림
     slack-enabled: true           # Slack 알림
+  blog:
+    ai-generation-enabled: true   # AI 블로그 자동 생성
 
 # 동기화 설정
 sync:
@@ -97,6 +99,12 @@ lh:
     key: ${LH_API_KEY}
   web:
     base-url: https://apply.lh.or.kr
+
+# Claude API 설정
+claude:
+  api:
+    key: ${CLAUDE_API_KEY:}
+    model: claude-sonnet-4-20250514
 
 # 텔레그램 설정
 telegram:
