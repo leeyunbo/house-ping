@@ -1,5 +1,6 @@
 package com.yunbok.houseping.entity;
 
+import com.yunbok.houseping.support.dto.BlogContentResult;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,4 +41,15 @@ public class BlogCardImageEntity {
     @Lob
     @Column(name = "image_data")
     private byte[] imageData;
+
+    public static BlogCardImageEntity from(Long blogPostId, BlogContentResult.BlogCardEntry entry) {
+        return BlogCardImageEntity.builder()
+                .blogPostId(blogPostId)
+                .rank(entry.getRank())
+                .houseName(entry.getHouseName())
+                .subscriptionId(entry.getSubscriptionId())
+                .narrativeText(entry.getNarrativeText())
+                .imageData(entry.getCardImage())
+                .build();
+    }
 }

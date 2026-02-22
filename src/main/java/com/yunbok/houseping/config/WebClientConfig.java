@@ -72,7 +72,7 @@ public class WebClientConfig {
     }
 
     /**
-     * LH 웹 캘린더용 WebClient (API 다운 시 대체)
+     * LH 웹 캘린더용 WebClient
      */
     @Bean
     public WebClient lhWebCalendarClient() {

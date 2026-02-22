@@ -1,6 +1,5 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.core.domain.BlogPost;
 import com.yunbok.houseping.core.service.blog.BlogPublishService;
 import com.yunbok.houseping.core.service.blog.WeeklyBlogContentService;
 import com.yunbok.houseping.support.dto.BlogContentResult;
@@ -88,11 +87,11 @@ public class AdminBlogController {
     @PostMapping("/generate-ai")
     public String generateAi(@RequestParam(defaultValue = "5") int topN,
                               RedirectAttributes redirectAttributes) {
-        var result = blogPublishService.saveDraftWithAi(topN);
-        if (result.isPresent()) {
+        try {
+            blogPublishService.saveDraftWithAi(topN);
             redirectAttributes.addFlashAttribute("message", "AI 블로그 DRAFT가 생성되었습니다.");
-        } else {
-            redirectAttributes.addFlashAttribute("message", "AI 블로그 생성에 실패했습니다. 로그를 확인해주세요.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "AI 블로그 생성에 실패했습니다: " + e.getMessage());
         }
         return "redirect:/admin/blog/posts";
     }

@@ -63,6 +63,16 @@ public class SubscriptionSearchService {
                 .toList();
     }
 
+    public List<SubscriptionCardView> getAllActiveAndUpcoming() {
+        List<Subscription> all = findActiveAndUpcomingSubscriptions(null);
+        return all.stream()
+                .map(s -> SubscriptionCardView.builder()
+                        .subscription(s)
+                        .priceBadge(priceBadgeCalculator.computePriceBadge(s))
+                        .build())
+                .toList();
+    }
+
     public HomePageResult getHomeData(String area) {
         List<Subscription> activeUpcoming = findActiveAndUpcomingSubscriptions(area);
 

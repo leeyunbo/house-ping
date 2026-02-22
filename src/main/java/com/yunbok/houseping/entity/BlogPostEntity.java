@@ -89,4 +89,14 @@ public class BlogPostEntity {
     public void unpublish() {
         this.status = BlogPostStatus.DRAFT;
     }
+
+    public static BlogPostEntity createDraft(String title, LocalDate weekStart, LocalDate weekEnd, int topN) {
+        return BlogPostEntity.builder()
+                .title(title)
+                .weekStartDate(weekStart)
+                .weekEndDate(weekEnd)
+                .topN(topN)
+                .status(BlogPostStatus.DRAFT)
+                .build();
+    }
 }

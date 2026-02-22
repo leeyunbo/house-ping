@@ -23,5 +23,16 @@ public class BlogContentResult {
         private final int rank;
         private final String narrativeText;
         private final byte[] cardImage;
+
+        public static BlogCardEntry createWithImage(Long subscriptionId, String houseName,
+                                                     int rank, String narrativeText, byte[] cardImage) {
+            return BlogCardEntry.builder()
+                    .subscriptionId(subscriptionId)
+                    .houseName(houseName)
+                    .rank(rank)
+                    .narrativeText(narrativeText)
+                    .cardImage(cardImage)
+                    .build();
+        }
     }
 }

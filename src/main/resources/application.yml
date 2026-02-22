@@ -105,6 +105,7 @@ claude:
   api:
     key: ${CLAUDE_API_KEY:}
     model: claude-sonnet-4-20250514
+    max-tokens: 4096
 
 # 텔레그램 설정
 telegram:

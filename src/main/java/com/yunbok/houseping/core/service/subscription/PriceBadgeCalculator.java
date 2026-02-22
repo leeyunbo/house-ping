@@ -28,6 +28,18 @@ public class PriceBadgeCalculator {
     private final AddressHelper addressHelper;
     private final HouseTypeComparisonBuilder comparisonBuilder;
 
+    /**
+     * 청약 분양가와 주변 시세를 비교하여 가격 배지를 산출한다.
+     *
+     * <ol>
+     *   <li>LH 청약이거나 관리번호·주소가 없으면 {@code UNKNOWN}</li>
+     *   <li>대표 평형(84㎡ 기준, ±5㎡ 허용)의 분양가를 선택</li>
+     *   <li>같은 동 내 최근 4년 이내 신축 실거래가 중 유사 면적(±5㎡)의 중앙값을 시세로 산출</li>
+     *   <li>분양가 &lt; 시세의 95% → {@code CHEAP}</li>
+     *   <li>분양가 &gt; 시세의 105% → {@code EXPENSIVE}</li>
+     *   <li>그 외 → {@code UNKNOWN}</li>
+     * </ol>
+     */
     public PriceBadge computePriceBadge(Subscription subscription) {
         if (subscription.getSource() != null && subscription.getSource().toUpperCase().contains("LH")) {
             return PriceBadge.UNKNOWN;

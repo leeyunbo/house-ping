@@ -14,13 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class BlogPostPersistenceAdapter {
+public class BlogPostStore {
 
     private final BlogPostRepository blogPostRepository;
     private final BlogCardImageRepository blogCardImageRepository;
+
+    // ── Command ──
 
     @Transactional
     public BlogPost saveDraft(BlogContentResult content, int topN) {
@@ -28,32 +32,18 @@ public class BlogPostPersistenceAdapter {
         LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = weekStart.plusDays(6);
 
-        BlogPostEntity entity = blogPostRepository
+        BlogPostEntity blogPost = blogPostRepository
                 .findByWeekStartDateAndWeekEndDate(weekStart, weekEnd)
-                .orElse(BlogPostEntity.builder()
-                        .title(content.getTitle())
-                        .weekStartDate(weekStart)
-                        .weekEndDate(weekEnd)
-                        .topN(topN)
-                        .status(BlogPostStatus.DRAFT)
-                        .build());
+                .orElse(BlogPostEntity.createDraft(content.getTitle(), weekStart, weekEnd, topN));
 
-        entity.publish(null, content.getBlogText());
-        BlogPostEntity saved = blogPostRepository.save(entity);
+        blogPost.publish(null, content.getBlogText());
+        BlogPostEntity saved = blogPostRepository.save(blogPost);
 
-        // 카드 이미지 삭제 후 재저장
         blogCardImageRepository.deleteByBlogPostId(saved.getId());
-        blogCardImageRepository.flush();
+        blogCardImageRepository.flush(); // DELETE → INSERT 순서를 보장하기 위해 flush
 
         for (BlogContentResult.BlogCardEntry entry : content.getEntries()) {
-            blogCardImageRepository.save(BlogCardImageEntity.builder()
-                    .blogPostId(saved.getId())
-                    .rank(entry.getRank())
-                    .houseName(entry.getHouseName())
-                    .subscriptionId(entry.getSubscriptionId())
-                    .narrativeText(entry.getNarrativeText())
-                    .imageData(entry.getCardImage())
-                    .build());
+            blogCardImageRepository.save(BlogCardImageEntity.from(saved.getId(), entry));
         }
 
         return saved.toDomain();
@@ -61,8 +51,8 @@ public class BlogPostPersistenceAdapter {
 
     @Transactional
     public void updateContentHtml(Long postId, String contentHtml) {
-        blogPostRepository.findById(postId).ifPresent(entity -> {
-            entity.publish(contentHtml, entity.getContentText());
+        blogPostRepository.findById(postId).ifPresent(post -> {
+            post.publish(contentHtml, post.getContentText());
         });
     }
 
@@ -75,5 +65,34 @@ public class BlogPostPersistenceAdapter {
     public void delete(Long id) {
         blogCardImageRepository.deleteByBlogPostId(id);
         blogPostRepository.deleteById(id);
+    }
+
+    // ── Query ──
+
+    public Optional<BlogPost> findById(Long id) {
+        return blogPostRepository.findById(id)
+                .map(BlogPostEntity::toDomain);
+    }
+
+    public List<BlogPost> findPublished() {
+        return blogPostRepository.findByStatusOrderByPublishedAtDesc(BlogPostStatus.PUBLISHED)
+                .stream()
+                .map(BlogPostEntity::toDomain)
+                .toList();
+    }
+
+    public List<BlogPost> findAll() {
+        return blogPostRepository.findAll()
+                .stream()
+                .map(BlogPostEntity::toDomain)
+                .toList();
+    }
+
+    public List<BlogCardImageEntity> findCardImages(Long postId) {
+        return blogCardImageRepository.findByBlogPostIdOrderByRankAsc(postId);
+    }
+
+    public Optional<BlogCardImageEntity> findCardImage(Long postId, int rank) {
+        return blogCardImageRepository.findByBlogPostIdAndRank(postId, rank);
     }
 }
