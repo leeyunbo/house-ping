@@ -4,7 +4,7 @@ import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.support.dto.NotificationTarget;
 import com.yunbok.houseping.core.domain.Subscription;
-import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionStore;
+import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.port.NotificationSender;
 import com.yunbok.houseping.repository.NotificationHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class DailyNotificationServiceTest {
     private SubscriptionCollector subscriptionCollector;
 
     @Mock
-    private NotificationSubscriptionStore persistencePort;
+    private NotificationSubscriptionPersistencePort persistencePort;
 
     @Mock
     private NotificationSender notificationSender;

@@ -2,7 +2,7 @@ package com.yunbok.houseping.core.service.subscription;
 
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionStatus;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.support.dto.AnnouncedSubscriptionView;
@@ -34,7 +34,7 @@ public class SubscriptionSearchService {
 
     private static final List<String> SUPPORTED_AREAS = List.of("서울", "경기");
 
-    private final SubscriptionStore subscriptionQueryPort;
+    private final SubscriptionPersistencePort subscriptionQueryPort;
     private final CompetitionRateRepository competitionRateRepository;
     private final PriceBadgeCalculator priceBadgeCalculator;
 

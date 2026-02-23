@@ -2,6 +2,7 @@ package com.yunbok.houseping.infrastructure.persistence;
 
 import com.yunbok.houseping.core.domain.BlogPost;
 import com.yunbok.houseping.core.domain.BlogPostStatus;
+import com.yunbok.houseping.core.port.BlogPostPersistencePort;
 import com.yunbok.houseping.entity.BlogCardImageEntity;
 import com.yunbok.houseping.entity.BlogPostEntity;
 import com.yunbok.houseping.repository.BlogCardImageRepository;
@@ -19,7 +20,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class BlogPostStore {
+public class BlogPostStore implements BlogPostPersistencePort {
 
     private final BlogPostRepository blogPostRepository;
     private final BlogCardImageRepository blogCardImageRepository;

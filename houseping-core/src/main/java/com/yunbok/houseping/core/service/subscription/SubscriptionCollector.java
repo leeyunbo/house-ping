@@ -2,7 +2,7 @@ package com.yunbok.houseping.core.service.subscription;
 
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionConfig;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionCollector {
 
-    private final SubscriptionStore subscriptionStore;
+    private final SubscriptionPersistencePort subscriptionStore;
     private final SubscriptionConfig config;
 
     public List<Subscription> collectFromAllAreas(LocalDate targetDate) {

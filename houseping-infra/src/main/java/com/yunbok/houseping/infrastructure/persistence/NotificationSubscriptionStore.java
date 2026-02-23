@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
+import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.support.dto.NotificationTarget;
 import com.yunbok.houseping.entity.NotificationSubscriptionEntity;
 import com.yunbok.houseping.repository.NotificationSubscriptionRepository;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class NotificationSubscriptionStore {
+public class NotificationSubscriptionStore implements NotificationSubscriptionPersistencePort {
 
     private final NotificationSubscriptionRepository notificationSubscriptionRepository;
     private final SubscriptionRepository subscriptionRepository;

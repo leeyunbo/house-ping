@@ -1,6 +1,7 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
 import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.core.port.CompetitionRatePersistencePort;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 @Component
 @RequiredArgsConstructor
-public class CompetitionRateDbStore {
+public class CompetitionRateDbStore implements CompetitionRatePersistencePort {
 
     private final CompetitionRateRepository repository;
 

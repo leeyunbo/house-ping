@@ -1,7 +1,7 @@
 package com.yunbok.houseping.support.util;
 
 import com.yunbok.houseping.core.domain.RealTransaction;
-import com.yunbok.houseping.infrastructure.persistence.RegionCodeStore;
+import com.yunbok.houseping.core.port.RegionCodePersistencePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class AddressHelper {
 
-    private final RegionCodeStore regionCodeQueryPort;
+    private final RegionCodePersistencePort regionCodeQueryPort;
 
     // 시도 + 시군구 패턴 (용인시 수지구 같은 복합 구조도 지원)
     private static final Pattern SIGUNGU_PATTERN = Pattern.compile(

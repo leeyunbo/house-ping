@@ -1,6 +1,7 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
 import com.yunbok.houseping.core.domain.RealTransaction;
+import com.yunbok.houseping.core.port.RealTransactionPersistencePort;
 import com.yunbok.houseping.entity.RealTransactionCacheEntity;
 import com.yunbok.houseping.repository.RealTransactionCacheRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 @Component
 @RequiredArgsConstructor
-public class RealTransactionStore {
+public class RealTransactionStore implements RealTransactionPersistencePort {
 
     private final RealTransactionCacheRepository realTransactionCacheRepository;
 

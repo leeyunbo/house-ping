@@ -4,8 +4,8 @@ import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionPrice;
 import com.yunbok.houseping.core.service.subscription.PriceBadgeCalculator;
 import com.yunbok.houseping.core.service.subscription.SubscriptionSearchService;
-import com.yunbok.houseping.infrastructure.api.ClaudeApiClient;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceStore;
+import com.yunbok.houseping.core.port.AiContentPort;
+import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
 import com.yunbok.houseping.support.dto.BlogContentResult;
 import com.yunbok.houseping.support.dto.SubscriptionCardView;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +28,9 @@ public class AiBlogContentService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("M/d");
 
     private final SubscriptionSearchService subscriptionSearchService;
-    private final SubscriptionPriceStore subscriptionPriceStore;
+    private final SubscriptionPricePersistencePort subscriptionPriceStore;
     private final PriceBadgeCalculator priceBadgeCalculator;
-    private final ClaudeApiClient claudeApiClient;
+    private final AiContentPort claudeApiClient;
     private final BlogPromptBuilder promptBuilder;
 
     public BlogContentResult generateAiBlogContent(int topN) {

@@ -1,9 +1,9 @@
 package com.yunbok.houseping.core.service.subscription;
 
-import com.yunbok.houseping.infrastructure.persistence.RealTransactionStore;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceStore;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
+import com.yunbok.houseping.core.port.RealTransactionPersistencePort;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
+import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.support.dto.CompetitionRateDetailRow;
@@ -32,9 +32,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionAnalysisService {
 
-    private final SubscriptionStore subscriptionQueryPort;
-    private final SubscriptionPriceStore subscriptionPriceQueryPort;
-    private final RealTransactionStore realTransactionQueryPort;
+    private final SubscriptionPersistencePort subscriptionQueryPort;
+    private final SubscriptionPricePersistencePort subscriptionPriceQueryPort;
+    private final RealTransactionPersistencePort realTransactionQueryPort;
     private final RealTransactionFetchPort realTransactionFetchPort;
     private final CompetitionRateRepository competitionRateRepository;
 

@@ -1,6 +1,7 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
 import com.yunbok.houseping.core.domain.Subscription;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class SubscriptionStore {
+public class SubscriptionStore implements SubscriptionPersistencePort {
 
     private final SubscriptionRepository subscriptionRepository;
 

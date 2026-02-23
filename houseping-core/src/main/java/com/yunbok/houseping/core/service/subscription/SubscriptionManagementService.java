@@ -2,8 +2,8 @@ package com.yunbok.houseping.core.service.subscription;
 
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionConfig;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import com.yunbok.houseping.support.dto.SyncResult;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SubscriptionManagementService {
 
-    private final SubscriptionStore subscriptionStore;
+    private final SubscriptionPersistencePort subscriptionStore;
     private final List<SubscriptionProviderChain> chains;
     private final SubscriptionConfig config;
 

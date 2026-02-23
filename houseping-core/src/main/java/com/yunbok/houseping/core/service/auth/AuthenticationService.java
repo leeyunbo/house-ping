@@ -4,7 +4,7 @@ import com.yunbok.houseping.config.oauth2.OAuth2UserInfo;
 import com.yunbok.houseping.core.domain.User;
 import com.yunbok.houseping.core.domain.UserRole;
 import com.yunbok.houseping.core.domain.UserStatus;
-import com.yunbok.houseping.infrastructure.persistence.UserStore;
+import com.yunbok.houseping.core.port.UserPersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserStore userPersistencePort;
+    private final UserPersistencePort userPersistencePort;
 
     @Value("${master.admin.naver-id:}")
     private String masterNaverId;

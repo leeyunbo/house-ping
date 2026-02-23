@@ -5,6 +5,8 @@ plugins {
 
 dependencies {
     implementation project(':houseping-core')
+    implementation project(':houseping-infra')
+    implementation project(':houseping-web')
     implementation project(':houseping-admin')
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

@@ -1,7 +1,7 @@
 package com.yunbok.houseping.core.service.subscription;
 
-import com.yunbok.houseping.infrastructure.persistence.RealTransactionStore;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionPriceStore;
+import com.yunbok.houseping.core.port.RealTransactionPersistencePort;
+import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
 import com.yunbok.houseping.core.domain.RealTransaction;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionPrice;
@@ -23,8 +23,8 @@ public class PriceBadgeCalculator {
 
     private static final BigDecimal AREA_TOLERANCE = new BigDecimal("5");
 
-    private final SubscriptionPriceStore subscriptionPriceQueryPort;
-    private final RealTransactionStore realTransactionQueryPort;
+    private final SubscriptionPricePersistencePort subscriptionPriceQueryPort;
+    private final RealTransactionPersistencePort realTransactionQueryPort;
     private final AddressHelper addressHelper;
     private final HouseTypeComparisonBuilder comparisonBuilder;
 

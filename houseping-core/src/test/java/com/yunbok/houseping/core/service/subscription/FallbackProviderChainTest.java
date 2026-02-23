@@ -1,6 +1,5 @@
 package com.yunbok.houseping.core.service.subscription;
 
-import com.yunbok.houseping.infrastructure.dto.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import org.junit.jupiter.api.DisplayName;
@@ -154,11 +153,11 @@ class FallbackProviderChainTest {
     }
 
     private Subscription createSubscription(String name) {
-        return ApplyHomeSubscriptionInfo.builder()
+        return Subscription.builder()
                 .houseName(name)
                 .area("서울")
                 .houseType("APT")
                 .receiptStartDate(LocalDate.now())
-                .build().toSubscription();
+                .build();
     }
 }

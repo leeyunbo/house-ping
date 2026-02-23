@@ -1,2 +1,2 @@
 rootProject.name = 'houseping'
-include 'houseping-core', 'houseping-admin', 'houseping-app'
+include 'houseping-core', 'houseping-infra', 'houseping-web', 'houseping-admin', 'houseping-app'

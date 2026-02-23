@@ -1,7 +1,7 @@
 package com.yunbok.houseping.core.service.notification;
 
 import com.yunbok.houseping.support.dto.NotificationTarget;
-import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionStore;
+import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.port.NotificationSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SubscriptionNotificationService {
 
-    private final NotificationSubscriptionStore persistencePort;
+    private final NotificationSubscriptionPersistencePort persistencePort;
     private final Optional<NotificationSender> notificationSender;
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy년 M월 d일");

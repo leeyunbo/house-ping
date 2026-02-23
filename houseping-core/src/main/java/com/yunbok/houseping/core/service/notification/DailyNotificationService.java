@@ -3,7 +3,7 @@ package com.yunbok.houseping.core.service.notification;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.support.dto.NotificationTarget;
-import com.yunbok.houseping.infrastructure.persistence.NotificationSubscriptionStore;
+import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.port.NotificationSender;
 import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
 import com.yunbok.houseping.entity.NotificationHistoryEntity;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class DailyNotificationService {
 
     private final SubscriptionCollector subscriptionCollector;
-    private final NotificationSubscriptionStore persistencePort;
+    private final NotificationSubscriptionPersistencePort persistencePort;
     private final Optional<NotificationSender> notificationSender;
     private final NotificationHistoryRepository historyRepository;
 

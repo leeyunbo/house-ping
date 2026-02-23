@@ -1,6 +1,7 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
 import com.yunbok.houseping.core.domain.User;
+import com.yunbok.houseping.core.port.UserPersistencePort;
 import com.yunbok.houseping.entity.UserEntity;
 import com.yunbok.houseping.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class UserStore {
+public class UserStore implements UserPersistencePort {
 
     private final UserRepository userRepository;
 

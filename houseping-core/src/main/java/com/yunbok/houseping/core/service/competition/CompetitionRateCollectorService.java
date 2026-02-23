@@ -2,9 +2,9 @@ package com.yunbok.houseping.core.service.competition;
 
 import com.yunbok.houseping.core.domain.CompetitionRate;
 import com.yunbok.houseping.core.domain.SubscriptionConfig;
-import com.yunbok.houseping.infrastructure.persistence.CompetitionRateDbStore;
+import com.yunbok.houseping.core.port.CompetitionRatePersistencePort;
 import com.yunbok.houseping.core.port.CompetitionRateProvider;
-import com.yunbok.houseping.infrastructure.persistence.SubscriptionStore;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CompetitionRateCollectorService {
 
-    private final CompetitionRateDbStore competitionRatePort;
-    private final SubscriptionStore subscriptionPort;
+    private final CompetitionRatePersistencePort competitionRatePort;
+    private final SubscriptionPersistencePort subscriptionPort;
     private final Optional<CompetitionRateProvider> competitionRateProvider;
     private final SubscriptionConfig config;
 

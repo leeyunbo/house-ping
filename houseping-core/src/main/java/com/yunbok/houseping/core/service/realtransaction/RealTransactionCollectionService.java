@@ -3,7 +3,7 @@ package com.yunbok.houseping.core.service.realtransaction;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.service.region.RegionCodeService;
 import com.yunbok.houseping.entity.SubscriptionEntity;
-import com.yunbok.houseping.infrastructure.api.RealTransactionApiClient;
+import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.repository.SubscriptionRepository;
 import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class RealTransactionCollectionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final RegionCodeService regionCodeService;
-    private final RealTransactionApiClient realTransactionApiClient;
+    private final RealTransactionFetchPort realTransactionFetchPort;
 
     public void collectRealTransactions() {
         log.info("[실거래가] 수집 시작");
@@ -54,7 +54,7 @@ public class RealTransactionCollectionService {
 
         for (String lawdCd : lawdCodes) {
             try {
-                realTransactionApiClient.fetchRecentTransactions(lawdCd, 6);
+                realTransactionFetchPort.fetchAndCacheRecentTransactions(lawdCd, 6);
                 successCount++;
                 ApiRateLimiter.delay(200);
             } catch (Exception e) {

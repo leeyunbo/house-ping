@@ -1,6 +1,6 @@
 package com.yunbok.houseping.core.service.blog;
 
-import com.yunbok.houseping.infrastructure.persistence.BlogPostStore;
+import com.yunbok.houseping.core.port.BlogPostPersistencePort;
 import com.yunbok.houseping.core.domain.BlogPost;
 import com.yunbok.houseping.entity.BlogCardImageEntity;
 import com.yunbok.houseping.support.dto.BlogContentResult;
@@ -18,7 +18,7 @@ public class BlogPublishService {
 
     private final WeeklyBlogContentService weeklyBlogContentService;
     private final AiBlogContentService aiBlogContentService;
-    private final BlogPostStore blogPostStore;
+    private final BlogPostPersistencePort blogPostStore;
     private final NaverHtmlBuilder naverHtmlBuilder;
 
     @Transactional

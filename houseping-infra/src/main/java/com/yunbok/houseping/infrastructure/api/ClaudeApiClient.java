@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.api;
 
+import com.yunbok.houseping.core.port.AiContentPort;
 import com.yunbok.houseping.infrastructure.api.dto.ClaudeRequest;
 import com.yunbok.houseping.infrastructure.api.dto.ClaudeResponse;
 import com.yunbok.houseping.support.exception.ClaudeApiException;
@@ -11,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
 @Component
-public class ClaudeApiClient {
+public class ClaudeApiClient implements AiContentPort {
 
     private final WebClient claudeWebClient;
     private final String model;

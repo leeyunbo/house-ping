@@ -1,6 +1,5 @@
 package com.yunbok.houseping.support.dto;
 
-import com.yunbok.houseping.infrastructure.dto.LhSubscriptionInfo;
 import com.yunbok.houseping.core.domain.Subscription;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -66,7 +65,7 @@ class DailyNotificationReportTest {
         @DisplayName("newSubscriptions에 데이터가 있으면 false를 반환한다")
         void returnsFalseWhenNewSubscriptionsNotEmpty() {
             // given
-            Subscription subscription = LhSubscriptionInfo.builder()
+            Subscription subscription = Subscription.builder()
                     .houseName("테스트")
                     .houseType("아파트")
                     .area("서울")
@@ -74,8 +73,7 @@ class DailyNotificationReportTest {
                     .receiptStartDate(LocalDate.now())
                     .receiptEndDate(LocalDate.now().plusDays(5))
                     .detailUrl("https://example.com")
-                    .subscriptionStatus("접수중")
-                    .build().toSubscription();
+                    .build();
             DailyNotificationReport report = new DailyNotificationReport(
                     List.of(), List.of(), List.of(subscription)
             );
@@ -101,7 +99,7 @@ class DailyNotificationReportTest {
                     2L, 200L, "테스트2", "경기",
                     LocalDate.now().plusDays(1), LocalDate.now().plusDays(5), 200, "https://example.com/2"
             );
-            Subscription subscription = LhSubscriptionInfo.builder()
+            Subscription subscription = Subscription.builder()
                     .houseName("테스트3")
                     .houseType("아파트")
                     .area("인천")
@@ -109,8 +107,7 @@ class DailyNotificationReportTest {
                     .receiptStartDate(LocalDate.now())
                     .receiptEndDate(LocalDate.now().plusDays(5))
                     .detailUrl("https://example.com/3")
-                    .subscriptionStatus("접수중")
-                    .build().toSubscription();
+                    .build();
 
             DailyNotificationReport report = new DailyNotificationReport(
                     List.of(target1),

@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
+import com.yunbok.houseping.core.port.RegionCodePersistencePort;
 import com.yunbok.houseping.entity.RegionCodeEntity;
 import com.yunbok.houseping.repository.RegionCodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.Optional;
  */
 @Component
 @RequiredArgsConstructor
-public class RegionCodeStore {
+public class RegionCodeStore implements RegionCodePersistencePort {
 
     private final RegionCodeRepository regionCodeRepository;
 
