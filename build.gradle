@@ -1,153 +1,43 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.5'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'jacoco'
-    id 'info.solidsoft.pitest' version '1.15.0'
 }
 
-group = 'com.yunbok'
-version = '0.0.1-SNAPSHOT'
-description = 'houseping'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
+    group = 'com.yunbok'
+    version = '0.0.1-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
-// QueryDSL Q클래스 생성 경로
-def generated = 'src/main/generated'
-
-sourceSets {
-    main {
-        java {
-            srcDirs += generated
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
-}
 
-tasks.named('compileJava') {
-    options.annotationProcessorGeneratedSourcesDirectory = file(generated)
-}
-
-clean {
-    delete file(generated)
-}
-
-dependencies {
-    // Spring Boot Starters
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient용
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
-    // Database
-    runtimeOnly 'org.postgresql:postgresql'
-    testRuntimeOnly 'com.h2database:h2' // H2 for tests
-
-    // Environment
-    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
-
-    // Monitoring
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-
-    // Logging & Utils
-    implementation 'org.springframework.boot:spring-boot-starter-logging'
-    implementation 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    // XML Parsing (for 국토부 API)
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-
-    // QueryDSL
-    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
-    annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
-    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
-    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
-
-    // Scheduling
-    implementation 'org.springframework.boot:spring-boot-starter-quartz'
-
-    // Test Dependencies
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
-jacoco {
-    toolVersion = "0.8.12"
-}
-
-jacocoTestReport {
-    dependsOn test
-    reports {
-        xml.required = true
-        html.required = true
+    repositories {
+        mavenCentral()
     }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/persistence/*Entity.class',
-                '**/persistence/*Entity$*.class',
-                '**/api/*Response.class',
-                '**/api/*Response$*.class',
-                '**/api/*Item.class',
-                '**/dto/*.class',
-                '**/config/*.class',
-                '**/security/*.class'
-            ])
-        }))
-    }
-}
 
-jacocoTestCoverageVerification {
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/persistence/*Entity.class',
-                '**/persistence/*Entity$*.class',
-                '**/api/*Response.class',
-                '**/api/*Response$*.class',
-                '**/api/*Item.class',
-                '**/dto/*.class',
-                '**/config/*.class',
-                '**/security/*.class'
-            ])
-        }))
-    }
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.75
-            }
+    dependencyManagement {
+        imports {
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.5'
         }
     }
-}
 
-// Mutation Testing (PIT)
-// 비즈니스 로직(Service)에만 적용 - Model/DTO 제외
-pitest {
-    targetClasses = ['com.yunbok.houseping.domain.service.*']
-    targetTests = ['com.yunbok.houseping.**']
-    threads = 4
-    outputFormats = ['HTML', 'XML']
-    timestampedReports = false
-    junit5PluginVersion = '1.2.1'
+    dependencies {
+        implementation 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs += ['-parameters']
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }

@@ -1,0 +1,71 @@
+plugins {
+    id 'org.springframework.boot' version '3.5.5'
+    id 'jacoco'
+}
+
+dependencies {
+    implementation project(':houseping-core')
+    implementation project(':houseping-admin')
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly 'org.postgresql:postgresql'
+    testRuntimeOnly 'com.h2database:h2'
+}
+
+tasks.named('test') {
+    workingDir = rootProject.projectDir
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/persistence/*Entity.class',
+                '**/persistence/*Entity$*.class',
+                '**/api/*Response.class',
+                '**/api/*Response$*.class',
+                '**/api/*Item.class',
+                '**/dto/*.class',
+                '**/config/*.class',
+                '**/security/*.class'
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/persistence/*Entity.class',
+                '**/persistence/*Entity$*.class',
+                '**/api/*Response.class',
+                '**/api/*Response$*.class',
+                '**/api/*Item.class',
+                '**/dto/*.class',
+                '**/config/*.class',
+                '**/security/*.class'
+            ])
+        }))
+    }
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.75
+            }
+        }
+    }
+}

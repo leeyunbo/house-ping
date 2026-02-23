@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+}
+
+// QueryDSL Q클래스 생성 경로
+def generated = 'src/main/generated'
+
+sourceSets {
+    main {
+        java {
+            srcDirs += generated
+        }
+    }
+}
+
+tasks.named('compileJava') {
+    options.annotationProcessorGeneratedSourcesDirectory = file(generated)
+}
+
+clean {
+    delete file(generated)
+}
+
+dependencies {
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.springframework.boot:spring-boot-starter-webflux'
+    api 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    api 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
+    api 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+
+    runtimeOnly 'org.postgresql:postgresql'
+    testRuntimeOnly 'com.h2database:h2'
+}

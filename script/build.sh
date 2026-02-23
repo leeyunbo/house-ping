@@ -10,8 +10,8 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # 설정
 APP_NAME="houseping"
-JAR_NAME="${APP_NAME}-0.0.1-SNAPSHOT.jar"
-JAR_PATH="${PROJECT_DIR}/build/libs/${JAR_NAME}"
+JAR_NAME="houseping-app-0.0.1-SNAPSHOT.jar"
+JAR_PATH="${PROJECT_DIR}/houseping-app/build/libs/${JAR_NAME}"
 
 # 기본값: 테스트 스킵
 SKIP_TEST=true

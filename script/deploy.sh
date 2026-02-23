@@ -44,7 +44,7 @@ backup_current_jar() {
         return 0
     fi
 
-    local JAR_PATH="../build/libs/${APP_NAME}-0.0.1-SNAPSHOT.jar"
+    local JAR_PATH="../houseping-app/build/libs/houseping-app-0.0.1-SNAPSHOT.jar"
 
     if [ ! -f "$JAR_PATH" ]; then
         echo "ℹ️  백업할 JAR 파일이 없습니다."
@@ -79,7 +79,7 @@ backup_current_jar() {
 
 # 기존 JAR 삭제
 clean_jar() {
-    local JAR_PATH="../build/libs/${APP_NAME}-0.0.1-SNAPSHOT.jar"
+    local JAR_PATH="../houseping-app/build/libs/houseping-app-0.0.1-SNAPSHOT.jar"
     if [ -f "$JAR_PATH" ]; then
         echo "🗑️  기존 JAR 파일 삭제..."
         rm -f "$JAR_PATH"

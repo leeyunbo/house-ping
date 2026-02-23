@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head(${post.title}, ${post.title} + ' - 하우스핑 청약 블로그')}"></head>
+<head>
+    <style>
+        .blog-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .blog-header {
+            padding: 40px 0 24px;
+        }
+
+        .blog-header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.4;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+        }
+
+        .blog-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .blog-meta-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            opacity: 0.4;
+        }
+
+        .blog-content {
+            padding-bottom: 40px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .blog-intro {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .blog-intro h1, .blog-intro h2, .blog-intro h3 {
+            color: var(--text);
+            margin-top: 28px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .blog-intro h1 { font-size: 22px; }
+        .blog-intro h2 { font-size: 18px; }
+        .blog-intro h3 { font-size: 16px; }
+
+        .blog-intro p {
+            margin-bottom: 16px;
+        }
+
+        .blog-intro strong {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .blog-intro ul, .blog-intro ol {
+            margin: 8px 0 16px;
+            padding-left: 20px;
+        }
+
+        .blog-intro li {
+            margin-bottom: 6px;
+            line-height: 1.7;
+        }
+
+        .blog-intro li::marker {
+            color: var(--text-muted);
+        }
+
+        .blog-intro hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 24px 0;
+        }
+
+        .blog-intro blockquote {
+            border-left: 3px solid var(--primary);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: var(--text-secondary);
+        }
+
+        .subscription-list-section {
+            margin-top: 36px;
+        }
+
+        .subscription-list-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        .subscription-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .subscription-item {
+            background: var(--card);
+            padding: 16px 20px;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: background 0.15s ease;
+        }
+
+        .subscription-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .subscription-item-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .subscription-item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .subscription-item-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .badge-upcoming {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+        }
+
+        .subscription-item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        .info-dot {
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            opacity: 0.4;
+        }
+
+        .blog-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 32px 0;
+        }
+
+        .blog-footer-text {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .blog-disclaimer {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: color 0.15s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+    </style>
+</head>
+<body>
+<nav th:replace="~{fragments/home-layout :: navbar('blog')}"></nav>
+
+<div class="blog-container">
+    <div class="blog-header">
+        <a href="/home/blog" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            블로그 목록
+        </a>
+        <h1 th:text="${post.title}">제목</h1>
+        <div class="blog-meta">
+            <span th:if="${post.publishedAt}" th:text="${#temporals.format(post.publishedAt, 'yyyy년 M월 d일')}">2026년 1월 1일</span>
+            <span class="blog-meta-dot"></span>
+            <span>
+                <span th:text="${#temporals.format(post.weekStartDate, 'M/d')}">1/1</span>
+                ~
+                <span th:text="${#temporals.format(post.weekEndDate, 'M/d')}">1/7</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="blog-content">
+        <div id="ai-blog-content" class="blog-intro" th:if="${post.contentText}" th:attr="data-markdown=${post.contentText}"></div>
+        <div class="blog-intro" th:unless="${post.contentText}">
+            <p>안녕하세요, 하우스핑입니다.<br>이번 주 서울/경기 지역에서 눈여겨볼 청약을 정리해 드립니다.</p>
+        </div>
+
+        <div th:if="${!subscriptions.isEmpty()}" class="subscription-list-section">
+            <h2>이번 주 청약 리스트</h2>
+            <div class="subscription-list">
+                <a th:each="sub : ${subscriptions}"
+                   th:href="@{/home/subscription/{id}(id=${sub.id})}"
+                   class="subscription-item">
+                    <div class="subscription-item-header">
+                        <span class="subscription-item-badge badge-active"
+                              th:if="${sub.receiptInProgress}">접수중</span>
+                        <span class="subscription-item-badge badge-upcoming"
+                              th:unless="${sub.receiptInProgress}">접수예정</span>
+                        <span class="subscription-item-name" th:text="${sub.houseName}">단지명</span>
+                    </div>
+                    <div class="subscription-item-info">
+                        <span th:if="${sub.area}" th:text="${sub.area}">서울</span>
+                        <span th:if="${sub.totalSupplyCount}" class="info-dot"></span>
+                        <span th:if="${sub.totalSupplyCount}" th:text="${#numbers.formatInteger(sub.totalSupplyCount, 1, 'COMMA')} + '세대'">100세대</span>
+                        <span th:if="${sub.receiptStartDate}" class="info-dot"></span>
+                        <span th:if="${sub.receiptStartDate}">
+                            <span th:text="${#temporals.format(sub.receiptStartDate, 'M/d')}">2/17</span>
+                            <span th:if="${sub.receiptEndDate}">
+                                ~ <span th:text="${#temporals.format(sub.receiptEndDate, 'M/d')}">2/21</span>
+                            </span>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <hr class="blog-divider"/>
+        <p class="blog-footer-text">
+            더 자세한 분석은 <a href="/home" style="color: var(--primary); text-decoration: none; font-weight: 600;">house-ping.com</a>에서 확인하세요.
+        </p>
+        <p class="blog-disclaimer">
+            ※ 본 콘텐츠는 AI가 공공데이터를 기반으로 자동 생성한 글이며, 정보의 정확성을 보장하지 않습니다.
+            시세 및 예상 차익은 주변 최근 3년 내 준공 신축 아파트 실거래가를 참고한 추정치이며, 실제와 다를 수 있습니다.
+            투자 및 청약 판단의 책임은 본인에게 있습니다.
+        </p>
+
+    </div>
+</div>
+
+<footer th:replace="~{fragments/home-layout :: footer}"></footer>
+<nav th:replace="~{fragments/home-layout :: bottomTab('blog')}"></nav>
+<script th:replace="~{fragments/home-layout :: themeScript}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+(function() {
+    var el = document.getElementById('ai-blog-content');
+    if (el && el.dataset.markdown) {
+        el.innerHTML = marked.parse(el.dataset.markdown);
+    }
+})();
+</script>
+
+</body>
+</html>
