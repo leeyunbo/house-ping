@@ -19,8 +19,8 @@ public class ClaudeApiClient implements AiContentPort {
     private final int maxTokens;
 
     public ClaudeApiClient(@Qualifier("claudeWebClient") WebClient claudeWebClient,
-                            @Value("${claude.api.model:claude-sonnet-4-20250514}") String model,
-                            @Value("${claude.api.max-tokens:4096}") int maxTokens) {
+                           @Value("${claude.api.model:claude-sonnet-4-20250514}") String model,
+                           @Value("${claude.api.max-tokens:4096}") int maxTokens) {
         this.claudeWebClient = claudeWebClient;
         this.model = model;
         this.maxTokens = maxTokens;
@@ -47,8 +47,6 @@ public class ClaudeApiClient implements AiContentPort {
             }
 
             return text;
-        } catch (ClaudeApiException e) {
-            throw e;
         } catch (Exception e) {
             log.error("[Claude API] 호출 실패", e);
             throw new ClaudeApiException(e);

@@ -16,9 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -57,7 +54,7 @@ public class SubscriptionAnalysisService {
         log.info("동 필터링: {} → {}건 → {}건", dongName, allTransactions.size(), dongTransactions.size());
 
         // 신축 필터링 (최근 3년 내 준공)
-        int newBuildYearThreshold = LocalDate.now().getYear() - 2;
+        int newBuildYearThreshold = HouseTypeComparisonBuilder.newBuildYearThreshold();
         List<RealTransaction> newBuildTx = dongTransactions.stream()
                 .filter(t -> t.getBuildYear() != null && t.getBuildYear() >= newBuildYearThreshold)
                 .toList();
@@ -104,23 +101,12 @@ public class SubscriptionAnalysisService {
                         .rank(r.getRank())
                         .supplyCount(r.getSupplyCount())
                         .requestCount(r.getRequestCount())
-                        .competitionRate(effectiveRate(r))
+                        .competitionRate(r.getEffectiveRate())
                         .build())
                 .sorted(Comparator.comparing(CompetitionRateDetailRow::getHouseType, Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(CompetitionRateDetailRow::getRank, Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(d -> "해당지역".equals(d.getResidenceArea()) ? 0 : 1))
                 .toList();
-    }
-
-    private BigDecimal effectiveRate(CompetitionRateEntity r) {
-        if (r.getCompetitionRate() != null) {
-            return r.getCompetitionRate();
-        }
-        if (r.getSupplyCount() != null && r.getSupplyCount() > 0 && r.getRequestCount() != null) {
-            return BigDecimal.valueOf(r.getRequestCount())
-                    .divide(BigDecimal.valueOf(r.getSupplyCount()), 2, RoundingMode.HALF_UP);
-        }
-        return null;
     }
 
     /**

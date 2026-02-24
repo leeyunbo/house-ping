@@ -1,11 +1,32 @@
 plugins {
     id 'java'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
+
+repositories {
+    mavenCentral()
+}
+
+def jacocoExcludes = [
+    '**/persistence/*Entity.class',
+    '**/persistence/*Entity$*.class',
+    '**/api/*Response.class',
+    '**/api/*Response$*.class',
+    '**/api/*Item.class',
+    '**/dto/*.class',
+    '**/config/*.class',
+    '**/security/*.class'
+]
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
+
+    jacoco {
+        toolVersion = "0.8.12"
+    }
 
     group = 'com.yunbok'
     version = '0.0.1-SNAPSHOT'
@@ -39,5 +60,38 @@ subprojects {
 
     tasks.named('test') {
         useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.required = true
+            html.required = true
+        }
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: jacocoExcludes)
+            }))
+        }
+    }
+}
+
+// 전체 모듈 합산 리포트
+tasks.register('jacocoMergedReport', JacocoReport) {
+    dependsOn subprojects*.tasks*.named('test')
+
+    subprojects.each { subproject ->
+        executionData.from fileTree(dir: "${subproject.buildDir}/jacoco", include: '*.exec')
+        sourceDirectories.from files(subproject.sourceSets.main.java.srcDirs)
+        classDirectories.from files(subproject.sourceSets.main.output.classesDirs.files.collect {
+            fileTree(dir: it, exclude: jacocoExcludes)
+        })
+    }
+
+    reports {
+        xml.required = true
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/merged/html')
+        xml.outputLocation = layout.buildDirectory.file('reports/jacoco/merged/jacocoMergedReport.xml')
     }
 }

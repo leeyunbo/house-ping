@@ -1,5 +1,6 @@
 package com.yunbok.houseping.support.dto;
 
+import com.yunbok.houseping.support.util.PriceFormatter;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -28,7 +29,7 @@ public class MarketAnalysis {
      */
     public String getAverageAmountFormatted() {
         if (averageAmount == null) return "-";
-        return formatPrice(averageAmount);
+        return PriceFormatter.format(averageAmount);
     }
 
     /**
@@ -36,7 +37,7 @@ public class MarketAnalysis {
      */
     public String getMaxAmountFormatted() {
         if (maxAmount == null) return "-";
-        return formatPrice(maxAmount);
+        return PriceFormatter.format(maxAmount);
     }
 
     /**
@@ -44,7 +45,7 @@ public class MarketAnalysis {
      */
     public String getMinAmountFormatted() {
         if (minAmount == null) return "-";
-        return formatPrice(minAmount);
+        return PriceFormatter.format(minAmount);
     }
 
     /**
@@ -52,18 +53,6 @@ public class MarketAnalysis {
      */
     public String getAveragePricePerPyeongFormatted() {
         if (averagePricePerPyeong == null) return "-";
-        return formatPrice(averagePricePerPyeong) + "/평";
-    }
-
-    private String formatPrice(long amount) {
-        if (amount >= 10000) {
-            long uk = amount / 10000;
-            long rest = amount % 10000;
-            if (rest == 0) {
-                return uk + "억";
-            }
-            return uk + "억 " + String.format("%,d", rest) + "만";
-        }
-        return String.format("%,d", amount) + "만";
+        return PriceFormatter.format(averagePricePerPyeong) + "/평";
     }
 }

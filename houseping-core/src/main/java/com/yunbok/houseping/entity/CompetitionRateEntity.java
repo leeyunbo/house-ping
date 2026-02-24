@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 /**
@@ -89,4 +90,15 @@ public class CompetitionRateEntity {
     @CreatedDate
     @Column(name = "collected_at", nullable = false, updatable = false)
     private LocalDateTime collectedAt;
+
+    public BigDecimal getEffectiveRate() {
+        if (competitionRate != null) {
+            return competitionRate;
+        }
+        if (supplyCount != null && supplyCount > 0 && requestCount != null) {
+            return BigDecimal.valueOf(requestCount)
+                    .divide(BigDecimal.valueOf(supplyCount), 2, RoundingMode.HALF_UP);
+        }
+        return null;
+    }
 }

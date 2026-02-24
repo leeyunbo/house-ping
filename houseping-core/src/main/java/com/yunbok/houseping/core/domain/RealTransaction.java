@@ -1,5 +1,6 @@
 package com.yunbok.houseping.core.domain;
 
+import com.yunbok.houseping.support.util.PriceFormatter;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -41,18 +42,6 @@ public class RealTransaction {
      */
     public String getDealAmountFormatted() {
         if (dealAmount == null) return "-";
-        return formatPrice(dealAmount);
-    }
-
-    private String formatPrice(long amount) {
-        if (amount >= 10000) {
-            long uk = amount / 10000;
-            long rest = amount % 10000;
-            if (rest == 0) {
-                return uk + "억";
-            }
-            return uk + "억 " + String.format("%,d", rest) + "만";
-        }
-        return String.format("%,d", amount) + "만";
+        return PriceFormatter.format(dealAmount);
     }
 }

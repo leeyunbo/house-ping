@@ -4,6 +4,7 @@ import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionStatus;
 import com.yunbok.houseping.core.service.blog.WeeklyBlogContentService.ScoredEntry;
 import com.yunbok.houseping.support.dto.HouseTypeComparison;
+import com.yunbok.houseping.support.util.PriceFormatter;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
@@ -52,16 +53,16 @@ class BlogNarrativeBuilder {
         // 가격 정보
         if (rep != null && rep.getSupplyPrice() != null) {
             sb.append(rep.getHouseType() != null ? rep.getHouseType() + " 기준 " : "");
-            sb.append("분양가는 약 ").append(formatPriceKorean(rep.getSupplyPrice())).append("으로,\n");
+            sb.append("분양가는 약 ").append(PriceFormatter.formatWithWon(rep.getSupplyPrice())).append("으로,\n");
 
             if (rep.hasMarketData()) {
-                sb.append("주변 신축 시세(").append(formatPriceKorean(rep.getMarketPrice())).append(") 대비 ");
+                sb.append("주변 신축 시세(").append(PriceFormatter.formatWithWon(rep.getMarketPrice())).append(") 대비 ");
                 if (rep.getEstimatedProfit() != null) {
                     long profit = rep.getEstimatedProfit();
                     if (profit > 0) {
-                        sb.append("약 ").append(formatPriceKorean(profit)).append("의 차익이 예상됩니다.\n");
+                        sb.append("약 ").append(PriceFormatter.formatWithWon(profit)).append("의 차익이 예상됩니다.\n");
                     } else if (profit < 0) {
-                        sb.append("약 ").append(formatPriceKorean(Math.abs(profit))).append(" 높은 수준입니다.\n");
+                        sb.append("약 ").append(PriceFormatter.formatWithWon(Math.abs(profit))).append(" 높은 수준입니다.\n");
                     } else {
                         sb.append("비슷한 수준입니다.\n");
                     }
@@ -70,17 +71,5 @@ class BlogNarrativeBuilder {
         }
 
         return sb.toString();
-    }
-
-    private String formatPriceKorean(long amount) {
-        if (amount >= 10000) {
-            long uk = amount / 10000;
-            long rest = amount % 10000;
-            if (rest == 0) {
-                return uk + "억 원";
-            }
-            return uk + "억 " + String.format("%,d", rest) + "만 원";
-        }
-        return String.format("%,d", amount) + "만 원";
     }
 }

@@ -43,6 +43,9 @@ application-local.properties
 .claude/
 claude
 
+# Blog banner HTML
+blog-banner*.html
+
 # OS
 .DS_Store
 Thumbs.db

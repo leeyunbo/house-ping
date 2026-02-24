@@ -1,5 +1,6 @@
 package com.yunbok.houseping.core.domain;
 
+import com.yunbok.houseping.support.util.PriceFormatter;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -37,7 +38,7 @@ public class SubscriptionPrice {
      */
     public String getTopAmountFormatted() {
         if (topAmount == null) return "-";
-        return formatPrice(topAmount);
+        return PriceFormatter.format(topAmount);
     }
 
     /**
@@ -45,18 +46,6 @@ public class SubscriptionPrice {
      */
     public String getPricePerPyeongFormatted() {
         if (pricePerPyeong == null) return "-";
-        return formatPrice(pricePerPyeong) + "/평";
-    }
-
-    private String formatPrice(long amount) {
-        if (amount >= 10000) {
-            long uk = amount / 10000;
-            long rest = amount % 10000;
-            if (rest == 0) {
-                return uk + "억";
-            }
-            return uk + "억 " + String.format("%,d", rest) + "만";
-        }
-        return String.format("%,d", amount) + "만";
+        return PriceFormatter.format(pricePerPyeong) + "/평";
     }
 }

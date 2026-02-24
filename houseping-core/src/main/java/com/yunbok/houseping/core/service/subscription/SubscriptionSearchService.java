@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Comparator;
@@ -43,30 +42,15 @@ public class SubscriptionSearchService {
     }
 
     public List<Subscription> findActiveAndUpcomingSubscriptions(String area) {
-        List<Subscription> subscriptions;
-
-        if (area != null && !area.isBlank()) {
-            subscriptions = subscriptionQueryPort.findByAreaContaining(area);
-        } else {
-            subscriptions = subscriptionQueryPort.findBySupportedAreas(SUPPORTED_AREAS);
-        }
-
-        // 서울/경기만, 접수중+예정만 필터링 (ApplyHome + LH 모두 포함)
-        return subscriptions.stream()
-                .filter(s -> s.getArea() != null && SUPPORTED_AREAS.stream()
-                        .anyMatch(supported -> s.getArea().contains(supported)))
+        return findByAreaWithFilter(area).stream()
                 .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE
                         || s.getStatus() == SubscriptionStatus.UPCOMING)
                 .toList();
     }
 
     public List<SubscriptionCardView> getAllActiveAndUpcoming() {
-        List<Subscription> all = findActiveAndUpcomingSubscriptions(null);
-        return all.stream()
-                .map(s -> SubscriptionCardView.builder()
-                        .subscription(s)
-                        .priceBadge(priceBadgeCalculator.computePriceBadge(s))
-                        .build())
+        return findActiveAndUpcomingSubscriptions(null).stream()
+                .map(this::toCardView)
                 .toList();
     }
 
@@ -75,18 +59,12 @@ public class SubscriptionSearchService {
 
         List<SubscriptionCardView> activeCards = filterActiveSubscriptions(activeUpcoming).stream()
                 .sorted(Comparator.comparing(Subscription::getReceiptEndDate, Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(s -> SubscriptionCardView.builder()
-                        .subscription(s)
-                        .priceBadge(priceBadgeCalculator.computePriceBadge(s))
-                        .build())
+                .map(this::toCardView)
                 .toList();
 
         List<SubscriptionCardView> upcomingCards = filterUpcomingSubscriptions(activeUpcoming).stream()
                 .sorted(Comparator.comparing(Subscription::getReceiptStartDate, Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(s -> SubscriptionCardView.builder()
-                        .subscription(s)
-                        .priceBadge(priceBadgeCalculator.computePriceBadge(s))
-                        .build())
+                .map(this::toCardView)
                 .toList();
 
         return HomePageResult.builder()
@@ -102,16 +80,7 @@ public class SubscriptionSearchService {
         Set<String> houseManageNosWithRates = new HashSet<>(competitionRateRepository.findDistinctHouseManageNos());
         LocalDate twoWeeksAgo = LocalDate.now().minusWeeks(2);
 
-        List<Subscription> allSubscriptions;
-        if (area != null && !area.isBlank()) {
-            allSubscriptions = subscriptionQueryPort.findByAreaContaining(area);
-        } else {
-            allSubscriptions = subscriptionQueryPort.findBySupportedAreas(SUPPORTED_AREAS);
-        }
-
-        return allSubscriptions.stream()
-                .filter(s -> s.getArea() != null && SUPPORTED_AREAS.stream()
-                        .anyMatch(supported -> s.getArea().contains(supported)))
+        return findByAreaWithFilter(area).stream()
                 .filter(s -> s.getStatus() == SubscriptionStatus.CLOSED)
                 .filter(s -> s.getReceiptEndDate() != null && !s.getReceiptEndDate().isBefore(twoWeeksAgo))
                 .filter(s -> s.getHouseManageNo() != null && houseManageNosWithRates.contains(s.getHouseManageNo()))
@@ -133,21 +102,10 @@ public class SubscriptionSearchService {
         return rates.stream()
                 .filter(r -> r.getRank() != null && r.getRank() == 1)
                 .filter(r -> "해당지역".equals(r.getResidenceArea()))
-                .map(this::effectiveRate)
+                .map(CompetitionRateEntity::getEffectiveRate)
                 .filter(rate -> rate != null)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
-    }
-
-    private BigDecimal effectiveRate(CompetitionRateEntity r) {
-        if (r.getCompetitionRate() != null) {
-            return r.getCompetitionRate();
-        }
-        if (r.getSupplyCount() != null && r.getSupplyCount() > 0 && r.getRequestCount() != null) {
-            return BigDecimal.valueOf(r.getRequestCount())
-                    .divide(BigDecimal.valueOf(r.getSupplyCount()), 2, RoundingMode.HALF_UP);
-        }
-        return null;
     }
 
     private List<Subscription> filterActiveSubscriptions(List<Subscription> subscriptions) {
@@ -184,10 +142,7 @@ public class SubscriptionSearchService {
 
     public List<SubscriptionCardView> getSubscriptionCardsForWeek(LocalDate weekStart, LocalDate weekEnd) {
         return findSubscriptionsForWeek(weekStart, weekEnd).stream()
-                .map(s -> SubscriptionCardView.builder()
-                        .subscription(s)
-                        .priceBadge(priceBadgeCalculator.computePriceBadge(s))
-                        .build())
+                .map(this::toCardView)
                 .toList();
     }
 
@@ -202,5 +157,23 @@ public class SubscriptionSearchService {
         return subscriptionQueryPort.findAll();
     }
 
+    private List<Subscription> findByAreaWithFilter(String area) {
+        List<Subscription> subscriptions;
+        if (area != null && !area.isBlank()) {
+            subscriptions = subscriptionQueryPort.findByAreaContaining(area);
+        } else {
+            subscriptions = subscriptionQueryPort.findBySupportedAreas(SUPPORTED_AREAS);
+        }
+        return subscriptions.stream()
+                .filter(s -> s.getArea() != null && SUPPORTED_AREAS.stream()
+                        .anyMatch(supported -> s.getArea().contains(supported)))
+                .toList();
+    }
 
+    private SubscriptionCardView toCardView(Subscription s) {
+        return SubscriptionCardView.builder()
+                .subscription(s)
+                .priceBadge(priceBadgeCalculator.computePriceBadge(s))
+                .build();
+    }
 }

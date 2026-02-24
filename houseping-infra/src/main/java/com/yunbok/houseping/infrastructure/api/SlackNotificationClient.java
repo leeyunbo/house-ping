@@ -22,8 +22,7 @@ import java.util.List;
 @Component
 @ConditionalOnProperty(
     name = "feature.notification.slack-enabled",
-    havingValue = "true",
-    matchIfMissing = false
+    havingValue = "true"
 )
 public class SlackNotificationClient implements NotificationSender {
 

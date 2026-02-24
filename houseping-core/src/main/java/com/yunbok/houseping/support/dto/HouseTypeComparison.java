@@ -1,6 +1,7 @@
 package com.yunbok.houseping.support.dto;
 
 import com.yunbok.houseping.core.domain.RealTransaction;
+import com.yunbok.houseping.support.util.PriceFormatter;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,7 +27,7 @@ public class HouseTypeComparison {
      */
     public String getSupplyPriceFormatted() {
         if (supplyPrice == null) return "-";
-        return formatPrice(supplyPrice);
+        return PriceFormatter.format(supplyPrice);
     }
 
     /**
@@ -34,7 +35,7 @@ public class HouseTypeComparison {
      */
     public String getMarketPriceFormatted() {
         if (marketPrice == null) return "거래 없음";
-        return formatPrice(marketPrice);
+        return PriceFormatter.format(marketPrice);
     }
 
     /**
@@ -43,7 +44,7 @@ public class HouseTypeComparison {
     public String getEstimatedProfitFormatted() {
         if (estimatedProfit == null) return "-";
         String sign = estimatedProfit >= 0 ? "+" : "-";
-        return sign + formatPrice(Math.abs(estimatedProfit));
+        return sign + PriceFormatter.format(Math.abs(estimatedProfit));
     }
 
     /**
@@ -70,15 +71,4 @@ public class HouseTypeComparison {
         return "최근 " + similarTransactions.size() + "건 거래 기준";
     }
 
-    private String formatPrice(long amount) {
-        if (amount >= 10000) {
-            long uk = amount / 10000;
-            long rest = amount % 10000;
-            if (rest == 0) {
-                return uk + "억";
-            }
-            return uk + "억 " + String.format("%,d", rest) + "만";
-        }
-        return String.format("%,d", amount) + "만";
-    }
 }

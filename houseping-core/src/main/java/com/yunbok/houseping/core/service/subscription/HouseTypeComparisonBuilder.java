@@ -6,6 +6,7 @@ import com.yunbok.houseping.core.domain.SubscriptionPrice;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +17,12 @@ import java.util.List;
 @Component
 public class HouseTypeComparisonBuilder {
 
-    private static final BigDecimal AREA_TOLERANCE = new BigDecimal("5");
+    public static final BigDecimal AREA_TOLERANCE = new BigDecimal("5");
     private static final int MAX_SIMILAR_TRANSACTIONS = 5;
+
+    public static int newBuildYearThreshold() {
+        return LocalDate.now().getYear() - 2;
+    }
 
     /**
      * 주택형별 시세 비교 생성

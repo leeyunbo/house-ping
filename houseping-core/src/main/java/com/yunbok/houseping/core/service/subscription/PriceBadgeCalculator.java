@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
@@ -20,8 +19,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class PriceBadgeCalculator {
-
-    private static final BigDecimal AREA_TOLERANCE = new BigDecimal("5");
 
     private final SubscriptionPricePersistencePort subscriptionPriceQueryPort;
     private final RealTransactionPersistencePort realTransactionQueryPort;
@@ -48,17 +45,7 @@ public class PriceBadgeCalculator {
             return PriceBadge.UNKNOWN;
         }
 
-        List<SubscriptionPrice> prices = subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo());
-        if (prices.isEmpty()) {
-            return PriceBadge.UNKNOWN;
-        }
-
-        SubscriptionPrice representative = selectRepresentativePrice(prices);
-        if (representative == null || representative.getTopAmount() == null) {
-            return PriceBadge.UNKNOWN;
-        }
-
-        BigDecimal area = comparisonBuilder.extractAreaFromHouseType(representative.getHouseType());
+        BigDecimal area = findRepresentativeArea(subscription);
         if (area == null) {
             return PriceBadge.UNKNOWN;
         }
@@ -69,47 +56,70 @@ public class PriceBadgeCalculator {
             return PriceBadge.UNKNOWN;
         }
 
-        List<RealTransaction> allTransactions = realTransactionQueryPort.findByLawdCd(lawdCd);
-        List<RealTransaction> dongTransactions = addressHelper.filterByDongName(allTransactions, dongName);
-
-        int newBuildYearThreshold = LocalDate.now().getYear() - 2;
-        List<RealTransaction> newBuildTx = dongTransactions.stream()
-                .filter(t -> t.getBuildYear() != null && t.getBuildYear() >= newBuildYearThreshold)
-                .toList();
+        List<RealTransaction> newBuildTx = findNewBuildTransactions(lawdCd, dongName);
         if (newBuildTx.isEmpty()) {
             return PriceBadge.UNKNOWN;
         }
 
-        BigDecimal minArea = area.subtract(AREA_TOLERANCE);
-        BigDecimal maxArea = area.add(AREA_TOLERANCE);
-        List<Long> similarAmounts = newBuildTx.stream()
+        Long median = calculateMedianPrice(newBuildTx, area);
+        if (median == null) {
+            return PriceBadge.UNKNOWN;
+        }
+
+        long supplyPrice = selectRepresentativePrice(
+                subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo())
+        ).getTopAmount();
+        return determineBadge(supplyPrice, median);
+    }
+
+    private BigDecimal findRepresentativeArea(Subscription subscription) {
+        List<SubscriptionPrice> prices = subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo());
+        if (prices.isEmpty()) {
+            return null;
+        }
+        SubscriptionPrice representative = selectRepresentativePrice(prices);
+        if (representative == null || representative.getTopAmount() == null) {
+            return null;
+        }
+        return comparisonBuilder.extractAreaFromHouseType(representative.getHouseType());
+    }
+
+    private List<RealTransaction> findNewBuildTransactions(String lawdCd, String dongName) {
+        List<RealTransaction> allTransactions = realTransactionQueryPort.findByLawdCd(lawdCd);
+        List<RealTransaction> dongTransactions = addressHelper.filterByDongName(allTransactions, dongName);
+        int threshold = HouseTypeComparisonBuilder.newBuildYearThreshold();
+        return dongTransactions.stream()
+                .filter(t -> t.getBuildYear() != null && t.getBuildYear() >= threshold)
+                .toList();
+    }
+
+    private Long calculateMedianPrice(List<RealTransaction> transactions, BigDecimal area) {
+        BigDecimal minArea = area.subtract(HouseTypeComparisonBuilder.AREA_TOLERANCE);
+        BigDecimal maxArea = area.add(HouseTypeComparisonBuilder.AREA_TOLERANCE);
+        List<Long> amounts = transactions.stream()
                 .filter(t -> t.getExclusiveArea() != null)
                 .filter(t -> t.getExclusiveArea().compareTo(minArea) >= 0
                           && t.getExclusiveArea().compareTo(maxArea) <= 0)
                 .map(RealTransaction::getDealAmount)
                 .sorted()
                 .toList();
-
-        if (similarAmounts.isEmpty()) {
-            return PriceBadge.UNKNOWN;
+        if (amounts.isEmpty()) {
+            return null;
         }
-
-        long median;
-        int size = similarAmounts.size();
+        int size = amounts.size();
         if (size % 2 == 0) {
-            median = (similarAmounts.get(size / 2 - 1) + similarAmounts.get(size / 2)) / 2;
-        } else {
-            median = similarAmounts.get(size / 2);
+            return (amounts.get(size / 2 - 1) + amounts.get(size / 2)) / 2;
         }
+        return amounts.get(size / 2);
+    }
 
-        long supplyPrice = representative.getTopAmount();
+    private PriceBadge determineBadge(long supplyPrice, long median) {
         if (supplyPrice < median * 0.95) {
             return PriceBadge.CHEAP;
         } else if (supplyPrice > median * 1.05) {
             return PriceBadge.EXPENSIVE;
-        } else {
-            return PriceBadge.UNKNOWN;
         }
+        return PriceBadge.UNKNOWN;
     }
 
     public SubscriptionPrice selectRepresentativePrice(List<SubscriptionPrice> prices) {
@@ -119,7 +129,7 @@ public class PriceBadgeCalculator {
                 .filter(p -> comparisonBuilder.extractAreaFromHouseType(p.getHouseType()) != null)
                 .filter(p -> {
                     BigDecimal area = comparisonBuilder.extractAreaFromHouseType(p.getHouseType());
-                    return area.subtract(target84).abs().compareTo(AREA_TOLERANCE) <= 0;
+                    return area.subtract(target84).abs().compareTo(HouseTypeComparisonBuilder.AREA_TOLERANCE) <= 0;
                 })
                 .min(Comparator.comparing(p -> comparisonBuilder.extractAreaFromHouseType(p.getHouseType()).subtract(target84).abs()))
                 .orElse(null);
