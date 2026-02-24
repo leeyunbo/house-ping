@@ -7,12 +7,10 @@ import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.config.SubscriptionProperties;
-import com.yunbok.houseping.support.external.ApplyhomeApiItem;
 import com.yunbok.houseping.support.external.ApplyhomeAptResponse;
-import com.yunbok.houseping.support.external.ApplyhomeRemainingItem;
 import com.yunbok.houseping.support.external.ApplyhomeRemainingResponse;
-import com.yunbok.houseping.support.external.ApplyhomeArbitraryItem;
 import com.yunbok.houseping.support.external.ApplyhomeArbitraryResponse;
+import com.yunbok.houseping.support.external.ApplyhomeSubscriptionItem;
 import com.yunbok.houseping.support.external.ApplyhomePriceDetailItem;
 import com.yunbok.houseping.support.external.ApplyhomePriceDetailResponse;
 import com.yunbok.houseping.entity.SubscriptionPriceEntity;
@@ -28,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -35,12 +34,21 @@ import java.util.function.Supplier;
 @Component
 @ConditionalOnProperty(
         name = "feature.subscription.applyhome-api-enabled",
-        havingValue = "true",
-        matchIfMissing = false
+        havingValue = "true"
 )
 public class ApplyhomeApiClient implements SubscriptionProvider {
 
     private static final String SOURCE_NAME = SubscriptionSource.APPLYHOME.getValue();
+    private static final int PRICE_DETAIL_PAGE_SIZE = 100;
+
+    private static final List<HouseType> FETCH_TYPES = List.of(
+            HouseType.APT, HouseType.PRIVATE_PRE_SUBSCRIPTION, HouseType.NEWLYWED_TOWN,
+            HouseType.REMAINING, HouseType.ARBITRARY
+    );
+
+    private static final List<String> FETCH_TYPE_LABELS = List.of(
+            "일반APT", "민간사전", "신혼희망", "잔여세대", "임의공급"
+    );
 
     @Value("${applyhome.api.key}")
     private String apiKey;
@@ -66,11 +74,11 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
         log.info("[청약Home API] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
 
         List<ApplyHomeSubscriptionInfo> allDtos = new ArrayList<>();
-        allDtos.addAll(fetchSafely(() -> fetchRegularApts(areaName, targetDate), "일반APT"));
-        allDtos.addAll(fetchSafely(() -> fetchPrivatePreApts(areaName, targetDate), "민간사전"));
-        allDtos.addAll(fetchSafely(() -> fetchNewlywedApts(areaName, targetDate), "신혼희망"));
-        allDtos.addAll(fetchSafely(() -> fetchRemainingApts(areaName, targetDate), "잔여세대"));
-        allDtos.addAll(fetchSafely(() -> fetchArbitraryApts(areaName, targetDate), "임의공급"));
+        for (int i = 0; i < FETCH_TYPES.size(); i++) {
+            HouseType type = FETCH_TYPES.get(i);
+            String label = FETCH_TYPE_LABELS.get(i);
+            allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, targetDate), label));
+        }
 
         log.info("[청약Home API] {} 지역에서 {}개 데이터 수집 완료", areaName, allDtos.size());
         return allDtos.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
@@ -80,11 +88,11 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
         log.info("[청약Home API] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
 
         List<ApplyHomeSubscriptionInfo> allDtos = new ArrayList<>();
-        allDtos.addAll(fetchSafely(() -> fetchAllRegularApts(areaName), "일반APT"));
-        allDtos.addAll(fetchSafely(() -> fetchAllPrivatePreApts(areaName), "민간사전"));
-        allDtos.addAll(fetchSafely(() -> fetchAllNewlywedApts(areaName), "신혼희망"));
-        allDtos.addAll(fetchSafely(() -> fetchAllRemainingApts(areaName), "잔여세대"));
-        allDtos.addAll(fetchSafely(() -> fetchAllArbitraryApts(areaName), "임의공급"));
+        for (int i = 0; i < FETCH_TYPES.size(); i++) {
+            HouseType type = FETCH_TYPES.get(i);
+            String label = FETCH_TYPE_LABELS.get(i);
+            allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, null), label));
+        }
 
         log.info("[청약Home API] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allDtos.size());
         return allDtos.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
@@ -103,131 +111,53 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
         }
     }
 
-    private List<ApplyHomeSubscriptionInfo> fetchRegularApts(String areaName, LocalDate targetDate) {
-        return fetchAptSubscriptions(HouseType.APT, areaName, targetDate);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchPrivatePreApts(String areaName, LocalDate targetDate) {
-        return fetchAptSubscriptions(HouseType.PRIVATE_PRE_SUBSCRIPTION, areaName, targetDate);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchNewlywedApts(String areaName, LocalDate targetDate) {
-        return fetchAptSubscriptions(HouseType.NEWLYWED_TOWN, areaName, targetDate);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchRemainingApts(String areaName, LocalDate targetDate) {
-        return fetchRemainingAptSubscriptions(areaName, targetDate);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchAllRegularApts(String areaName) {
-        return fetchAllAptSubscriptions(HouseType.APT, areaName);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchAllPrivatePreApts(String areaName) {
-        return fetchAllAptSubscriptions(HouseType.PRIVATE_PRE_SUBSCRIPTION, areaName);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchAllNewlywedApts(String areaName) {
-        return fetchAllAptSubscriptions(HouseType.NEWLYWED_TOWN, areaName);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchAllRemainingApts(String areaName) {
-        return fetchAllRemainingAptSubscriptions(areaName);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchArbitraryApts(String areaName, LocalDate targetDate) {
-        return fetchArbitraryAptSubscriptions(areaName, targetDate);
-    }
-
-    private List<ApplyHomeSubscriptionInfo> fetchAllArbitraryApts(String areaName) {
-        return fetchAllArbitraryAptSubscriptions(areaName);
+    /**
+     * 통합 청약 데이터 조회 — targetDate가 null이면 전체 조회
+     */
+    private List<ApplyHomeSubscriptionInfo> fetchSubscriptions(HouseType houseType, String areaName, LocalDate targetDate) {
+        List<? extends ApplyhomeSubscriptionItem> items = fetchItems(houseType, areaName);
+        return parseResponse(items, houseType.getDisplayName(), targetDate);
     }
 
     /**
-     * 일반 APT API 호출 (특정 날짜)
+     * HouseType별 API 호출 및 아이템 목록 반환
      */
-    private List<ApplyHomeSubscriptionInfo> fetchAptSubscriptions(HouseType houseType, String areaName, LocalDate targetDate) {
-        ApplyhomeAptResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getAPTLttotPblancDetail")
-                        .queryParam("page", properties.getApi().getDefaultPage())
-                        .queryParam("perPage", properties.getApi().getPageSize())
-                        .queryParam("cond[HOUSE_SECD::EQ]", houseType.getHouseSecd())
-                        .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
-                        .queryParam("serviceKey", apiKey)
-                        .build())
-                .retrieve()
-                .bodyToMono(ApplyhomeAptResponse.class)
-                .block();
+    private List<? extends ApplyhomeSubscriptionItem> fetchItems(HouseType houseType, String areaName) {
+        if (houseType.usesHouseSecd()) {
+            ApplyhomeAptResponse response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(houseType.getDetailPath())
+                            .queryParam("page", properties.getApi().getDefaultPage())
+                            .queryParam("perPage", properties.getApi().getPageSize())
+                            .queryParam("cond[HOUSE_SECD::EQ]", houseType.getHouseSecd())
+                            .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
+                            .queryParam("serviceKey", apiKey)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(ApplyhomeAptResponse.class)
+                    .block();
+            return response != null ? response.getData() : Collections.emptyList();
+        }
 
-        return parseAptResponse(response, houseType.getDisplayName(), targetDate);
-    }
+        if (houseType == HouseType.REMAINING) {
+            ApplyhomeRemainingResponse response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(houseType.getDetailPath())
+                            .queryParam("page", properties.getApi().getDefaultPage())
+                            .queryParam("perPage", properties.getApi().getPageSize())
+                            .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
+                            .queryParam("serviceKey", apiKey)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(ApplyhomeRemainingResponse.class)
+                    .block();
+            return response != null ? response.getData() : Collections.emptyList();
+        }
 
-    /**
-     * 잔여세대 APT API 호출 (특정 날짜)
-     */
-    private List<ApplyHomeSubscriptionInfo> fetchRemainingAptSubscriptions(String areaName, LocalDate targetDate) {
-        ApplyhomeRemainingResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getRemndrLttotPblancDetail")
-                        .queryParam("page", properties.getApi().getDefaultPage())
-                        .queryParam("perPage", properties.getApi().getPageSize())
-                        .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
-                        .queryParam("serviceKey", apiKey)
-                        .build())
-                .retrieve()
-                .bodyToMono(ApplyhomeRemainingResponse.class)
-                .block();
-
-        return parseRemainingResponse(response, targetDate);
-    }
-
-    /**
-     * 일반 APT API 호출 (전체 데이터)
-     */
-    private List<ApplyHomeSubscriptionInfo> fetchAllAptSubscriptions(HouseType houseType, String areaName) {
-        ApplyhomeAptResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getAPTLttotPblancDetail")
-                        .queryParam("page", properties.getApi().getDefaultPage())
-                        .queryParam("perPage", properties.getApi().getPageSize())
-                        .queryParam("cond[HOUSE_SECD::EQ]", houseType.getHouseSecd())
-                        .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
-                        .queryParam("serviceKey", apiKey)
-                        .build())
-                .retrieve()
-                .bodyToMono(ApplyhomeAptResponse.class)
-                .block();
-
-        return parseAllAptResponse(response, houseType.getDisplayName());
-    }
-
-    /**
-     * 잔여세대 APT API 호출 (전체 데이터)
-     */
-    private List<ApplyHomeSubscriptionInfo> fetchAllRemainingAptSubscriptions(String areaName) {
-        ApplyhomeRemainingResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getRemndrLttotPblancDetail")
-                        .queryParam("page", properties.getApi().getDefaultPage())
-                        .queryParam("perPage", properties.getApi().getPageSize())
-                        .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
-                        .queryParam("serviceKey", apiKey)
-                        .build())
-                .retrieve()
-                .bodyToMono(ApplyhomeRemainingResponse.class)
-                .block();
-
-        return parseAllRemainingResponse(response);
-    }
-
-    /**
-     * 임의공급 APT API 호출 (특정 날짜)
-     */
-    private List<ApplyHomeSubscriptionInfo> fetchArbitraryAptSubscriptions(String areaName, LocalDate targetDate) {
+        // ARBITRARY
         ApplyhomeArbitraryResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/getOPTLttotPblancDetail")
+                        .path(houseType.getDetailPath())
                         .queryParam("page", properties.getApi().getDefaultPage())
                         .queryParam("perPage", properties.getApi().getPageSize())
                         .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
@@ -236,105 +166,19 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
                 .retrieve()
                 .bodyToMono(ApplyhomeArbitraryResponse.class)
                 .block();
-
-        return parseArbitraryResponse(response, targetDate);
+        return response != null ? response.getData() : Collections.emptyList();
     }
 
     /**
-     * 임의공급 APT API 호출 (전체 데이터)
+     * 통합 응답 파싱 — targetDate가 null이면 날짜 필터 없음
      */
-    private List<ApplyHomeSubscriptionInfo> fetchAllArbitraryAptSubscriptions(String areaName) {
-        ApplyhomeArbitraryResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getOPTLttotPblancDetail")
-                        .queryParam("page", properties.getApi().getDefaultPage())
-                        .queryParam("perPage", properties.getApi().getPageSize())
-                        .queryParam("cond[SUBSCRPT_AREA_CODE_NM::EQ]", areaName)
-                        .queryParam("serviceKey", apiKey)
-                        .build())
-                .retrieve()
-                .bodyToMono(ApplyhomeArbitraryResponse.class)
-                .block();
+    private List<ApplyHomeSubscriptionInfo> parseResponse(
+            List<? extends ApplyhomeSubscriptionItem> items, String houseType, LocalDate targetDate) {
+        if (items == null || items.isEmpty()) return Collections.emptyList();
 
-        return parseAllArbitraryResponse(response);
-    }
-
-    /**
-     * 일반 APT API 응답 파싱
-     */
-    private List<ApplyHomeSubscriptionInfo> parseAptResponse(ApplyhomeAptResponse response, String houseType, LocalDate targetDate) {
-        if (response == null) return Collections.emptyList();
-
-        return response.getData().stream()
-                .filter(item -> isReceiptDateInRange(item.receiptStartDate(), targetDate))
+        return items.stream()
+                .filter(item -> targetDate == null || isReceiptDateInRange(item.receiptStartDate(), targetDate))
                 .map(item -> buildSubscriptionInfo(item, houseType))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
-
-    /**
-     * 잔여세대 API 응답 파싱
-     */
-    private List<ApplyHomeSubscriptionInfo> parseRemainingResponse(ApplyhomeRemainingResponse response, LocalDate targetDate) {
-        if (response == null) return Collections.emptyList();
-
-        return response.getData().stream()
-                .filter(item -> isReceiptDateInRange(item.receiptStartDate(), targetDate))
-                .map(this::buildRemainingSubscriptionInfo)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
-
-    /**
-     * 일반 APT API 응답 파싱 (전체 데이터 - 날짜 필터링 없음)
-     */
-    private List<ApplyHomeSubscriptionInfo> parseAllAptResponse(ApplyhomeAptResponse response, String houseType) {
-        if (response == null) return Collections.emptyList();
-
-        return response.getData().stream()
-                .map(item -> buildSubscriptionInfo(item, houseType))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
-
-    /**
-     * 잔여세대 API 응답 파싱 (전체 데이터 - 날짜 필터링 없음)
-     */
-    private List<ApplyHomeSubscriptionInfo> parseAllRemainingResponse(ApplyhomeRemainingResponse response) {
-        if (response == null) return Collections.emptyList();
-
-        return response.getData().stream()
-                .map(this::buildRemainingSubscriptionInfo)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
-
-    /**
-     * 임의공급 API 응답 파싱
-     */
-    private List<ApplyHomeSubscriptionInfo> parseArbitraryResponse(ApplyhomeArbitraryResponse response, LocalDate targetDate) {
-        if (response == null) return Collections.emptyList();
-
-        return response.getData().stream()
-                .filter(item -> isReceiptDateInRange(item.receiptStartDate(), targetDate))
-                .map(this::buildArbitrarySubscriptionInfo)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
-
-    /**
-     * 임의공급 API 응답 파싱 (전체 데이터 - 날짜 필터링 없음)
-     */
-    private List<ApplyHomeSubscriptionInfo> parseAllArbitraryResponse(ApplyhomeArbitraryResponse response) {
-        if (response == null) return Collections.emptyList();
-
-        return response.getData().stream()
-                .map(this::buildArbitrarySubscriptionInfo)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
@@ -349,16 +193,16 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
     }
 
     /**
-     * 일반 APT SubscriptionInfo 생성
+     * 통합 SubscriptionInfo 생성
      */
-    private Optional<ApplyHomeSubscriptionInfo> buildSubscriptionInfo(ApplyhomeApiItem item, String houseType) {
+    private Optional<ApplyHomeSubscriptionInfo> buildSubscriptionInfo(ApplyhomeSubscriptionItem item, String houseType) {
         try {
             return Optional.of(ApplyHomeSubscriptionInfo.builder()
-                    .houseManageNo(nullToEmpty(item.houseManageNo()))
-                    .pblancNo(nullToEmpty(item.pblancNo()))
-                    .houseName(nullToEmpty(item.houseName()))
+                    .houseManageNo(Objects.toString(item.houseManageNo(), ""))
+                    .pblancNo(Objects.toString(item.pblancNo(), ""))
+                    .houseName(Objects.toString(item.houseName(), ""))
                     .houseType(houseType)
-                    .area(nullToEmpty(item.areaName()))
+                    .area(Objects.toString(item.areaName(), ""))
                     .announceDate(DateParsingUtil.parse(item.announceDate()))
                     .receiptStartDate(DateParsingUtil.parse(item.receiptStartDate()))
                     .receiptEndDate(DateParsingUtil.parse(item.receiptEndDate()))
@@ -377,75 +221,13 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
     }
 
     /**
-     * 잔여세대 SubscriptionInfo 생성
-     */
-    private Optional<ApplyHomeSubscriptionInfo> buildRemainingSubscriptionInfo(ApplyhomeRemainingItem item) {
-        try {
-            return Optional.of(ApplyHomeSubscriptionInfo.builder()
-                    .houseManageNo(nullToEmpty(item.houseManageNo()))
-                    .pblancNo(nullToEmpty(item.pblancNo()))
-                    .houseName(nullToEmpty(item.houseName()))
-                    .houseType(HouseType.REMAINING.getDisplayName())
-                    .area(nullToEmpty(item.areaName()))
-                    .announceDate(DateParsingUtil.parse(item.announceDate()))
-                    .receiptStartDate(DateParsingUtil.parse(item.receiptStartDate()))
-                    .receiptEndDate(DateParsingUtil.parse(item.receiptEndDate()))
-                    .winnerAnnounceDate(DateParsingUtil.parse(item.winnerAnnounceDate()))
-                    .homepageUrl(item.homepageUrl())
-                    .detailUrl(item.detailUrl())
-                    .contact(item.contact())
-                    .totalSupplyCount(item.totalSupplyCount() != null ? item.totalSupplyCount() : 0)
-                    .address(item.address())
-                    .zipCode(item.zipCode())
-                    .build());
-        } catch (Exception e) {
-            log.warn("잔여세대 SubscriptionInfo 생성 실패: {}", e.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * 임의공급 SubscriptionInfo 생성
-     */
-    private Optional<ApplyHomeSubscriptionInfo> buildArbitrarySubscriptionInfo(ApplyhomeArbitraryItem item) {
-        try {
-            return Optional.of(ApplyHomeSubscriptionInfo.builder()
-                    .houseManageNo(nullToEmpty(item.houseManageNo()))
-                    .pblancNo(nullToEmpty(item.pblancNo()))
-                    .houseName(nullToEmpty(item.houseName()))
-                    .houseType(HouseType.ARBITRARY.getDisplayName())
-                    .area(nullToEmpty(item.areaName()))
-                    .announceDate(DateParsingUtil.parse(item.announceDate()))
-                    .receiptStartDate(DateParsingUtil.parse(item.receiptStartDate()))
-                    .receiptEndDate(DateParsingUtil.parse(item.receiptEndDate()))
-                    .winnerAnnounceDate(DateParsingUtil.parse(item.winnerAnnounceDate()))
-                    .homepageUrl(item.homepageUrl())
-                    .detailUrl(item.detailUrl())
-                    .contact(item.contact())
-                    .totalSupplyCount(item.totalSupplyCount() != null ? item.totalSupplyCount() : 0)
-                    .address(item.address())
-                    .zipCode(item.zipCode())
-                    .build());
-        } catch (Exception e) {
-            log.warn("임의공급 SubscriptionInfo 생성 실패: {}", e.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    /**
      * 분양가 상세 정보 조회 및 저장
      */
     public void fetchAndSavePriceDetails(String houseManageNo, String pblancNo, String houseType) {
         try {
-            List<ApplyhomePriceDetailItem> priceDetails;
-
-            if (HouseType.REMAINING.getDisplayName().equals(houseType)) {
-                priceDetails = fetchRemainingPriceDetails(houseManageNo, pblancNo);
-            } else if (HouseType.ARBITRARY.getDisplayName().equals(houseType)) {
-                priceDetails = fetchArbitraryPriceDetails(houseManageNo, pblancNo);
-            } else {
-                priceDetails = fetchAptPriceDetails(houseManageNo, pblancNo);
-            }
+            HouseType type = HouseType.fromDisplayName(houseType);
+            List<ApplyhomePriceDetailItem> priceDetails = fetchPriceDetails(
+                    type.getPricePath(), houseManageNo, pblancNo);
 
             for (ApplyhomePriceDetailItem item : priceDetails) {
                 if (priceRepository.findByHouseManageNoAndPblancNoAndModelNo(
@@ -473,14 +255,14 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
     }
 
     /**
-     * APT 분양가 상세 조회
+     * 분양가 상세 조회
      */
-    private List<ApplyhomePriceDetailItem> fetchAptPriceDetails(String houseManageNo, String pblancNo) {
+    private List<ApplyhomePriceDetailItem> fetchPriceDetails(String path, String houseManageNo, String pblancNo) {
         ApplyhomePriceDetailResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/getAPTLttotPblancMdl")
+                        .path(path)
                         .queryParam("page", 1)
-                        .queryParam("perPage", 100)
+                        .queryParam("perPage", PRICE_DETAIL_PAGE_SIZE)
                         .queryParam("cond[HOUSE_MANAGE_NO::EQ]", houseManageNo)
                         .queryParam("cond[PBLANC_NO::EQ]", pblancNo)
                         .queryParam("serviceKey", apiKey)
@@ -490,49 +272,5 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
                 .block();
 
         return response != null ? response.getData() : Collections.emptyList();
-    }
-
-    /**
-     * 잔여세대 분양가 상세 조회
-     */
-    private List<ApplyhomePriceDetailItem> fetchRemainingPriceDetails(String houseManageNo, String pblancNo) {
-        ApplyhomePriceDetailResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getRemndrLttotPblancMdl")
-                        .queryParam("page", 1)
-                        .queryParam("perPage", 100)
-                        .queryParam("cond[HOUSE_MANAGE_NO::EQ]", houseManageNo)
-                        .queryParam("cond[PBLANC_NO::EQ]", pblancNo)
-                        .queryParam("serviceKey", apiKey)
-                        .build())
-                .retrieve()
-                .bodyToMono(ApplyhomePriceDetailResponse.class)
-                .block();
-
-        return response != null ? response.getData() : Collections.emptyList();
-    }
-
-    /**
-     * 임의공급 분양가 상세 조회
-     */
-    private List<ApplyhomePriceDetailItem> fetchArbitraryPriceDetails(String houseManageNo, String pblancNo) {
-        ApplyhomePriceDetailResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getOPTLttotPblancMdl")
-                        .queryParam("page", 1)
-                        .queryParam("perPage", 100)
-                        .queryParam("cond[HOUSE_MANAGE_NO::EQ]", houseManageNo)
-                        .queryParam("cond[PBLANC_NO::EQ]", pblancNo)
-                        .queryParam("serviceKey", apiKey)
-                        .build())
-                .retrieve()
-                .bodyToMono(ApplyhomePriceDetailResponse.class)
-                .block();
-
-        return response != null ? response.getData() : Collections.emptyList();
-    }
-
-    private String nullToEmpty(String value) {
-        return value != null ? value : "";
     }
 }

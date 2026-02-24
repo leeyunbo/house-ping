@@ -27,6 +27,8 @@ import java.util.List;
 public class RealTransactionApiClient implements RealTransactionFetchPort {
 
     private static final int CACHE_VALIDITY_DAYS = 1;
+    private static final int MAX_ROWS_PER_PAGE = 1000;
+    private static final int FIRST_PAGE = 1;
 
     @Value("${realtransaction.api.key:}")
     private String apiKey;
@@ -56,7 +58,7 @@ public class RealTransactionApiClient implements RealTransactionFetchPort {
         if (!cached.isEmpty()) {
             // 캐시 유효성 확인 (1일)
             LocalDateTime threshold = LocalDateTime.now().minusDays(CACHE_VALIDITY_DAYS);
-            if (cached.get(0).getCachedAt().isAfter(threshold)) {
+            if (cached.getFirst().getCachedAt().isAfter(threshold)) {
                 log.debug("[실거래가 API] 캐시 사용: lawdCd={}, dealYmd={}, count={}", lawdCd, dealYmd, cached.size());
                 return cached;
             }
@@ -92,8 +94,8 @@ public class RealTransactionApiClient implements RealTransactionFetchPort {
                             .queryParam("serviceKey", apiKey)
                             .queryParam("LAWD_CD", lawdCd)
                             .queryParam("DEAL_YMD", dealYmd)
-                            .queryParam("numOfRows", 1000)
-                            .queryParam("pageNo", 1)
+                            .queryParam("numOfRows", MAX_ROWS_PER_PAGE)
+                            .queryParam("pageNo", FIRST_PAGE)
                             .build())
                     .accept(MediaType.APPLICATION_XML)
                     .retrieve()

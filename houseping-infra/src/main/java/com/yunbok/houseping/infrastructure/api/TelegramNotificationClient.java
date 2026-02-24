@@ -3,6 +3,8 @@ package com.yunbok.houseping.infrastructure.api;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.infrastructure.formatter.TelegramMessageFormatter;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
+import com.yunbok.houseping.support.external.TelegramResponseDto;
+import com.yunbok.houseping.support.external.TelegramSendMessageRequest;
 import com.yunbok.houseping.core.port.NotificationSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 텔레그램 알림 어댑터
@@ -22,8 +23,7 @@ import java.util.Map;
 @Component
 @ConditionalOnProperty(
     name = "feature.notification.telegram-enabled",
-    havingValue = "true",
-    matchIfMissing = false
+    havingValue = "true"
 )
 public class TelegramNotificationClient implements NotificationSender {
 
@@ -81,17 +81,11 @@ public class TelegramNotificationClient implements NotificationSender {
             try {
                 log.info("[Telegram] 메시지 발송 시도 - chatId: {}", chatId);
 
-                Map<String, Object> request = Map.of(
-                        "chat_id", chatId,
-                        "text", message,
-                        "parse_mode", "HTML"
-                );
-
                 webClient.post()
                         .uri("/sendMessage")
-                        .bodyValue(request)
+                        .bodyValue(TelegramSendMessageRequest.html(chatId, message))
                         .retrieve()
-                        .bodyToMono(Map.class)
+                        .bodyToMono(TelegramResponseDto.class)
                         .block();
 
                 log.info("[Telegram] 메시지 발송 완료");

@@ -8,6 +8,7 @@ import com.yunbok.houseping.core.domain.LhApiTypeCode;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.infrastructure.dto.LhSubscriptionInfo;
+import com.yunbok.houseping.infrastructure.support.LhResidentialFilter;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.config.SubscriptionProperties;
 import com.yunbok.houseping.support.external.LhApiItem;
@@ -25,21 +26,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "feature.subscription.lh-api-enabled", havingValue = "true", matchIfMissing = false)
 public class LhApiClient implements SubscriptionProvider {
 
-    private static final String LH_PROVIDER_NAME = SubscriptionSource.LH.getValue();
     private static final String SOURCE_NAME = SubscriptionSource.LH.getValue();
     private static final String RECEIPT_STATUS_IN_PROGRESS = "접수중";
-
-    /** 비주거용 공고 제외 키워드 */
-    private static final Set<String> NON_RESIDENTIAL_KEYWORDS = Set.of(
-            "상가", "어린이집", "가스충전소", "용지", "입점자", "임차운영자"
-    );
 
     @Value("${lh.api.key}")
     private String apiKey;
@@ -48,10 +42,13 @@ public class LhApiClient implements SubscriptionProvider {
     private final SubscriptionProperties properties;
     private final ObjectMapper objectMapper;
 
-    public LhApiClient(@Qualifier("lhWebClient") WebClient webClient, SubscriptionProperties properties) {
+    public LhApiClient(
+            @Qualifier("lhWebClient") WebClient webClient,
+            SubscriptionProperties properties,
+            ObjectMapper objectMapper) {
         this.webClient = webClient;
         this.properties = properties;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     public String getSourceName() {
@@ -141,7 +138,8 @@ public class LhApiClient implements SubscriptionProvider {
         try {
             // LH API는 배열 형태로 응답하며, 두 번째 요소에 dsList가 포함됨
             List<Map<String, Object>> responseList = objectMapper.readValue(
-                    responseStr, new TypeReference<List<Map<String, Object>>>() {});
+                    responseStr, new TypeReference<>() {
+                    });
 
             if (responseList == null || responseList.size() < 2) {
                 log.debug("[LH API] Invalid response structure");
@@ -157,7 +155,7 @@ public class LhApiClient implements SubscriptionProvider {
 
             return lhResponse.getItems().stream()
                     .filter(item -> !filterInProgress || RECEIPT_STATUS_IN_PROGRESS.equals(item.status()))
-                    .filter(this::isResidential)
+                    .filter(item -> LhResidentialFilter.isResidential(item.projectName()))
                     .map(item -> buildLhSubscriptionInfo(item, houseType))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
@@ -167,25 +165,6 @@ public class LhApiClient implements SubscriptionProvider {
             log.error("[LH API] Failed to parse response: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
-    }
-
-    /**
-     * 주거용 공고인지 확인 (상가, 어린이집 등 비주거용 제외)
-     */
-    private boolean isResidential(LhApiItem item) {
-        String projectName = item.projectName();
-        if (projectName == null || projectName.isBlank()) {
-            return false;
-        }
-
-        boolean isNonResidential = NON_RESIDENTIAL_KEYWORDS.stream()
-                .anyMatch(projectName::contains);
-
-        if (isNonResidential) {
-            log.debug("[LH API] 비주거용 공고 제외: {}", projectName);
-        }
-
-        return !isNonResidential;
     }
 
     private Optional<LhSubscriptionInfo> buildLhSubscriptionInfo(LhApiItem item, String houseType) {

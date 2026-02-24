@@ -10,19 +10,23 @@ import java.util.Arrays;
 @Getter
 public enum HouseType {
 
-    APT("01", "APT"),
-    PRIVATE_PRE_SUBSCRIPTION("09", "민간사전청약"),
-    NEWLYWED_TOWN("10", "신혼희망타운"),
-    REMAINING("", "무순위"),
-    ARBITRARY("", "임의공급"),
-    OTHER("", "기타");
+    APT("01", "APT", "/getAPTLttotPblancDetail", "/getAPTLttotPblancMdl"),
+    PRIVATE_PRE_SUBSCRIPTION("09", "민간사전청약", "/getAPTLttotPblancDetail", "/getAPTLttotPblancMdl"),
+    NEWLYWED_TOWN("10", "신혼희망타운", "/getAPTLttotPblancDetail", "/getAPTLttotPblancMdl"),
+    REMAINING("", "무순위", "/getRemndrLttotPblancDetail", "/getRemndrLttotPblancMdl"),
+    ARBITRARY("", "임의공급", "/getOPTLttotPblancDetail", "/getOPTLttotPblancMdl"),
+    OTHER("", "기타", "", "");
 
     private final String houseSecd;    // 청약Home API 주택구분코드
     private final String displayName;  // 표시명
+    private final String detailPath;   // 청약 상세 API 경로
+    private final String pricePath;    // 분양가 API 경로
 
-    HouseType(String houseSecd, String displayName) {
+    HouseType(String houseSecd, String displayName, String detailPath, String pricePath) {
         this.houseSecd = houseSecd;
         this.displayName = displayName;
+        this.detailPath = detailPath;
+        this.pricePath = pricePath;
     }
 
     /**
@@ -45,5 +49,22 @@ public enum HouseType {
                 .map(HouseType::getHouseSecd)
                 .findFirst()
                 .orElse(OTHER.houseSecd);
+    }
+
+    /**
+     * 표시명으로 HouseType 조회
+     */
+    public static HouseType fromDisplayName(String displayName) {
+        return Arrays.stream(values())
+                .filter(type -> type.displayName.equals(displayName))
+                .findFirst()
+                .orElse(OTHER);
+    }
+
+    /**
+     * APT 계열 API를 사용하는 타입인지 (houseSecd 파라미터 필요)
+     */
+    public boolean usesHouseSecd() {
+        return !houseSecd.isEmpty();
     }
 }

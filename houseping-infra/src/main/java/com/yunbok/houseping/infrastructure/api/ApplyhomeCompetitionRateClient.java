@@ -31,6 +31,8 @@ import java.util.List;
 )
 public class ApplyhomeCompetitionRateClient implements CompetitionRateProvider {
 
+    private static final int API_RATE_LIMIT_MS = 100;
+
     private final WebClient webClient;
     private final SubscriptionProperties properties;
     private final String apiKey;
@@ -81,7 +83,7 @@ public class ApplyhomeCompetitionRateClient implements CompetitionRateProvider {
                 } catch (WebClientResponseException e) {
                     log.warn("[경쟁률 API] 페이지 {} 조회 실패 - status: {}", page, e.getStatusCode());
                 }
-                ApiRateLimiter.delay(100);
+                ApiRateLimiter.delay(API_RATE_LIMIT_MS);
             }
 
             log.info("[경쟁률 API] APT 경쟁률 전체 조회 완료 - 총 {}건", allRates.size());
@@ -107,36 +109,6 @@ public class ApplyhomeCompetitionRateClient implements CompetitionRateProvider {
                 .retrieve()
                 .bodyToMono(CompetitionRateResponse.class)
                 .block();
-    }
-
-    /**
-     * 잔여세대 분양정보/경쟁률 전체 조회
-     */
-    private List<CompetitionRate> fetchRemainingCompetitionRates() {
-        try {
-            CompetitionRateResponse response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/getRemndrLttotPblancCmpet")
-                            .queryParam("page", properties.getApi().getDefaultPage())
-                            .queryParam("perPage", properties.getApi().getPageSize())
-                            .queryParam("serviceKey", apiKey)
-                            .build())
-                    .retrieve()
-                    .bodyToMono(CompetitionRateResponse.class)
-                    .block();
-
-            List<CompetitionRate> rates = parseResponse(response);
-            log.info("[경쟁률 API] 잔여세대 경쟁률 조회 완료 - {}건", rates.size());
-            return rates;
-
-        } catch (WebClientResponseException e) {
-            log.warn("[경쟁률 API] 잔여세대 경쟁률 조회 실패 - status: {}, message: {}",
-                    e.getStatusCode(), e.getMessage());
-            return Collections.emptyList();
-        } catch (Exception e) {
-            log.warn("[경쟁률 API] 잔여세대 경쟁률 조회 중 오류 - {}", e.getMessage());
-            return Collections.emptyList();
-        }
     }
 
     private List<CompetitionRate> parseResponse(CompetitionRateResponse response) {

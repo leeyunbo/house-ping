@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yunbok.houseping.core.domain.Subscription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +44,7 @@ class LhWebScraperClientTest {
 
     @BeforeEach
     void setUp() {
-        adapter = new LhWebScraperClient(webClient);
+        adapter = new LhWebScraperClient(webClient, new ObjectMapper());
     }
 
     @Nested

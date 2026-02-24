@@ -21,6 +21,8 @@ import java.util.Arrays;
 @Component
 public class SchedulerErrorSlackClient {
 
+    private static final int MAX_STACK_TRACE_LINES = 5;
+
     private final WebClient webClient;
     private final String errorWebhookUrl;
     private final SlackMessageFormatter messageFormatter;
@@ -39,7 +41,7 @@ public class SchedulerErrorSlackClient {
         }
         try {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String stackTrace = summarizeStackTrace(e, 5);
+            String stackTrace = summarizeStackTrace(e, MAX_STACK_TRACE_LINES);
 
             String message = messageFormatter.formatSchedulerError(schedulerName, timestamp, e.getMessage(), stackTrace);
             String fallback = messageFormatter.formatSchedulerErrorFallback(schedulerName, timestamp, e.getMessage());

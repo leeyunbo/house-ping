@@ -1,5 +1,6 @@
 package com.yunbok.houseping.infrastructure.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.config.SubscriptionProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +49,7 @@ class LhApiClientTest {
 
     @BeforeEach
     void setUp() {
-        adapter = new LhApiClient(webClient, properties);
+        adapter = new LhApiClient(webClient, properties, new ObjectMapper());
         ReflectionTestUtils.setField(adapter, "apiKey", "test-api-key");
 
         when(properties.getApi()).thenReturn(apiProperties);

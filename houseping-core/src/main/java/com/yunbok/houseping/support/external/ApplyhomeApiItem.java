@@ -23,4 +23,4 @@ public record ApplyhomeApiItem(
     @JsonProperty("MDHS_TELNO") String contact,
     @JsonProperty("HSSPLY_ADRES") String address,
     @JsonProperty("HSSPLY_ZIP") String zipCode
-) {}
+) implements ApplyhomeSubscriptionItem {}
