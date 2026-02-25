@@ -1,7 +1,7 @@
-package com.yunbok.houseping.core.service.admin;
+package com.yunbok.houseping.service;
 
-import com.yunbok.houseping.core.service.admin.dto.AdminCompetitionRateDto;
-import com.yunbok.houseping.core.service.admin.dto.AdminCompetitionRateSearchCriteria;
+import com.yunbok.houseping.service.dto.AdminCompetitionRateDto;
+import com.yunbok.houseping.service.dto.AdminCompetitionRateSearchCriteria;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.entity.SubscriptionEntity;

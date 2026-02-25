@@ -17,7 +17,9 @@ import java.util.Locale;
  */
 @Component
 @Primary
-public class SlackMessageFormatter implements SubscriptionMessageFormatter {
+public class SlackMessageFormatter implements SubscriptionMessageFormatter, SchedulerErrorFormatter {
+
+    private static final int MAX_NEW_SUBSCRIPTION_DISPLAY = 5;
 
     @Override
     public String formatBatchSummary(List<Subscription> subscriptions) {
@@ -95,13 +97,13 @@ public class SlackMessageFormatter implements SubscriptionMessageFormatter {
             sb.append("   신규 청약 없음\n");
         } else {
             sb.append("\n");
-            int displayCount = Math.min(report.newSubscriptions().size(), 5);
+            int displayCount = Math.min(report.newSubscriptions().size(), MAX_NEW_SUBSCRIPTION_DISPLAY);
             for (int i = 0; i < displayCount; i++) {
                 Subscription sub = report.newSubscriptions().get(i);
                 sb.append(formatCompactItem(sub.getHouseName(), sub.getArea(), sub.getTotalSupplyCount(), sub.getDetailUrl()));
             }
-            if (report.newSubscriptions().size() > 5) {
-                sb.append("   _외 ").append(report.newSubscriptions().size() - 5).append("건..._\n");
+            if (report.newSubscriptions().size() > MAX_NEW_SUBSCRIPTION_DISPLAY) {
+                sb.append("   _외 ").append(report.newSubscriptions().size() - MAX_NEW_SUBSCRIPTION_DISPLAY).append("건..._\n");
             }
         }
 
@@ -115,6 +117,7 @@ public class SlackMessageFormatter implements SubscriptionMessageFormatter {
         return sb.toString();
     }
 
+    @Override
     public String formatSchedulerError(String schedulerName, String timestamp, String errorMessage, String stackTrace) {
         return String.format(
                 ":rotating_light: *스케줄러 실행 실패*\n\n"
@@ -126,6 +129,7 @@ public class SlackMessageFormatter implements SubscriptionMessageFormatter {
         );
     }
 
+    @Override
     public String formatSchedulerErrorFallback(String schedulerName, String timestamp, String errorMessage) {
         return String.format("[%s] %s 실행 실패: %s", timestamp, schedulerName, errorMessage);
     }
@@ -148,7 +152,4 @@ public class SlackMessageFormatter implements SubscriptionMessageFormatter {
         return sb.toString();
     }
 
-    private String formatSupplyCount(Integer count) {
-        return count != null ? count + "세대" : "-";
-    }
 }

@@ -19,4 +19,8 @@ public interface SubscriptionMessageFormatter {
      * 일일 종합 알림 리포트를 포맷팅
      */
     String formatDailyReport(DailyNotificationReport report);
+
+    default String formatSupplyCount(Integer count) {
+        return count != null ? count + "세대" : "-";
+    }
 }

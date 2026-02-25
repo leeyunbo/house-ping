@@ -1,6 +1,6 @@
-package com.yunbok.houseping.core.service.admin;
+package com.yunbok.houseping.service;
 
-import com.yunbok.houseping.core.service.admin.dto.DashboardStatisticsDto;
+import com.yunbok.houseping.service.dto.DashboardStatisticsDto;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.entity.SubscriptionEntity;

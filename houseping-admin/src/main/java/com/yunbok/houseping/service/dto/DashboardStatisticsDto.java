@@ -1,4 +1,4 @@
-package com.yunbok.houseping.core.service.admin.dto;
+package com.yunbok.houseping.service.dto;
 
 import java.math.BigDecimal;
 import java.util.List;

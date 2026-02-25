@@ -1,8 +1,8 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.core.service.admin.AdminCompetitionRateQueryService;
+import com.yunbok.houseping.service.AdminCompetitionRateQueryService;
 import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
-import com.yunbok.houseping.core.service.admin.dto.AdminCompetitionRateSearchCriteria;
+import com.yunbok.houseping.service.dto.AdminCompetitionRateSearchCriteria;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

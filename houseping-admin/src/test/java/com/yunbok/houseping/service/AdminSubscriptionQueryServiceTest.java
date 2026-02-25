@@ -1,8 +1,8 @@
-package com.yunbok.houseping.core.service.admin;
+package com.yunbok.houseping.service;
 
 import com.yunbok.houseping.support.dto.CalendarEventDto;
-import com.yunbok.houseping.core.service.admin.dto.AdminSubscriptionDto;
-import com.yunbok.houseping.core.service.admin.dto.AdminSubscriptionSearchCriteria;
+import com.yunbok.houseping.service.dto.AdminSubscriptionDto;
+import com.yunbok.houseping.service.dto.AdminSubscriptionSearchCriteria;
 
 import com.yunbok.houseping.entity.NotificationSubscriptionEntity;
 import com.yunbok.houseping.repository.NotificationSubscriptionRepository;

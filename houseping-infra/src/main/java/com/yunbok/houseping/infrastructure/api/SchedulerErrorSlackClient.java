@@ -1,7 +1,7 @@
 package com.yunbok.houseping.infrastructure.api;
 
 import com.yunbok.houseping.infrastructure.api.dto.SlackWebhookRequest;
-import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
+import com.yunbok.houseping.infrastructure.formatter.SchedulerErrorFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -25,11 +25,11 @@ public class SchedulerErrorSlackClient {
 
     private final WebClient webClient;
     private final String errorWebhookUrl;
-    private final SlackMessageFormatter messageFormatter;
+    private final SchedulerErrorFormatter messageFormatter;
 
     public SchedulerErrorSlackClient(
             @Value("${slack.webhook.error-url:}") String errorWebhookUrl,
-            SlackMessageFormatter messageFormatter) {
+            SchedulerErrorFormatter messageFormatter) {
         this.errorWebhookUrl = errorWebhookUrl;
         this.messageFormatter = messageFormatter;
         this.webClient = WebClient.create();

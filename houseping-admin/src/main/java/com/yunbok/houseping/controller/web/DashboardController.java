@@ -1,6 +1,6 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.core.service.admin.DashboardQueryService;
+import com.yunbok.houseping.service.DashboardQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

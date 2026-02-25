@@ -1,7 +1,7 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.core.service.admin.DashboardQueryService;
-import com.yunbok.houseping.core.service.admin.dto.DashboardStatisticsDto;
+import com.yunbok.houseping.service.DashboardQueryService;
+import com.yunbok.houseping.service.dto.DashboardStatisticsDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

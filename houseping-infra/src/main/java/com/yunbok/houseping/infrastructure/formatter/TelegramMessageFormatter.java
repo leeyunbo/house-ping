@@ -65,7 +65,8 @@ public class TelegramMessageFormatter implements SubscriptionMessageFormatter {
         if (!report.receiptEndToday().isEmpty()) {
             sb.append("<b>접수 마감 (오늘)</b>\n");
             for (NotificationTarget target : report.receiptEndToday()) {
-                sb.append(formatReceiptEndItem(target));
+                sb.append(formatItem(target.houseName(), target.area(), target.totalSupplyCount(),
+                        "접수 마감: 오늘까지", target.detailUrl()));
             }
             sb.append("\n");
         }
@@ -74,7 +75,9 @@ public class TelegramMessageFormatter implements SubscriptionMessageFormatter {
         if (!report.receiptStartTomorrow().isEmpty()) {
             sb.append("<b>접수 시작 (내일)</b>\n");
             for (NotificationTarget target : report.receiptStartTomorrow()) {
-                sb.append(formatReceiptStartItem(target));
+                String periodText = "접수 기간: " + formatDate(target.receiptStartDate()) + " ~ " + formatDate(target.receiptEndDate());
+                sb.append(formatItem(target.houseName(), target.area(), target.totalSupplyCount(),
+                        periodText, target.detailUrl()));
             }
             sb.append("\n");
         }
@@ -83,7 +86,9 @@ public class TelegramMessageFormatter implements SubscriptionMessageFormatter {
         if (!report.newSubscriptions().isEmpty()) {
             sb.append("<b>신규 청약</b>\n");
             for (Subscription subscription : report.newSubscriptions()) {
-                sb.append(formatNewSubscriptionItem(subscription));
+                String periodText = "접수 기간: " + formatDate(subscription.getReceiptStartDate()) + " ~ " + formatDate(subscription.getReceiptEndDate());
+                sb.append(formatItem(subscription.getHouseName(), subscription.getArea(), subscription.getTotalSupplyCount(),
+                        periodText, subscription.getDetailUrl()));
             }
             sb.append("\n");
         }
@@ -98,49 +103,17 @@ public class TelegramMessageFormatter implements SubscriptionMessageFormatter {
         return sb.toString();
     }
 
-    private String formatReceiptEndItem(NotificationTarget target) {
+    private String formatItem(String name, String area, Integer supplyCount, String periodText, String detailUrl) {
         StringBuilder sb = new StringBuilder();
-        sb.append("• <b>").append(escapeHtml(target.houseName())).append("</b>")
-          .append(" | ").append(target.area() != null ? escapeHtml(target.area()) : "-")
-          .append(" | ").append(formatSupplyCount(target.totalSupplyCount())).append("\n");
-        sb.append("  접수 마감: 오늘까지");
-        if (target.detailUrl() != null) {
-            sb.append(" | <a href=\"").append(target.detailUrl()).append("\">상세보기</a>");
+        sb.append("• <b>").append(escapeHtml(name)).append("</b>")
+          .append(" | ").append(area != null ? escapeHtml(area) : "-")
+          .append(" | ").append(formatSupplyCount(supplyCount)).append("\n");
+        sb.append("  ").append(periodText);
+        if (detailUrl != null) {
+            sb.append(" | <a href=\"").append(detailUrl).append("\">상세보기</a>");
         }
         sb.append("\n");
         return sb.toString();
-    }
-
-    private String formatReceiptStartItem(NotificationTarget target) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("• <b>").append(escapeHtml(target.houseName())).append("</b>")
-          .append(" | ").append(target.area() != null ? escapeHtml(target.area()) : "-")
-          .append(" | ").append(formatSupplyCount(target.totalSupplyCount())).append("\n");
-        sb.append("  접수 기간: ").append(formatDate(target.receiptStartDate()))
-          .append(" ~ ").append(formatDate(target.receiptEndDate()));
-        if (target.detailUrl() != null) {
-            sb.append(" | <a href=\"").append(target.detailUrl()).append("\">상세보기</a>");
-        }
-        sb.append("\n");
-        return sb.toString();
-    }
-
-    private String formatNewSubscriptionItem(Subscription subscription) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("• <b>").append(escapeHtml(subscription.getHouseName())).append("</b>")
-          .append(" | ").append(escapeHtml(subscription.getArea()))
-          .append(" | ").append(formatSupplyCount(subscription.getTotalSupplyCount())).append("\n");
-        sb.append("  접수 기간: ").append(formatDate(subscription.getReceiptStartDate()))
-          .append(" ~ ").append(formatDate(subscription.getReceiptEndDate()));
-        if (subscription.getDetailUrl() != null) {
-            sb.append(" | <a href=\"").append(subscription.getDetailUrl()).append("\">상세보기</a>");
-        }
-        sb.append("\n");
-        return sb.toString();
-    }
-
-    private String formatSupplyCount(Integer count) {
-        return count != null ? count + "세대" : "-";
     }
 
     private String formatDate(LocalDate date) {

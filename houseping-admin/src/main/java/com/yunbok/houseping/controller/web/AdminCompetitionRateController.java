@@ -1,7 +1,7 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.core.service.admin.dto.AdminCompetitionRateSearchCriteria;
-import com.yunbok.houseping.core.service.admin.AdminCompetitionRateQueryService;
+import com.yunbok.houseping.service.dto.AdminCompetitionRateSearchCriteria;
+import com.yunbok.houseping.service.AdminCompetitionRateQueryService;
 import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

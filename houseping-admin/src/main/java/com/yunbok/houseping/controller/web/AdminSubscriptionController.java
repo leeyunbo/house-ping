@@ -1,12 +1,12 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.core.service.admin.dto.AdminSubscriptionDto;
-import com.yunbok.houseping.core.service.admin.dto.AdminSubscriptionSearchCriteria;
+import com.yunbok.houseping.service.dto.AdminSubscriptionDto;
+import com.yunbok.houseping.service.dto.AdminSubscriptionSearchCriteria;
 import com.yunbok.houseping.support.dto.HouseTypeComparison;
 import com.yunbok.houseping.core.domain.RealTransaction;
 import com.yunbok.houseping.support.dto.CalendarEventDto;
 import com.yunbok.houseping.support.dto.SyncResult;
-import com.yunbok.houseping.core.service.admin.AdminSubscriptionQueryService;
+import com.yunbok.houseping.service.AdminSubscriptionQueryService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionAnalysisService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import lombok.RequiredArgsConstructor;
