@@ -126,6 +126,15 @@ public class PublicHomeController {
     }
 
     /**
+     * 개인정보처리방침
+     */
+    @GetMapping("/privacy")
+    public String privacy(Model model) {
+        model.addAttribute("canonicalPath", "/home/privacy");
+        return "home/privacy";
+    }
+
+    /**
      * 청약 분석 페이지
      */
     @GetMapping("/analysis/{id}")

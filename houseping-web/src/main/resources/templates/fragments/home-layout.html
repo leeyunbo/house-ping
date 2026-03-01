@@ -9,6 +9,11 @@
     <meta name="description" th:attr="content=${description != null ? description : '청약 일정, 경쟁률, 시세 분석을 한눈에. 청약홈, LH 청약 정보 통합 제공'}">
     <meta name="keywords" content="청약, 아파트 청약, 청약홈, LH, 경쟁률, 분양, 청약 일정, 청약 분석">
     <meta name="color-scheme" content="light dark">
+    <meta name="google-adsense-account" content="ca-pub-9637271180734042">
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9637271180734042"
+         crossorigin="anonymous"></script>
 
     <!-- Open Graph (카카오톡, 페이스북 공유용) -->
     <meta property="og:title" th:attr="content=${title} + ' - Houseping'">
@@ -455,6 +460,9 @@ function toggleTheme() {
     <p class="footer-source">
         본 서비스는 청약Home·LH·국토교통부 공공데이터를 활용하며, 정보의 정확성을 보장하지 않습니다.<br>
         투자 및 청약 판단의 책임은 이용자에게 있습니다.
+    </p>
+    <p class="footer-links" style="margin-top:8px;font-size:13px;">
+        <a href="/home/privacy" style="color:var(--text-muted);text-decoration:none;">개인정보처리방침</a>
     </p>
 </footer>
 </body>

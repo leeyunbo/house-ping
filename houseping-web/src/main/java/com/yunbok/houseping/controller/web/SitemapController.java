@@ -32,6 +32,9 @@ public class SitemapController {
         appendUrl(sb, BASE_URL + "/home/calendar", today, "weekly", "0.8");
         appendUrl(sb, BASE_URL + "/home/calculator", today, "monthly", "0.8");
 
+        // 개인정보처리방침
+        appendUrl(sb, BASE_URL + "/home/privacy", today, "yearly", "0.3");
+
         // 가이드 페이지
         appendUrl(sb, BASE_URL + "/home/guide", today, "weekly", "0.8");
         for (GuideSlug guide : GuideSlug.values()) {

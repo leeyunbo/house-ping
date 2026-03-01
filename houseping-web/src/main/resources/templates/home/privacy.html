@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/home-layout :: head('개인정보처리방침', 'Houseping 개인정보처리방침. 수집하는 개인정보 항목, 이용 목적, 보유 기간, 제3자 제공, 이용자 권리 등을 안내합니다.')}"></head>
+<head>
+    <style>
+        .hero {
+            padding: 48px 0 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .hero-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+        .article {
+            padding-top: 40px;
+        }
+        .article h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 16px;
+            margin-top: 48px;
+        }
+        .article h2:first-child { margin-top: 0; }
+        .article p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            word-break: keep-all;
+            margin-bottom: 16px;
+        }
+        .article strong { color: var(--text); font-weight: 700; }
+        .article ul {
+            margin: 12px 0 16px 20px;
+            font-size: 15px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+        .article ul li { margin-bottom: 4px; }
+        .callout {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .callout strong { color: var(--primary); }
+        .bottom-spacer { height: 80px; }
+        @media (max-width: 640px) {
+            .hero { padding: 36px 0 0; }
+            .hero h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/home-layout :: navbar('')}"></nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>개인정보처리방침</h1>
+            <p class="hero-desc">시행일: 2026년 3월 1일</p>
+        </div>
+
+        <div class="article">
+            <h2>1. 개인정보의 처리 목적</h2>
+            <p>Houseping(이하 "서비스")은 다음 목적을 위해 개인정보를 처리합니다.</p>
+            <ul>
+                <li><strong>서비스 제공</strong> — 청약 일정 조회, 경쟁률 분석, 알림 발송 등 서비스 운영</li>
+                <li><strong>서비스 개선</strong> — 이용 통계 분석, 오류 진단 및 서비스 품질 향상</li>
+                <li><strong>광고 게재</strong> — Google AdSense를 통한 맞춤형 광고 제공</li>
+            </ul>
+
+            <h2>2. 수집하는 개인정보 항목</h2>
+            <p>서비스는 별도의 회원가입 절차 없이 이용할 수 있으며, 최소한의 정보만 수집합니다.</p>
+            <ul>
+                <li><strong>자동 수집 항목</strong> — 접속 IP, 브라우저 종류, 접속 일시, 방문 페이지, 쿠키</li>
+                <li><strong>알림 서비스 이용 시</strong> — 이메일 주소 또는 메신저 식별 정보</li>
+            </ul>
+
+            <h2>3. 개인정보의 보유 및 이용 기간</h2>
+            <p>수집된 개인정보는 수집 목적이 달성되면 지체 없이 파기합니다.</p>
+            <ul>
+                <li><strong>접속 로그</strong> — 3개월 보관 후 파기</li>
+                <li><strong>알림 설정 정보</strong> — 서비스 이용 종료(알림 해제) 시 즉시 파기</li>
+            </ul>
+
+            <h2>4. 개인정보의 제3자 제공</h2>
+            <p>서비스는 이용자의 개인정보를 제3자에게 제공하지 않습니다. 단, 다음의 경우는 예외입니다.</p>
+            <ul>
+                <li>이용자가 사전에 동의한 경우</li>
+                <li>법령에 의해 요구되는 경우</li>
+            </ul>
+
+            <h2>5. 쿠키 및 광고</h2>
+            <p>서비스는 <strong>Google AdSense</strong>를 사용하여 광고를 게재합니다. Google은 쿠키를 사용하여 이용자의 관심사에 기반한 광고를 표시할 수 있습니다.</p>
+            <ul>
+                <li>Google의 광고 쿠키 사용에 대한 자세한 내용은 <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener" style="color:var(--primary);">Google 광고 정책</a>에서 확인할 수 있습니다.</li>
+                <li>맞춤 광고를 원하지 않는 경우 <a href="https://adssettings.google.com" target="_blank" rel="noopener" style="color:var(--primary);">Google 광고 설정</a>에서 비활성화할 수 있습니다.</li>
+            </ul>
+
+            <h2>6. 개인정보의 안전성 확보 조치</h2>
+            <p>서비스는 개인정보의 안전성 확보를 위해 다음 조치를 취하고 있습니다.</p>
+            <ul>
+                <li>데이터 전송 시 SSL/TLS 암호화 적용</li>
+                <li>개인정보 접근 권한 최소화</li>
+                <li>접속 기록의 보관 및 위·변조 방지</li>
+            </ul>
+
+            <h2>7. 이용자의 권리</h2>
+            <p>이용자는 언제든지 다음의 권리를 행사할 수 있습니다.</p>
+            <ul>
+                <li>개인정보 열람, 정정, 삭제 요청</li>
+                <li>개인정보 처리 정지 요청</li>
+                <li>알림 서비스 해제를 통한 정보 삭제</li>
+            </ul>
+
+            <h2>8. 개인정보 보호책임자</h2>
+            <p>개인정보 처리에 관한 문의는 아래로 연락해주세요.</p>
+            <div class="callout">
+                <strong>개인정보 보호책임자</strong><br>
+                이메일: servers1@naver.com
+            </div>
+
+            <h2>9. 변경 사항 고지</h2>
+            <p>본 개인정보처리방침이 변경되는 경우, 변경 사항을 서비스 내 공지를 통해 안내합니다.</p>
+        </div>
+
+        <div class="bottom-spacer"></div>
+    </div>
+
+    <nav th:replace="~{fragments/home-layout :: bottomTab('')}"></nav>
+    <script th:replace="~{fragments/home-layout :: themeScript}"></script>
+    <footer th:replace="~{fragments/home-layout :: footer}"></footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://house-ping.com/home"},
+            {"@type": "ListItem", "position": 2, "name": "개인정보처리방침", "item": "https://house-ping.com/home/privacy"}
+        ]
+    }
+    </script>
+</body>
+</html>
