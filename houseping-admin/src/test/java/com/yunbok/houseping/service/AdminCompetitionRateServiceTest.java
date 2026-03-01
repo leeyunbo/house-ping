@@ -27,9 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@DisplayName("AdminCompetitionRateQueryService - 경쟁률 조회 서비스")
+@DisplayName("AdminCompetitionRateService - 경쟁률 조회 서비스")
 @ExtendWith(MockitoExtension.class)
-class AdminCompetitionRateQueryServiceTest {
+class AdminCompetitionRateServiceTest {
 
     @Mock
     private CompetitionRateRepository competitionRateRepository;
@@ -37,11 +37,11 @@ class AdminCompetitionRateQueryServiceTest {
     @Mock
     private SubscriptionRepository subscriptionRepository;
 
-    private AdminCompetitionRateQueryService service;
+    private AdminCompetitionRateService service;
 
     @BeforeEach
     void setUp() {
-        service = new AdminCompetitionRateQueryService(competitionRateRepository, subscriptionRepository);
+        service = new AdminCompetitionRateService(competitionRateRepository, subscriptionRepository);
     }
 
     @Nested
@@ -54,13 +54,11 @@ class AdminCompetitionRateQueryServiceTest {
             // given
             AdminCompetitionRateSearchCriteria criteria = new AdminCompetitionRateSearchCriteria(
                     null, null, null, null, null, null, null, null, 0, 20);
-            CompetitionRateEntity entity = createCompetitionRateEntity("H001");
+            CompetitionRateEntity entity = createCompetitionRateEntity("H001", null);
             Page<CompetitionRateEntity> page = new PageImpl<>(List.of(entity));
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(page);
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             Page<AdminCompetitionRateDto> result = service.search(criteria);
@@ -78,8 +76,6 @@ class AdminCompetitionRateQueryServiceTest {
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
@@ -89,87 +85,37 @@ class AdminCompetitionRateQueryServiceTest {
         }
 
         @Test
-        @DisplayName("주택명 조건이 있으면 청약 정보에서 houseManageNo를 조회한다")
+        @DisplayName("주택명 조건이 있으면 subscription.houseName으로 필터링한다")
         void appliesHouseNameCondition() {
             // given
             AdminCompetitionRateSearchCriteria criteria = new AdminCompetitionRateSearchCriteria(
                     null, "힐스테이트", null, null, null, null, null, null, 0, 20);
 
-            when(subscriptionRepository.findHouseManageNosByHouseNameContaining("힐스테이트"))
-                    .thenReturn(List.of("H001", "H002"));
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findHouseManageNosByHouseNameContaining("힐스테이트");
+            verify(competitionRateRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
-        @DisplayName("주택명으로 검색 결과가 없으면 빈 결과를 반환한다")
-        void returnsEmptyWhenNoHouseNameMatch() {
-            // given
-            AdminCompetitionRateSearchCriteria criteria = new AdminCompetitionRateSearchCriteria(
-                    null, "없는아파트", null, null, null, null, null, null, 0, 20);
-
-            when(subscriptionRepository.findHouseManageNosByHouseNameContaining("없는아파트"))
-                    .thenReturn(List.of());
-            when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
-                    .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
-
-            // when
-            Page<AdminCompetitionRateDto> result = service.search(criteria);
-
-            // then
-            assertThat(result.getContent()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("지역 조건이 있으면 해당 지역의 houseManageNo를 조회한다")
+        @DisplayName("지역 조건이 있으면 subscription.area로 필터링한다")
         void appliesAreaCondition() {
             // given
             AdminCompetitionRateSearchCriteria criteria = new AdminCompetitionRateSearchCriteria(
                     null, null, "서울", null, null, null, null, null, 0, 20);
 
-            when(subscriptionRepository.findHouseManageNosByAreaIn(any()))
-                    .thenReturn(List.of("H001"));
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
 
             // then
-            verify(subscriptionRepository).findHouseManageNosByAreaIn(any());
-        }
-
-        @Test
-        @DisplayName("지역으로 검색 결과가 없으면 빈 결과를 반환한다")
-        void returnsEmptyWhenNoAreaMatch() {
-            // given
-            AdminCompetitionRateSearchCriteria criteria = new AdminCompetitionRateSearchCriteria(
-                    null, null, "제주", null, null, null, null, null, 0, 20);
-
-            when(subscriptionRepository.findHouseManageNosByAreaIn(any()))
-                    .thenReturn(List.of());
-            when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
-                    .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
-
-            // when
-            Page<AdminCompetitionRateDto> result = service.search(criteria);
-
-            // then
-            assertThat(result.getContent()).isEmpty();
+            verify(competitionRateRepository).findAll(any(Predicate.class), any(Pageable.class));
         }
 
         @Test
@@ -181,8 +127,6 @@ class AdminCompetitionRateQueryServiceTest {
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
@@ -200,8 +144,6 @@ class AdminCompetitionRateQueryServiceTest {
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
@@ -219,8 +161,6 @@ class AdminCompetitionRateQueryServiceTest {
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
@@ -238,8 +178,6 @@ class AdminCompetitionRateQueryServiceTest {
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
@@ -257,8 +195,6 @@ class AdminCompetitionRateQueryServiceTest {
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of());
 
             // when
             service.search(criteria);
@@ -268,20 +204,18 @@ class AdminCompetitionRateQueryServiceTest {
         }
 
         @Test
-        @DisplayName("청약 정보를 조인하여 주택명과 지역을 반환한다")
+        @DisplayName("청약 정보가 연관된 경우 주택명과 지역을 반환한다")
         void joinsSubscription() {
             // given
             AdminCompetitionRateSearchCriteria criteria = new AdminCompetitionRateSearchCriteria(
                     null, null, null, null, null, null, null, null, 0, 20);
-            CompetitionRateEntity rateEntity = createCompetitionRateEntity("H001");
             SubscriptionEntity subEntity = createSubscriptionEntity("H001", "테스트 아파트", "서울");
+            CompetitionRateEntity rateEntity = createCompetitionRateEntity("H001", subEntity);
 
             Page<CompetitionRateEntity> page = new PageImpl<>(List.of(rateEntity));
 
             when(competitionRateRepository.findAll(any(Predicate.class), any(Pageable.class)))
                     .thenReturn(page);
-            when(subscriptionRepository.findAll(any(Predicate.class)))
-                    .thenReturn(List.of(subEntity));
 
             // when
             Page<AdminCompetitionRateDto> result = service.search(criteria);
@@ -347,7 +281,7 @@ class AdminCompetitionRateQueryServiceTest {
         }
     }
 
-    private CompetitionRateEntity createCompetitionRateEntity(String houseManageNo) {
+    private CompetitionRateEntity createCompetitionRateEntity(String houseManageNo, SubscriptionEntity subscription) {
         return CompetitionRateEntity.builder()
                 .houseManageNo(houseManageNo)
                 .pblancNo("P001")
@@ -358,6 +292,7 @@ class AdminCompetitionRateQueryServiceTest {
                 .residenceArea("해당지역")
                 .rank(1)
                 .collectedAt(LocalDateTime.now())
+                .subscription(subscription)
                 .build();
     }
 

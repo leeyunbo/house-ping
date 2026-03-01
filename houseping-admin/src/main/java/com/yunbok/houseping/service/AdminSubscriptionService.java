@@ -30,7 +30,7 @@ import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
-public class AdminSubscriptionQueryService {
+public class AdminSubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final NotificationSubscriptionRepository notificationSubscriptionRepository;

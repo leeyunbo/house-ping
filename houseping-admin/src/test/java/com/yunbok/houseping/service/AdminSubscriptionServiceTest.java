@@ -30,9 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@DisplayName("AdminSubscriptionQueryService - 관리자 검색 서비스")
+@DisplayName("AdminSubscriptionService - 관리자 검색 서비스")
 @ExtendWith(MockitoExtension.class)
-class AdminSubscriptionQueryServiceTest {
+class AdminSubscriptionServiceTest {
 
     @Mock
     private SubscriptionRepository subscriptionRepository;
@@ -40,11 +40,11 @@ class AdminSubscriptionQueryServiceTest {
     @Mock
     private NotificationSubscriptionRepository notificationSubscriptionRepository;
 
-    private AdminSubscriptionQueryService service;
+    private AdminSubscriptionService service;
 
     @BeforeEach
     void setUp() {
-        service = new AdminSubscriptionQueryService(subscriptionRepository, notificationSubscriptionRepository);
+        service = new AdminSubscriptionService(subscriptionRepository, notificationSubscriptionRepository);
     }
 
     @Nested

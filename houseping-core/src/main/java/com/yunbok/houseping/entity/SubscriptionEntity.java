@@ -25,7 +25,8 @@ import java.time.LocalDateTime;
        indexes = {
            @Index(name = "idx_receipt_start_date", columnList = "receipt_start_date"),
            @Index(name = "idx_area", columnList = "area"),
-           @Index(name = "idx_source", columnList = "source")
+           @Index(name = "idx_source", columnList = "source"),
+           @Index(name = "uk_house_manage_no", columnList = "house_manage_no", unique = true)
        })
 @Getter
 @Builder

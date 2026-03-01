@@ -6,7 +6,7 @@ import com.yunbok.houseping.support.dto.HouseTypeComparison;
 import com.yunbok.houseping.core.domain.RealTransaction;
 import com.yunbok.houseping.support.dto.CalendarEventDto;
 import com.yunbok.houseping.support.dto.SyncResult;
-import com.yunbok.houseping.service.AdminSubscriptionQueryService;
+import com.yunbok.houseping.service.AdminSubscriptionService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionAnalysisService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 @RequiredArgsConstructor
 public class AdminSubscriptionController {
 
-    private final AdminSubscriptionQueryService queryService;
+    private final AdminSubscriptionService queryService;
     private final SubscriptionManagementService managementUseCase;
     private final SubscriptionPriceRepository priceRepository;
     private final SubscriptionAnalysisService analysisUseCase;

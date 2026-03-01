@@ -1,6 +1,6 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.service.AdminCompetitionRateQueryService;
+import com.yunbok.houseping.service.AdminCompetitionRateService;
 import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
 import com.yunbok.houseping.service.dto.AdminCompetitionRateSearchCriteria;
 
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class AdminCompetitionRateControllerTest {
 
     @Mock
-    private AdminCompetitionRateQueryService queryService;
+    private AdminCompetitionRateService queryService;
 
     @Mock
     private CompetitionRateCollectorService collectorUseCase;

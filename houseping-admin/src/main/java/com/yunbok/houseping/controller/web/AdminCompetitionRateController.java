@@ -1,7 +1,7 @@
 package com.yunbok.houseping.controller.web;
 
 import com.yunbok.houseping.service.dto.AdminCompetitionRateSearchCriteria;
-import com.yunbok.houseping.service.AdminCompetitionRateQueryService;
+import com.yunbok.houseping.service.AdminCompetitionRateService;
 import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class AdminCompetitionRateController {
 
-    private final AdminCompetitionRateQueryService queryService;
+    private final AdminCompetitionRateService queryService;
     private final CompetitionRateCollectorService collectorUseCase;
 
     @GetMapping

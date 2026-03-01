@@ -1,6 +1,6 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.service.DashboardQueryService;
+import com.yunbok.houseping.service.DashboardService;
 import com.yunbok.houseping.service.dto.DashboardStatisticsDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class DashboardControllerTest {
 
     @Mock
-    private DashboardQueryService dashboardQueryService;
+    private DashboardService dashboardQueryService;
 
     @Mock
     private Model model;
@@ -66,7 +66,7 @@ class DashboardControllerTest {
         }
 
         @Test
-        @DisplayName("DashboardQueryService의 getStatistics를 호출한다")
+        @DisplayName("DashboardService의 getStatistics를 호출한다")
         void callsQueryService() {
             // given
             DashboardStatisticsDto stats = createEmptyStats();

@@ -6,7 +6,6 @@ import com.yunbok.houseping.support.util.AreaNormalizer;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.entity.QCompetitionRateEntity;
-import com.yunbok.houseping.entity.QSubscriptionEntity;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -15,23 +14,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
-public class AdminCompetitionRateQueryService {
+public class AdminCompetitionRateService {
 
     private final CompetitionRateRepository competitionRateRepository;
     private final SubscriptionRepository subscriptionRepository;
 
     private static final QCompetitionRateEntity competitionRate = QCompetitionRateEntity.competitionRateEntity;
-    private static final QSubscriptionEntity subscription = QSubscriptionEntity.subscriptionEntity;
 
+    @Transactional(readOnly = true)
     public Page<AdminCompetitionRateDto> search(AdminCompetitionRateSearchCriteria criteria) {
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -46,20 +43,11 @@ public class AdminCompetitionRateQueryService {
             );
         }
         if (StringUtils.hasText(criteria.houseName())) {
-            List<String> houseManageNos = subscriptionRepository.findHouseManageNosByHouseNameContaining(criteria.houseName().trim());
-            if (houseManageNos.isEmpty()) {
-                builder.and(competitionRate.houseManageNo.isNull()); // 결과 없음
-            } else {
-                builder.and(competitionRate.houseManageNo.in(houseManageNos));
-            }
+            builder.and(competitionRate.subscription.houseName.containsIgnoreCase(criteria.houseName().trim()));
         }
         if (StringUtils.hasText(criteria.area())) {
-            List<String> houseManageNos = subscriptionRepository.findHouseManageNosByAreaIn(AreaNormalizer.expand(criteria.area().trim()));
-            if (houseManageNos.isEmpty()) {
-                builder.and(competitionRate.houseManageNo.isNull()); // 결과 없음
-            } else {
-                builder.and(competitionRate.houseManageNo.in(houseManageNos));
-            }
+            List<String> areas = AreaNormalizer.expand(criteria.area().trim());
+            builder.and(competitionRate.subscription.area.in(areas));
         }
         if (StringUtils.hasText(criteria.houseType())) {
             builder.and(competitionRate.houseType.equalsIgnoreCase(criteria.houseType().trim()));
@@ -85,29 +73,11 @@ public class AdminCompetitionRateQueryService {
 
         Page<CompetitionRateEntity> resultPage = competitionRateRepository.findAll(builder, pageRequest);
 
-        // 청약 정보 조인을 위한 매핑
-        Map<String, SubscriptionEntity> subscriptionMap = buildSubscriptionMap(resultPage.getContent());
-
-        return resultPage.map(entity -> toDto(entity, subscriptionMap));
+        return resultPage.map(this::toDto);
     }
 
-    private Map<String, SubscriptionEntity> buildSubscriptionMap(List<CompetitionRateEntity> competitionRates) {
-        List<String> houseManageNos = competitionRates.stream()
-                .map(CompetitionRateEntity::getHouseManageNo)
-                .distinct()
-                .toList();
-
-        return StreamSupport
-                .stream(subscriptionRepository.findAll(subscription.houseManageNo.in(houseManageNos)).spliterator(), false)
-                .collect(Collectors.toMap(
-                        SubscriptionEntity::getHouseManageNo,
-                        entity -> entity,
-                        (existing, replacement) -> existing // 중복 시 첫 번째 유지
-                ));
-    }
-
-    private AdminCompetitionRateDto toDto(CompetitionRateEntity entity, Map<String, SubscriptionEntity> subscriptionMap) {
-        SubscriptionEntity sub = subscriptionMap.get(entity.getHouseManageNo());
+    private AdminCompetitionRateDto toDto(CompetitionRateEntity entity) {
+        SubscriptionEntity sub = entity.getSubscription();
 
         return new AdminCompetitionRateDto(
                 entity.getId(),

@@ -3,11 +3,10 @@ package com.yunbok.houseping.service;
 import com.yunbok.houseping.service.dto.DashboardStatisticsDto;
 import com.yunbok.houseping.entity.CompetitionRateEntity;
 import com.yunbok.houseping.repository.CompetitionRateRepository;
-import com.yunbok.houseping.entity.QSubscriptionEntity;
 import com.yunbok.houseping.entity.SubscriptionEntity;
-import com.yunbok.houseping.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,17 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
-public class DashboardQueryService {
+public class DashboardService {
 
     private final CompetitionRateRepository competitionRateRepository;
-    private final SubscriptionRepository subscriptionRepository;
 
-    private static final QSubscriptionEntity subscription = QSubscriptionEntity.subscriptionEntity;
-
+    @Transactional(readOnly = true)
     public DashboardStatisticsDto getStatistics() {
         List<CompetitionRateEntity> allRates = competitionRateRepository.findAll();
 
@@ -34,12 +30,9 @@ public class DashboardQueryService {
             return emptyStatistics();
         }
 
-        // 청약 정보와 조인하기 위한 맵 생성
-        Map<String, SubscriptionEntity> subscriptionMap = buildSubscriptionMap(allRates);
-
         // 통계 계산
-        DashboardStatisticsDto.Summary summary = calculateSummary(allRates, subscriptionMap);
-        DashboardStatisticsDto.AreaYearlyTrend areaYearlyTrend = calculateAreaYearlyTrend(allRates, subscriptionMap);
+        DashboardStatisticsDto.Summary summary = calculateSummary(allRates);
+        DashboardStatisticsDto.AreaYearlyTrend areaYearlyTrend = calculateAreaYearlyTrend(allRates);
         List<DashboardStatisticsDto.ResidenceAreaStat> byResidenceArea = calculateByResidenceArea(allRates);
         List<DashboardStatisticsDto.HouseTypeStat> byHouseType = calculateByHouseType(allRates);
         DashboardStatisticsDto.RateDistribution distribution = calculateDistribution(allRates);
@@ -47,24 +40,7 @@ public class DashboardQueryService {
         return new DashboardStatisticsDto(summary, areaYearlyTrend, byResidenceArea, byHouseType, distribution);
     }
 
-    private Map<String, SubscriptionEntity> buildSubscriptionMap(List<CompetitionRateEntity> rates) {
-        List<String> houseManageNos = rates.stream()
-                .map(CompetitionRateEntity::getHouseManageNo)
-                .distinct()
-                .toList();
-
-        return StreamSupport
-                .stream(subscriptionRepository.findAll(subscription.houseManageNo.in(houseManageNos)).spliterator(), false)
-                .collect(Collectors.toMap(
-                        SubscriptionEntity::getHouseManageNo,
-                        entity -> entity,
-                        (existing, replacement) -> existing
-                ));
-    }
-
-    private DashboardStatisticsDto.Summary calculateSummary(
-            List<CompetitionRateEntity> rates,
-            Map<String, SubscriptionEntity> subscriptionMap) {
+    private DashboardStatisticsDto.Summary calculateSummary(List<CompetitionRateEntity> rates) {
 
         // 유효한 경쟁률만 필터링 (20세대 이상, 경쟁률 > 0)
         List<BigDecimal> validRates = rates.stream()
@@ -84,7 +60,7 @@ public class DashboardQueryService {
         }
 
         long areaCount = rates.stream()
-                .map(r -> subscriptionMap.get(r.getHouseManageNo()))
+                .map(r -> r.getSubscription())
                 .filter(Objects::nonNull)
                 .map(SubscriptionEntity::getArea)
                 .filter(Objects::nonNull)
@@ -107,15 +83,13 @@ public class DashboardQueryService {
         );
     }
 
-    private DashboardStatisticsDto.AreaYearlyTrend calculateAreaYearlyTrend(
-            List<CompetitionRateEntity> rates,
-            Map<String, SubscriptionEntity> subscriptionMap) {
+    private DashboardStatisticsDto.AreaYearlyTrend calculateAreaYearlyTrend(List<CompetitionRateEntity> rates) {
 
         // 유효한 데이터만 필터링 (20세대 이상, 경쟁률 > 0, 지역/연도 정보 있음)
         List<CompetitionRateEntity> validRates = rates.stream()
                 .filter(this::isValidRateEntity)
                 .filter(r -> {
-                    SubscriptionEntity sub = subscriptionMap.get(r.getHouseManageNo());
+                    SubscriptionEntity sub = r.getSubscription();
                     return sub != null && sub.getArea() != null && getSubscriptionYear(sub) != null;
                 })
                 .toList();
@@ -126,7 +100,7 @@ public class DashboardQueryService {
 
         // 연도 목록 추출 (청약 날짜 기준, 정렬)
         List<Integer> years = validRates.stream()
-                .map(r -> getSubscriptionYear(subscriptionMap.get(r.getHouseManageNo())))
+                .map(r -> getSubscriptionYear(r.getSubscription()))
                 .filter(Objects::nonNull)
                 .distinct()
                 .sorted()
@@ -134,10 +108,7 @@ public class DashboardQueryService {
 
         // 지역별로 그룹핑
         Map<String, List<CompetitionRateEntity>> byArea = validRates.stream()
-                .collect(Collectors.groupingBy(r -> {
-                    SubscriptionEntity sub = subscriptionMap.get(r.getHouseManageNo());
-                    return sub.getArea();
-                }));
+                .collect(Collectors.groupingBy(r -> r.getSubscription().getArea()));
 
         // 지역별 연도별 평균 경쟁률 계산
         List<DashboardStatisticsDto.AreaYearlyData> areaData = byArea.entrySet().stream()
@@ -148,7 +119,7 @@ public class DashboardQueryService {
                     // 연도별 평균 계산 (청약 날짜 기준) - 이미 validRates로 필터링됨
                     Map<Integer, BigDecimal> yearlyAvg = areaRates.stream()
                             .collect(Collectors.groupingBy(
-                                    r -> getSubscriptionYear(subscriptionMap.get(r.getHouseManageNo())),
+                                    r -> getSubscriptionYear(r.getSubscription()),
                                     Collectors.collectingAndThen(
                                             Collectors.toList(),
                                             list -> {
@@ -298,24 +269,6 @@ public class DashboardQueryService {
         if (values.isEmpty()) return null;
         BigDecimal sum = values.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         return sum.divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP);
-    }
-
-    private String categorizeSqm(String houseType) {
-        // 주택형에서 숫자 추출 (예: "084.9543T" -> 84)
-        try {
-            String numPart = houseType.replaceAll("[^0-9.]", "");
-            if (numPart.isEmpty()) return "기타";
-
-            double sqm = Double.parseDouble(numPart.split("\\.")[0]);
-
-            if (sqm < 60) return "소형 (60㎡ 미만)";
-            if (sqm < 85) return "중소형 (60~85㎡)";
-            if (sqm < 102) return "중형 (85~102㎡)";
-            if (sqm < 135) return "중대형 (102~135㎡)";
-            return "대형 (135㎡ 이상)";
-        } catch (Exception e) {
-            return "기타";
-        }
     }
 
     private DashboardStatisticsDto emptyStatistics() {

@@ -85,6 +85,14 @@ public class CompetitionRateEntity {
     private Integer rank;
 
     /**
+     * 청약 정보 (읽기 전용 네비게이션)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_manage_no", referencedColumnName = "house_manage_no",
+                insertable = false, updatable = false)
+    private SubscriptionEntity subscription;
+
+    /**
      * 수집 일시
      */
     @CreatedDate
