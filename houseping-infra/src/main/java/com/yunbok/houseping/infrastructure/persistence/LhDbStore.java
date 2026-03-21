@@ -30,7 +30,7 @@ public class LhDbStore implements SubscriptionProvider {
 
     public List<Subscription> fetch(String areaName, LocalDate targetDate) {
         try {
-            log.info("[LH DB] Fetching area={}", areaName);
+            log.info("[db.lh] Fetching area={}", areaName);
 
             List<SubscriptionEntity> entities = subscriptionRepository
                     .findByAreaAndReceiptStartDateGreaterThanEqual(areaName, LocalDate.now());
@@ -40,10 +40,10 @@ public class LhDbStore implements SubscriptionProvider {
                     .map(this::toDomain)
                     .toList();
 
-            log.info("[LH DB] area={} fetched {} items", areaName, result.size());
+            log.info("[db.lh] area={} fetched {} items", areaName, result.size());
             return result;
         } catch (Exception e) {
-            log.error("[LH DB] Fetch failed: {}", e.getMessage(), e);
+            log.error("[db.lh] Fetch failed: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }

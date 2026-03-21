@@ -76,7 +76,7 @@ public class SlackNotificationClient implements NotificationSender {
      */
     private void sendSlackMessage(String message) {
         try {
-            log.info("[Slack] 메시지 발송 시도");
+            log.info("[notify.slack] 메시지 발송 시도");
 
             webClient.post()
                     .uri(webhookUrl)
@@ -85,10 +85,10 @@ public class SlackNotificationClient implements NotificationSender {
                     .bodyToMono(String.class)
                     .block();
 
-            log.info("[Slack] 메시지 발송 완료");
+            log.info("[notify.slack] 메시지 발송 완료");
 
         } catch (Exception e) {
-            log.error("[Slack] 메시지 발송 실패: {}", e.getMessage(), e);
+            log.error("[notify.slack] 메시지 발송 실패: {}", e.getMessage(), e);
         }
     }
 }

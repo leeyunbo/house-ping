@@ -25,12 +25,12 @@ public class DailyNotificationScheduler {
      */
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     public void sendDailyReport() {
-        log.info("[일일 알림 스케줄러] 실행 시작");
+        log.info("[scheduler.notification] 실행 시작");
         try {
             dailyNotificationUseCase.sendDailyReport();
-            log.info("[일일 알림 스케줄러] 실행 완료");
+            log.info("[scheduler.notification] 실행 완료");
         } catch (Exception e) {
-            log.error("[일일 알림 스케줄러] 실행 실패", e);
+            log.error("[scheduler.notification] 실행 실패", e);
             errorNotifier.sendError("일일 알림", e);
         }
     }

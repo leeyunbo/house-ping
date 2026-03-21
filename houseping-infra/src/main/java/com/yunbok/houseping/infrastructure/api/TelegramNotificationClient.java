@@ -79,7 +79,7 @@ public class TelegramNotificationClient implements NotificationSender {
     private void sendTelegramMessage(String message) {
         for (String chatId : chatIds) {
             try {
-                log.info("[Telegram] 메시지 발송 시도 - chatId: {}", chatId);
+                log.info("[notify.telegram] 메시지 발송 시도 - chatId: {}", chatId);
 
                 webClient.post()
                         .uri("/sendMessage")
@@ -88,10 +88,10 @@ public class TelegramNotificationClient implements NotificationSender {
                         .bodyToMono(TelegramResponseDto.class)
                         .block();
 
-                log.info("[Telegram] 메시지 발송 완료");
+                log.info("[notify.telegram] 메시지 발송 완료");
 
             } catch (Exception e) {
-                log.error("[Telegram] 메시지 발송 실패: {}", e.getMessage());
+                log.error("[notify.telegram] 메시지 발송 실패: {}", e.getMessage());
             }
         }
     }

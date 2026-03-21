@@ -47,9 +47,9 @@ public class SchedulerErrorSlackClient {
             String fallback = messageFormatter.formatSchedulerErrorFallback(schedulerName, timestamp, e.getMessage());
 
             sendSlackMessage(message, fallback);
-            log.info("[에러 알림] {} 실패 알림 발송 완료", schedulerName);
+            log.info("[notify.error] {} 실패 알림 발송 완료", schedulerName);
         } catch (Exception sendError) {
-            log.error("[에러 알림] 알림 발송 실패: {}", sendError.getMessage());
+            log.error("[notify.error] 알림 발송 실패: {}", sendError.getMessage());
         }
     }
 

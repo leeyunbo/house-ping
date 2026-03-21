@@ -30,12 +30,12 @@ public class CompetitionRateScheduler {
      */
     @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Seoul")
     public void collectCompetitionRates() {
-        log.info("[경쟁률 스케줄러] 실행 시작");
+        log.info("[scheduler.competition] 실행 시작");
         try {
             int count = collectorUseCase.collect();
-            log.info("[경쟁률 스케줄러] 실행 완료 - {}건 수집", count);
+            log.info("[scheduler.competition] 실행 완료 - {}건 수집", count);
         } catch (Exception e) {
-            log.error("[경쟁률 스케줄러] 실행 실패", e);
+            log.error("[scheduler.competition] 실행 실패", e);
             errorNotifier.sendError("경쟁률 수집", e);
         }
     }

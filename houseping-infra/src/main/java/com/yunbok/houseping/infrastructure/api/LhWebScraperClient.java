@@ -40,7 +40,7 @@ import java.util.Optional;
 public class LhWebScraperClient implements SubscriptionProvider {
 
     private static final DateTimeFormatter LH_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final String LH_PROVIDER_NAME = SubscriptionSource.LH.getValue() + "웹";
+    private static final String LH_PROVIDER_NAME = "api.lh-web";
     private static final String SOURCE_NAME = SubscriptionSource.LH.getValue();
 
     private final WebClient webClient;
@@ -77,7 +77,7 @@ public class LhWebScraperClient implements SubscriptionProvider {
                     .bodyToMono(String.class)
                     .block();
 
-            log.info("[{}] 분양+임대 응답 수신: {}", LH_PROVIDER_NAME, responseStr);
+            log.debug("[{}] 응답 수신: {}", LH_PROVIDER_NAME, responseStr);
 
             LhWebCalendarResponse response = objectMapper.readValue(responseStr, LhWebCalendarResponse.class);
             List<Subscription> result = parseDetailResponse(response, areaName, targetDate);
@@ -93,13 +93,13 @@ public class LhWebScraperClient implements SubscriptionProvider {
 
     private List<Subscription> parseDetailResponse(LhWebCalendarResponse response, String areaName, LocalDate targetDate) {
         if (response == null) {
-            log.info("[{}] 응답이 null입니다.", LH_PROVIDER_NAME);
+            log.warn("[{}] 응답이 null", LH_PROVIDER_NAME);
             return Collections.emptyList();
         }
 
         List<LhWebCalendarItem> items = response.getItems();
         if (items.isEmpty()) {
-            log.info("[{}] panList가 비어있습니다.", LH_PROVIDER_NAME);
+            log.debug("[{}] panList 비어있음", LH_PROVIDER_NAME);
             return Collections.emptyList();
         }
 

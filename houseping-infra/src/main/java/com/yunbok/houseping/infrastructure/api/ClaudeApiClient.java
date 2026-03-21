@@ -48,7 +48,7 @@ public class ClaudeApiClient implements AiContentPort {
 
             return text;
         } catch (Exception e) {
-            log.error("[Claude API] 호출 실패", e);
+            log.error("[api.claude] 호출 실패", e);
             throw new ClaudeApiException(e);
         }
     }

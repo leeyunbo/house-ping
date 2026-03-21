@@ -36,7 +36,7 @@ public class AdminNotificationController {
     @GetMapping("/preview-daily-report")
     public String previewDailyReport(Model model) {
         try {
-            log.info("[알림 관리] 일일 알림 미리보기 요청");
+            log.info("[admin.notification] 일일 알림 미리보기 요청");
             DailyNotificationReport report = dailyNotificationService.generateReport();
 
             String slackMessage = slackMessageFormatter.formatDailyReport(report);
@@ -46,13 +46,13 @@ public class AdminNotificationController {
             model.addAttribute("slackMessage", slackMessage);
             model.addAttribute("telegramMessage", telegramMessage);
 
-            log.info("[알림 관리] 미리보기 생성 완료 - 신규: {}건, 내일 접수: {}건, 오늘 마감: {}건",
+            log.info("[admin.notification] 미리보기 생성 완료 - 신규: {}건, 내일 접수: {}건, 오늘 마감: {}건",
                     report.newSubscriptions().size(),
                     report.receiptStartTomorrow().size(),
                     report.receiptEndToday().size());
 
         } catch (Exception e) {
-            log.error("[알림 관리] 미리보기 생성 실패", e);
+            log.error("[admin.notification] 미리보기 생성 실패", e);
             model.addAttribute("error", "미리보기 생성 실패: " + e.getMessage());
         }
         return "admin/system/preview";
@@ -64,12 +64,12 @@ public class AdminNotificationController {
     @PostMapping("/send-daily-report")
     public String sendDailyReport(RedirectAttributes redirectAttributes) {
         try {
-            log.info("[알림 관리] 일일 알림 수동 발송 시작");
+            log.info("[admin.notification] 일일 알림 수동 발송 시작");
             dailyNotificationService.sendDailyReportManual();
-            log.info("[알림 관리] 일일 알림 수동 발송 완료");
+            log.info("[admin.notification] 일일 알림 수동 발송 완료");
             redirectAttributes.addFlashAttribute("message", "일일 알림이 발송되었습니다.");
         } catch (Exception e) {
-            log.error("[알림 관리] 일일 알림 발송 실패", e);
+            log.error("[admin.notification] 일일 알림 발송 실패", e);
             redirectAttributes.addFlashAttribute("error", "알림 발송 실패: " + e.getMessage());
         }
         return "redirect:/admin/system";
@@ -85,7 +85,7 @@ public class AdminNotificationController {
             notificationSubscriptionPort.resetNotificationStatus(id);
             redirectAttributes.addFlashAttribute("message", "알림 상태가 리셋되었습니다. (ID: " + id + ")");
         } catch (Exception e) {
-            log.error("[알림 관리] 알림 리셋 실패", e);
+            log.error("[admin.notification] 알림 리셋 실패", e);
             redirectAttributes.addFlashAttribute("error", "리셋 실패: " + e.getMessage());
         }
         return "redirect:/admin/system";
@@ -101,7 +101,7 @@ public class AdminNotificationController {
             int count = notificationSubscriptionPort.resetAllNotificationStatuses();
             redirectAttributes.addFlashAttribute("message", "모든 알림 상태가 리셋되었습니다. (" + count + "건)");
         } catch (Exception e) {
-            log.error("[알림 관리] 전체 알림 리셋 실패", e);
+            log.error("[admin.notification] 전체 알림 리셋 실패", e);
             redirectAttributes.addFlashAttribute("error", "리셋 실패: " + e.getMessage());
         }
         return "redirect:/admin/system";

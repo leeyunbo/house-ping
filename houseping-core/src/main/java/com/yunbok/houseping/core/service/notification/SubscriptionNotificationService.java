@@ -26,7 +26,7 @@ public class SubscriptionNotificationService {
     @Transactional
     public int sendScheduledNotifications() {
         if (notificationSender.isEmpty()) {
-            log.debug("[알림 서비스] 알림 발송기가 비활성화 상태입니다.");
+            log.debug("[notify.subscription] 알림 발송기가 비활성화 상태입니다.");
             return 0;
         }
 
@@ -53,7 +53,7 @@ public class SubscriptionNotificationService {
             sentCount++;
         }
 
-        log.info("[알림 서비스] 접수 시작 알림 {}건 발송", sentCount);
+        log.info("[notify.subscription] 접수 시작 알림 {}건 발송", sentCount);
         return sentCount;
     }
 
@@ -71,7 +71,7 @@ public class SubscriptionNotificationService {
             sentCount++;
         }
 
-        log.info("[알림 서비스] 접수 종료 알림 {}건 발송", sentCount);
+        log.info("[notify.subscription] 접수 종료 알림 {}건 발송", sentCount);
         return sentCount;
     }
 

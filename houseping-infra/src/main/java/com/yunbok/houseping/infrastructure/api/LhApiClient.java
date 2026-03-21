@@ -56,28 +56,28 @@ public class LhApiClient implements SubscriptionProvider {
     }
 
     public List<Subscription> fetch(String areaName, LocalDate targetDate) {
-        log.info("[LH API] Fetching area={}, date={}", areaName, targetDate);
+        log.info("[api.lh] Fetching area={}, date={}", areaName, targetDate);
 
         List<LhSubscriptionInfo> dtos = new ArrayList<>(fetchRegularApts(areaName));
         dtos.addAll(fetchNewlywedApts(areaName));
         dtos.addAll(fetchRentalApts(areaName));
 
-        log.info("[LH API] area={} fetched {} items", areaName, dtos.size());
+        log.info("[api.lh] area={} fetched {} items", areaName, dtos.size());
         return dtos.stream().map(LhSubscriptionInfo::toSubscription).toList();
     }
 
     public List<Subscription> fetchAll(String areaName) {
         try {
-            log.info("[LH API] Fetching all for area={}", areaName);
+            log.info("[api.lh] Fetching all for area={}", areaName);
 
             List<LhSubscriptionInfo> dtos = new ArrayList<>(fetchAllRegularApts(areaName));
             dtos.addAll(fetchAllNewlywedApts(areaName));
             dtos.addAll(fetchAllRentalApts(areaName));
 
-            log.info("[LH API] area={} fetched {} items total", areaName, dtos.size());
+            log.info("[api.lh] area={} fetched {} items total", areaName, dtos.size());
             return dtos.stream().map(LhSubscriptionInfo::toSubscription).toList();
         } catch (Exception e) {
-            log.error("[LH API] Fetch all failed: {}", e.getMessage(), e);
+            log.error("[api.lh] Fetch all failed: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -131,7 +131,7 @@ public class LhApiClient implements SubscriptionProvider {
 
     private List<LhSubscriptionInfo> parseLhResponse(String responseStr, String houseType, boolean filterInProgress) {
         if (responseStr == null || responseStr.isBlank()) {
-            log.debug("[LH API] Empty response");
+            log.debug("[api.lh] Empty response");
             return Collections.emptyList();
         }
 
@@ -142,7 +142,7 @@ public class LhApiClient implements SubscriptionProvider {
                     });
 
             if (responseList == null || responseList.size() < 2) {
-                log.debug("[LH API] Invalid response structure");
+                log.debug("[api.lh] Invalid response structure");
                 return Collections.emptyList();
             }
 
@@ -162,7 +162,7 @@ public class LhApiClient implements SubscriptionProvider {
                     .toList();
 
         } catch (Exception e) {
-            log.error("[LH API] Failed to parse response: {}", e.getMessage(), e);
+            log.error("[api.lh] Failed to parse response: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }

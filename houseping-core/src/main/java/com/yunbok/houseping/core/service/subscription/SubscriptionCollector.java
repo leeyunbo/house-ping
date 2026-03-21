@@ -24,7 +24,7 @@ public class SubscriptionCollector {
         for (String area : config.targetAreas()) {
             allSubscriptions.addAll(collectFromArea(area, targetDate));
         }
-        log.info("Collected {} subscriptions for date={}", allSubscriptions.size(), targetDate);
+        log.info("[sync.collect] {} subscriptions for date={}", allSubscriptions.size(), targetDate);
         return allSubscriptions;
     }
 

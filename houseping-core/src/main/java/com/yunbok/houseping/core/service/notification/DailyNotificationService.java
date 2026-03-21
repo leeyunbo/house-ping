@@ -71,7 +71,7 @@ public class DailyNotificationService {
      */
     private void sendDailyReport(String triggeredBy) {
         if (notificationSender.isEmpty()) {
-            log.debug("[일일 알림 서비스] 알림 발송기가 비활성화 상태입니다.");
+            log.debug("[notify.daily] 알림 발송기가 비활성화 상태입니다.");
             historyPort.save("DAILY_REPORT", "ALL", false,
                     "알림 발송기 비활성화", null, "알림 발송기가 비활성화 상태입니다.", triggeredBy);
             return;
@@ -79,7 +79,7 @@ public class DailyNotificationService {
 
         DailyNotificationReport report = generateReport();
 
-        log.info("[일일 알림 서비스] 리포트 생성 완료 - 신규: {}건, 내일 접수: {}건, 오늘 마감: {}건",
+        log.info("[notify.daily] 리포트 생성 완료 - 신규: {}건, 내일 접수: {}건, 오늘 마감: {}건",
                 report.newSubscriptions().size(),
                 report.receiptStartTomorrow().size(),
                 report.receiptEndToday().size());
@@ -101,9 +101,9 @@ public class DailyNotificationService {
             // 성공 이력 저장
             historyPort.save("DAILY_REPORT", "ALL", true, summary, detail, null, triggeredBy);
 
-            log.info("[일일 알림 서비스] 일일 리포트 발송 완료");
+            log.info("[notify.daily] 일일 리포트 발송 완료");
         } catch (Exception e) {
-            log.error("[일일 알림 서비스] 일일 리포트 발송 실패", e);
+            log.error("[notify.daily] 일일 리포트 발송 실패", e);
             // 실패 이력 저장
             historyPort.save("DAILY_REPORT", "ALL", false, summary, detail, e.getMessage(), triggeredBy);
             throw e;

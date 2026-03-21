@@ -40,20 +40,20 @@ public class AdminDataCollectionController {
     @PostMapping("/collect-price-data")
     public String collectPriceData(RedirectAttributes redirectAttributes) {
         try {
-            log.info("[데이터 수집] 분양가 데이터 수집 시작");
+            log.info("[admin.collect] 분양가 데이터 수집 시작");
 
             List<Subscription> subscriptions = findPriceCollectionTargets();
-            log.info("[데이터 수집] 분양가 수집 대상: {}건", subscriptions.size());
+            log.info("[admin.collect] 분양가 수집 대상: {}건", subscriptions.size());
 
             CollectionResult result = collectPriceDetails(subscriptions);
 
             String message = String.format("분양가 수집 완료 - 성공: %d건, 실패: %d건",
                     result.successCount(), result.failCount());
-            log.info("[데이터 수집] {}", message);
+            log.info("[admin.collect] {}", message);
             redirectAttributes.addFlashAttribute("message", message);
 
         } catch (Exception e) {
-            log.error("[데이터 수집] 분양가 수집 실패", e);
+            log.error("[admin.collect] 분양가 수집 실패", e);
             redirectAttributes.addFlashAttribute("error", "분양가 수집 실패: " + e.getMessage());
         }
         return "redirect:/admin/system";
@@ -65,11 +65,11 @@ public class AdminDataCollectionController {
     @PostMapping("/collect-real-transactions")
     public String collectRealTransactions(RedirectAttributes redirectAttributes) {
         try {
-            log.info("[데이터 수집] 실거래가 수집 시작");
+            log.info("[admin.collect] 실거래가 수집 시작");
             realTransactionCollectionService.collectRealTransactions();
             redirectAttributes.addFlashAttribute("message", "실거래가 수집이 완료되었습니다.");
         } catch (Exception e) {
-            log.error("[데이터 수집] 실거래가 수집 실패", e);
+            log.error("[admin.collect] 실거래가 수집 실패", e);
             redirectAttributes.addFlashAttribute("error", "실거래가 수집 실패: " + e.getMessage());
         }
         return "redirect:/admin/system";
@@ -99,7 +99,7 @@ public class AdminDataCollectionController {
                 ApiRateLimiter.delay(100);
             } catch (Exception e) {
                 failCount.incrementAndGet();
-                log.warn("[분양가] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
+                log.warn("[admin.collect.price] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
             }
         }
 

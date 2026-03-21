@@ -30,7 +30,7 @@ public class SubscriptionManagementService {
                 totalResult = totalResult.merge(saveSubscriptions(subscriptions, chain.getSourceName()));
             }
         }
-        log.info("Sync completed: inserted={}, updated={}, skipped={}",
+        log.info("[sync] completed: inserted={}, updated={}, skipped={}",
                 totalResult.inserted(), totalResult.updated(), totalResult.skipped());
         return totalResult;
     }
@@ -39,7 +39,7 @@ public class SubscriptionManagementService {
     public int cleanup() {
         LocalDate cutoffDate = LocalDate.now().minusYears(5);
         int deletedCount = subscriptionStore.deleteOldSubscriptions(cutoffDate);
-        log.info("Cleanup completed: deleted={}", deletedCount);
+        log.info("[sync.cleanup] completed: deleted={}", deletedCount);
         return deletedCount;
     }
 
@@ -57,7 +57,7 @@ public class SubscriptionManagementService {
                 }
             } catch (Exception e) {
                 skipped++;
-                log.warn("[Sync] 저장 실패 (건너뜀): {} - {}", subscription.getHouseName(), e.getMessage());
+                log.warn("[sync] 저장 실패 (건너뜀): {} - {}", subscription.getHouseName(), e.getMessage());
             }
         }
         return new SyncResult(inserted, updated, skipped);

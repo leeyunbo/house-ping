@@ -47,12 +47,12 @@ public class ApplyhomeCompetitionRateClient implements CompetitionRateProvider {
     }
 
     public List<CompetitionRate> fetchAll() {
-        log.info("[경쟁률 API] 전체 조회 시작");
+        log.info("[api.applyhome.competition] 전체 조회 시작");
 
         // APT 경쟁률만 조회 (잔여세대는 경쟁률이 미달 표시로 와서 제외)
         List<CompetitionRate> allRates = new ArrayList<>(fetchAptCompetitionRates());
 
-        log.info("[경쟁률 API] 전체 조회 완료 - {}건", allRates.size());
+        log.info("[api.applyhome.competition] 전체 조회 완료 - {}건", allRates.size());
         return allRates;
     }
 
@@ -70,7 +70,7 @@ public class ApplyhomeCompetitionRateClient implements CompetitionRateProvider {
             allRates.addAll(parseResponse(firstResponse));
 
             int totalPages = (totalCount + pageSize - 1) / pageSize;
-            log.info("[경쟁률 API] APT 경쟁률 페이지 1/{} 조회 - {}건 (총 {}건)",
+            log.info("[api.applyhome.competition] APT 경쟁률 페이지 1/{} 조회 - {}건 (총 {}건)",
                     totalPages, firstResponse.currentCount(), totalCount);
 
             // 나머지 페이지 조회
@@ -78,19 +78,19 @@ public class ApplyhomeCompetitionRateClient implements CompetitionRateProvider {
                 try {
                     CompetitionRateResponse response = fetchPage("/getAPTLttotPblancCmpet", page, pageSize);
                     allRates.addAll(parseResponse(response));
-                    log.info("[경쟁률 API] APT 경쟁률 페이지 {}/{} 조회 - {}건",
+                    log.info("[api.applyhome.competition] APT 경쟁률 페이지 {}/{} 조회 - {}건",
                             page, totalPages, response.currentCount());
                 } catch (WebClientResponseException e) {
-                    log.warn("[경쟁률 API] 페이지 {} 조회 실패 - status: {}", page, e.getStatusCode());
+                    log.warn("[api.applyhome.competition] 페이지 {} 조회 실패 - status: {}", page, e.getStatusCode());
                 }
                 ApiRateLimiter.delay(API_RATE_LIMIT_MS);
             }
 
-            log.info("[경쟁률 API] APT 경쟁률 전체 조회 완료 - 총 {}건", allRates.size());
+            log.info("[api.applyhome.competition] APT 경쟁률 전체 조회 완료 - 총 {}건", allRates.size());
             return allRates;
 
         } catch (Exception e) {
-            log.warn("[경쟁률 API] APT 경쟁률 조회 중 오류 - {}", e.getMessage());
+            log.warn("[api.applyhome.competition] APT 경쟁률 조회 중 오류 - {}", e.getMessage());
             return allRates;
         }
     }

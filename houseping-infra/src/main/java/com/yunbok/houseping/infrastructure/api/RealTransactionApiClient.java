@@ -49,7 +49,7 @@ public class RealTransactionApiClient implements RealTransactionFetchPort {
      */
     public List<RealTransactionCacheEntity> fetchTransactions(String lawdCd, String dealYmd) {
         if (apiKey == null || apiKey.isBlank()) {
-            log.warn("[실거래가 API] API 키가 설정되지 않음");
+            log.warn("[api.realTransaction] API 키가 설정되지 않음");
             return Collections.emptyList();
         }
 
@@ -59,7 +59,7 @@ public class RealTransactionApiClient implements RealTransactionFetchPort {
             // 캐시 유효성 확인 (1일)
             LocalDateTime threshold = LocalDateTime.now().minusDays(CACHE_VALIDITY_DAYS);
             if (cached.getFirst().getCachedAt().isAfter(threshold)) {
-                log.debug("[실거래가 API] 캐시 사용: lawdCd={}, dealYmd={}, count={}", lawdCd, dealYmd, cached.size());
+                log.debug("[api.realTransaction] 캐시 사용: lawdCd={}, dealYmd={}, count={}", lawdCd, dealYmd, cached.size());
                 return cached;
             }
         }
@@ -85,7 +85,7 @@ public class RealTransactionApiClient implements RealTransactionFetchPort {
     }
 
     private List<RealTransactionCacheEntity> fetchFromApi(String lawdCd, String dealYmd) {
-        log.info("[실거래가 API] API 호출: lawdCd={}, dealYmd={}", lawdCd, dealYmd);
+        log.info("[api.realTransaction] API 호출: lawdCd={}, dealYmd={}", lawdCd, dealYmd);
 
         try {
             RealTransactionApiResponse response = webClient.get()
@@ -103,13 +103,13 @@ public class RealTransactionApiClient implements RealTransactionFetchPort {
                     .block();
 
             if (response == null || !response.isSuccess()) {
-                log.warn("[실거래가 API] API 응답 실패: lawdCd={}, dealYmd={}", lawdCd, dealYmd);
+                log.warn("[api.realTransaction] API 응답 실패: lawdCd={}, dealYmd={}", lawdCd, dealYmd);
                 return Collections.emptyList();
             }
 
             List<RealTransactionItem> items = response.getItems();
             if (items.isEmpty()) {
-                log.debug("[실거래가 API] 데이터 없음: lawdCd={}, dealYmd={}", lawdCd, dealYmd);
+                log.debug("[api.realTransaction] 데이터 없음: lawdCd={}, dealYmd={}", lawdCd, dealYmd);
                 return Collections.emptyList();
             }
 
@@ -120,12 +120,12 @@ public class RealTransactionApiClient implements RealTransactionFetchPort {
                     .toList();
 
             cacheRepository.saveAll(entities);
-            log.info("[실거래가 API] {}건 캐싱 완료: lawdCd={}, dealYmd={}", entities.size(), lawdCd, dealYmd);
+            log.info("[api.realTransaction] {}건 캐싱 완료: lawdCd={}, dealYmd={}", entities.size(), lawdCd, dealYmd);
 
             return entities;
 
         } catch (Exception e) {
-            log.error("[실거래가 API] API 호출 실패: lawdCd={}, dealYmd={}, error={}", lawdCd, dealYmd, e.getMessage());
+            log.error("[api.realTransaction] API 호출 실패: lawdCd={}, dealYmd={}, error={}", lawdCd, dealYmd, e.getMessage());
             return Collections.emptyList();
         }
     }

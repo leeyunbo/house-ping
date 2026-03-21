@@ -24,11 +24,11 @@ public class RealTransactionScheduler {
      */
     @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
     public void collectRealTransactions() {
-        log.info("[실거래가 스케줄러] 수집 시작");
+        log.info("[scheduler.realTransaction] 수집 시작");
         try {
             realTransactionCollectionService.collectRealTransactions();
         } catch (Exception e) {
-            log.error("[실거래가 스케줄러] 수집 중 오류", e);
+            log.error("[scheduler.realTransaction] 수집 중 오류", e);
             errorNotifier.sendError("실거래가 수집", e);
         }
     }

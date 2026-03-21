@@ -98,7 +98,7 @@ public class BlogCardImageGenerator {
             g.drawString("house-ping.com", MARGIN, HEIGHT - 28);
 
         } catch (Exception e) {
-            log.error("카드 이미지 생성 중 오류", e);
+            log.error("[blog.image] 카드 이미지 생성 중 오류", e);
             drawErrorFallback(g);
         }
 
@@ -277,7 +277,7 @@ public class BlogCardImageGenerator {
             ImageIO.write(image, "png", baos);
             return baos.toByteArray();
         } catch (IOException e) {
-            log.error("PNG 변환 실패", e);
+            log.error("[blog.image] PNG 변환 실패", e);
             return new byte[0];
         }
     }

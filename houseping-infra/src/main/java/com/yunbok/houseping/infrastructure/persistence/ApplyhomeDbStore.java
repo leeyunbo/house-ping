@@ -35,7 +35,7 @@ public class ApplyhomeDbStore implements SubscriptionProvider {
 
     public List<Subscription> fetch(String areaName, LocalDate targetDate) {
         try {
-            log.info("[청약Home DB] {} 지역 {} 접수 시작 청약 조회", areaName, targetDate);
+            log.info("[db.applyhome] {} 지역 {} 접수 시작 청약 조회", areaName, targetDate);
 
             List<SubscriptionEntity> entities = subscriptionRepository
                     .findByAreaAndReceiptStartDate(areaName, targetDate);
@@ -45,11 +45,11 @@ public class ApplyhomeDbStore implements SubscriptionProvider {
                     .map(this::toDomain)
                     .collect(Collectors.toList());
 
-            log.info("[청약Home DB] {} 지역에서 {}개 데이터 조회 완료", areaName, subscriptions.size());
+            log.info("[db.applyhome] {} 지역에서 {}개 데이터 조회 완료", areaName, subscriptions.size());
             return subscriptions;
 
         } catch (Exception e) {
-            log.error("[청약Home DB] 데이터 조회 실패: {}", e.getMessage(), e);
+            log.error("[db.applyhome] 데이터 조회 실패: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }

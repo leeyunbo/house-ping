@@ -29,7 +29,7 @@ public class BlogPublishService {
         String naverHtml = naverHtmlBuilder.build(content, draft.getId(), baseUrl);
         blogPostStore.updateContentHtml(draft.getId(), naverHtml);
 
-        log.info("블로그 포스트 발행: id={}, title={}", draft.getId(), draft.getTitle());
+        log.info("[blog.publish] 포스트 발행: id={}, title={}", draft.getId(), draft.getTitle());
         return blogPostStore.findById(draft.getId()).orElseThrow();
     }
 
@@ -37,7 +37,7 @@ public class BlogPublishService {
     public BlogPost saveDraftWithAi(int topN) {
         BlogContentResult content = aiBlogContentService.generateAiBlogContent(topN);
         BlogPost draft = blogPostStore.saveDraft(content, topN);
-        log.info("[AI 블로그] DRAFT 저장 완료: id={}, title={}", draft.getId(), draft.getTitle());
+        log.info("[blog.draft] 저장 완료: id={}, title={}", draft.getId(), draft.getTitle());
         return draft;
     }
 

@@ -21,11 +21,11 @@ public class BlogFontProvider {
         boldFont = loadFont("fonts/Pretendard-Bold.otf");
 
         if (regularFont == null) {
-            log.warn("Pretendard-Regular 로드 실패, 시스템 폰트로 대체");
+            log.warn("[blog.font] Pretendard-Regular 로드 실패, 시스템 폰트로 대체");
             regularFont = new Font(Font.SANS_SERIF, Font.PLAIN, 16);
         }
         if (boldFont == null) {
-            log.warn("Pretendard-Bold 로드 실패, 시스템 폰트로 대체");
+            log.warn("[blog.font] Pretendard-Bold 로드 실패, 시스템 폰트로 대체");
             boldFont = new Font(Font.SANS_SERIF, Font.BOLD, 16);
         }
     }
@@ -42,10 +42,10 @@ public class BlogFontProvider {
         try (InputStream is = new ClassPathResource(path).getInputStream()) {
             Font font = Font.createFont(Font.TRUETYPE_FONT, is);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-            log.info("폰트 로드 성공: {}", path);
+            log.info("[blog.font] 폰트 로드 성공: {}", path);
             return font;
         } catch (Exception e) {
-            log.error("폰트 로드 실패: {}", path, e);
+            log.error("[blog.font] 폰트 로드 실패: {}", path, e);
             return null;
         }
     }

@@ -71,7 +71,7 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
     }
 
     public List<Subscription> fetch(String areaName, LocalDate targetDate) {
-        log.info("[청약Home API] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
+        log.info("[api.applyhome] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
 
         List<ApplyHomeSubscriptionInfo> allDtos = new ArrayList<>();
         for (int i = 0; i < FETCH_TYPES.size(); i++) {
@@ -80,12 +80,12 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
             allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, targetDate), label));
         }
 
-        log.info("[청약Home API] {} 지역에서 {}개 데이터 수집 완료", areaName, allDtos.size());
+        log.info("[api.applyhome] {} 지역에서 {}개 데이터 수집 완료", areaName, allDtos.size());
         return allDtos.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
     }
 
     public List<Subscription> fetchAll(String areaName) {
-        log.info("[청약Home API] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
+        log.info("[api.applyhome] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
 
         List<ApplyHomeSubscriptionInfo> allDtos = new ArrayList<>();
         for (int i = 0; i < FETCH_TYPES.size(); i++) {
@@ -94,7 +94,7 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
             allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, null), label));
         }
 
-        log.info("[청약Home API] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allDtos.size());
+        log.info("[api.applyhome] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allDtos.size());
         return allDtos.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
     }
 
@@ -106,7 +106,7 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
         try {
             return fetcher.get();
         } catch (Exception e) {
-            log.warn("[청약Home API] {} 수집 실패 (계속 진행): {}", type, e.getMessage());
+            log.warn("[api.applyhome] {} 수집 실패 (계속 진행): {}", type, e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -215,7 +215,7 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
                     .zipCode(item.zipCode())
                     .build());
         } catch (Exception e) {
-            log.warn("SubscriptionInfo 생성 실패: {}", e.getMessage());
+            log.warn("[api.applyhome] SubscriptionInfo 생성 실패: {}", e.getMessage());
             return Optional.empty();
         }
     }
@@ -248,9 +248,9 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
                 }
             }
 
-            log.info("[분양가] {}({}) 분양가 {}건 저장 완료", houseManageNo, houseType, priceDetails.size());
+            log.info("[api.applyhome.price] {}({}) 분양가 {}건 저장 완료", houseManageNo, houseType, priceDetails.size());
         } catch (Exception e) {
-            log.warn("[분양가] {}({}) 분양가 조회 실패: {}", houseManageNo, houseType, e.getMessage());
+            log.warn("[api.applyhome.price] {}({}) 분양가 조회 실패: {}", houseManageNo, houseType, e.getMessage());
         }
     }
 

@@ -40,12 +40,12 @@ public class AiBlogContentService {
 
         List<SubscriptionCardView> weekSubscriptions = subscriptionSearchService.getSubscriptionCardsForWeek(weekStart, weekEnd);
         if (weekSubscriptions.isEmpty()) {
-            throw new IllegalStateException("[AI 블로그] 이번 주 분석할 청약 데이터가 없습니다");
+            throw new IllegalStateException("[blog.ai] 이번 주 분석할 청약 데이터가 없습니다");
         }
 
         Map<Long, SubscriptionPrice> representativePrices = buildRepresentativePrices(weekSubscriptions);
 
-        log.info("[AI 블로그] 이번 주({}/{} ~ {}/{}) 청약 {}건 (분양가 {}건) → AI에게 TOP {} 선정 + 분석 요청",
+        log.info("[blog.ai] 이번 주({}/{} ~ {}/{}) 청약 {}건 (분양가 {}건) → AI에게 TOP {} 선정 + 분석 요청",
                 weekStart.getMonthValue(), weekStart.getDayOfMonth(),
                 weekEnd.getMonthValue(), weekEnd.getDayOfMonth(),
                 weekSubscriptions.size(), representativePrices.size(), topN);

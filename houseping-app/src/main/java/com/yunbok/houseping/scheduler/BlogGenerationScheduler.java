@@ -24,12 +24,12 @@ public class BlogGenerationScheduler {
 
     @Scheduled(cron = "0 0 9 * * MON", zone = "Asia/Seoul")
     public void generateWeeklyBlog() {
-        log.info("[블로그 스케줄러] AI 블로그 DRAFT 생성 시작");
+        log.info("[scheduler.blog] DRAFT 생성 시작");
         try {
             blogPublishService.saveDraftWithAi(5);
-            log.info("[블로그 스케줄러] AI 블로그 DRAFT 생성 완료");
+            log.info("[scheduler.blog] DRAFT 생성 완료");
         } catch (Exception e) {
-            log.error("[블로그 스케줄러] AI 블로그 DRAFT 생성 실패", e);
+            log.error("[scheduler.blog] DRAFT 생성 실패", e);
             errorNotifier.sendError("블로그 생성", e);
         }
     }

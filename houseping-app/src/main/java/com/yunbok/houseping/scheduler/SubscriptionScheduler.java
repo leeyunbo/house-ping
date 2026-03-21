@@ -35,7 +35,7 @@ public class SubscriptionScheduler {
             // 2단계: 신규 청약 분양가 수집
             collectPriceData();
         } catch (Exception e) {
-            log.error("[청약 스케줄러] 데이터 동기화 실패", e);
+            log.error("[scheduler.sync] 데이터 동기화 실패", e);
             errorNotifier.sendError("청약 데이터 동기화", e);
         }
     }
@@ -45,7 +45,7 @@ public class SubscriptionScheduler {
      * sync 이후 호출되어 신규 청약의 분양가 데이터 수집
      */
     public void collectPriceData() {
-        log.info("[스케줄러] ApplyHome 분양가 수집 시작");
+        log.info("[scheduler.price] 분양가 수집 시작");
 
         try {
             // 분양가 데이터가 없는 ApplyHome 청약 조회
@@ -55,7 +55,7 @@ public class SubscriptionScheduler {
                     .filter(s -> !priceRepository.existsByHouseManageNo(s.getHouseManageNo()))
                     .toList();
 
-            log.info("[스케줄러] 분양가 수집 대상: {}건", subscriptions.size());
+            log.info("[scheduler.price] 수집 대상: {}건", subscriptions.size());
 
             int successCount = 0;
             int failCount = 0;
@@ -71,13 +71,13 @@ public class SubscriptionScheduler {
                     ApiRateLimiter.delay(100); // API 과부하 방지
                 } catch (Exception e) {
                     failCount++;
-                    log.warn("[분양가] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
+                    log.warn("[scheduler.price] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
                 }
             }
 
-            log.info("[스케줄러] 분양가 수집 완료 - 성공: {}건, 실패: {}건", successCount, failCount);
+            log.info("[scheduler.price] 수집 완료 - 성공: {}건, 실패: {}건", successCount, failCount);
         } catch (Exception e) {
-            log.error("[스케줄러] 분양가 수집 중 오류", e);
+            log.error("[scheduler.price] 수집 중 오류", e);
             errorNotifier.sendError("분양가 수집", e);
         }
     }
