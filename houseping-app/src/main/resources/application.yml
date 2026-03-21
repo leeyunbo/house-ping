@@ -69,7 +69,7 @@ feature:
     telegram-enabled: false       # 텔레그램 알림
     slack-enabled: true           # Slack 알림
   blog:
-    ai-generation-enabled: true   # AI 블로그 자동 생성
+    ai-generation-enabled: false  # AI 블로그 자동 생성 (비활성화)
 
 # 동기화 설정
 sync:
