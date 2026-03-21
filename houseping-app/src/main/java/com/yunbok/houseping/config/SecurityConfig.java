@@ -47,11 +47,6 @@ public class SecurityConfig {
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .headers(headers -> headers
-                .contentSecurityPolicy(csp -> csp
-                    .policyDirectives("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-src https://googleads.g.doubleclick.net;")
-                )
-            )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/auth/login")
                 .redirectionEndpoint(redirect -> redirect
