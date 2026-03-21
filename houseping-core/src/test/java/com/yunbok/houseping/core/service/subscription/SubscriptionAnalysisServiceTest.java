@@ -7,8 +7,8 @@ import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.core.port.RealTransactionPersistencePort;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
-import com.yunbok.houseping.entity.CompetitionRateEntity;
-import com.yunbok.houseping.repository.CompetitionRateRepository;
+import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.core.port.CompetitionRatePersistencePort;
 import com.yunbok.houseping.support.dto.MarketAnalysis;
 import com.yunbok.houseping.support.dto.SubscriptionAnalysisResult;
 import com.yunbok.houseping.support.util.AddressHelper;
@@ -47,7 +47,7 @@ class SubscriptionAnalysisServiceTest {
     private RealTransactionFetchPort realTransactionFetchPort;
 
     @Mock
-    private CompetitionRateRepository competitionRateRepository;
+    private CompetitionRatePersistencePort competitionRatePort;
 
     @Mock
     private AddressHelper addressParser;
@@ -65,7 +65,7 @@ class SubscriptionAnalysisServiceTest {
         service = new SubscriptionAnalysisService(
                 subscriptionQueryPort, subscriptionPriceQueryPort,
                 realTransactionQueryPort, realTransactionFetchPort,
-                competitionRateRepository, addressParser, comparisonBuilder, marketAnalyzer);
+                competitionRatePort, addressParser, comparisonBuilder, marketAnalyzer);
     }
 
     @Nested
@@ -90,9 +90,9 @@ class SubscriptionAnalysisServiceTest {
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of(price));
             when(comparisonBuilder.build(anyList(), anyList())).thenReturn(List.of());
             when(marketAnalyzer.analyze(anyList())).thenReturn(
-                    MarketAnalysis.builder().transactionCount(1).averageAmount(60000L).build());
-            when(competitionRateRepository.findByHouseManageNo("H001")).thenReturn(List.of(
-                    CompetitionRateEntity.builder()
+                    Optional.of(MarketAnalysis.builder().transactionCount(1).averageAmount(60000L).build()));
+            when(competitionRatePort.findByHouseManageNo("H001")).thenReturn(List.of(
+                    CompetitionRate.builder()
                             .houseManageNo("H001").houseType("084T")
                             .rank(1).residenceArea("해당지역")
                             .supplyCount(10).requestCount(50)
@@ -137,8 +137,8 @@ class SubscriptionAnalysisServiceTest {
             when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 6)).thenReturn(List.of(tx));
             when(addressParser.filterByDongName(anyList(), eq("역삼동"))).thenReturn(List.of(tx));
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of());
-            when(marketAnalyzer.analyze(anyList())).thenReturn(null);
-            when(competitionRateRepository.findByHouseManageNo("H001")).thenReturn(List.of());
+            when(marketAnalyzer.analyze(anyList())).thenReturn(Optional.empty());
+            when(competitionRatePort.findByHouseManageNo("H001")).thenReturn(List.of());
 
             // when
             SubscriptionAnalysisResult result = service.analyze(1L);
@@ -158,8 +158,8 @@ class SubscriptionAnalysisServiceTest {
             when(addressParser.extractDongName("알수없는주소")).thenReturn(null);
             when(addressParser.filterByDongName(anyList(), isNull())).thenReturn(List.of());
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of());
-            when(marketAnalyzer.analyze(anyList())).thenReturn(null);
-            when(competitionRateRepository.findByHouseManageNo("H001")).thenReturn(List.of());
+            when(marketAnalyzer.analyze(anyList())).thenReturn(Optional.empty());
+            when(competitionRatePort.findByHouseManageNo("H001")).thenReturn(List.of());
 
             // when
             SubscriptionAnalysisResult result = service.analyze(1L);
@@ -183,8 +183,8 @@ class SubscriptionAnalysisServiceTest {
             when(realTransactionQueryPort.findByLawdCd("11680")).thenReturn(List.of(oldTx));
             when(addressParser.filterByDongName(anyList(), eq("역삼동"))).thenReturn(List.of(oldTx));
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of());
-            when(marketAnalyzer.analyze(anyList())).thenReturn(null);
-            when(competitionRateRepository.findByHouseManageNo("H001")).thenReturn(List.of());
+            when(marketAnalyzer.analyze(anyList())).thenReturn(Optional.empty());
+            when(competitionRatePort.findByHouseManageNo("H001")).thenReturn(List.of());
 
             // when
             SubscriptionAnalysisResult result = service.analyze(1L);
@@ -205,7 +205,7 @@ class SubscriptionAnalysisServiceTest {
             when(addressParser.extractLawdCd(anyString())).thenReturn(null);
             when(addressParser.extractDongName(anyString())).thenReturn(null);
             when(addressParser.filterByDongName(anyList(), isNull())).thenReturn(List.of());
-            when(marketAnalyzer.analyze(anyList())).thenReturn(null);
+            when(marketAnalyzer.analyze(anyList())).thenReturn(Optional.empty());
 
             // when
             SubscriptionAnalysisResult result = service.analyze(1L);
@@ -226,12 +226,12 @@ class SubscriptionAnalysisServiceTest {
             when(addressParser.extractDongName(anyString())).thenReturn(null);
             when(addressParser.filterByDongName(anyList(), isNull())).thenReturn(List.of());
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of());
-            when(marketAnalyzer.analyze(anyList())).thenReturn(null);
-            when(competitionRateRepository.findByHouseManageNo("H001")).thenReturn(List.of(
-                    CompetitionRateEntity.builder()
+            when(marketAnalyzer.analyze(anyList())).thenReturn(Optional.empty());
+            when(competitionRatePort.findByHouseManageNo("H001")).thenReturn(List.of(
+                    CompetitionRate.builder()
                             .houseType("084T").rank(2).residenceArea("기타지역")
                             .supplyCount(10).requestCount(20).competitionRate(new BigDecimal("2.0")).build(),
-                    CompetitionRateEntity.builder()
+                    CompetitionRate.builder()
                             .houseType("084T").rank(1).residenceArea("해당지역")
                             .supplyCount(10).requestCount(50).competitionRate(new BigDecimal("5.0")).build()
             ));

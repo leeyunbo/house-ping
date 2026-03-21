@@ -202,8 +202,8 @@ public class BlogCardImageGenerator {
     }
 
     private int drawStatusBadge(Graphics2D g, Subscription sub, int x, int y) {
-        String label = sub.getStatus() == SubscriptionStatus.ACTIVE ? "접수중" : "접수예정";
-        Color bg = sub.getStatus() == SubscriptionStatus.ACTIVE ? BRAND_BLUE : TEXT_MUTED;
+        String label = sub.getStatus(java.time.LocalDate.now()) == SubscriptionStatus.ACTIVE ? "접수중" : "접수예정";
+        Color bg = sub.getStatus(java.time.LocalDate.now()) == SubscriptionStatus.ACTIVE ? BRAND_BLUE : TEXT_MUTED;
         return drawBadge(g, label, x, y, bg, Color.WHITE);
     }
 

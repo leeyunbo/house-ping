@@ -43,7 +43,14 @@ public class SecurityConfig {
                 .requestMatchers("/admin/system/**").hasRole("MASTER")
                 .requestMatchers("/admin/**").hasAnyRole("MASTER", "ADMIN")
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
+                // 정적 리소스 (CSS, JS, 이미지 등)
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**", "/webjars/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-src https://googleads.g.doubleclick.net;")
+                )
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/auth/login")

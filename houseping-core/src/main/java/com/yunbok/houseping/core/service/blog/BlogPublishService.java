@@ -60,6 +60,10 @@ public class BlogPublishService {
                         "카드 이미지를 찾을 수 없습니다: postId=" + postId + ", rank=" + rank));
     }
 
+    public byte[] findCardImageData(Long postId, int rank) {
+        return findCardImage(postId, rank).getImageData();
+    }
+
     @Transactional
     public void unpublish(Long id) {
         blogPostStore.unpublish(id);

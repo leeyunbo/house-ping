@@ -1,10 +1,10 @@
 package com.yunbok.houseping.controller.web;
 
 import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
-import com.yunbok.houseping.entity.SubscriptionEntity;
-import com.yunbok.houseping.repository.SubscriptionPriceRepository;
-import com.yunbok.houseping.repository.SubscriptionRepository;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
+import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
 import com.yunbok.houseping.core.service.realtransaction.RealTransactionCollectionService;
 import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +29,8 @@ public class AdminDataCollectionController {
 
     private static final LocalDate PRICE_COLLECTION_START_DATE = LocalDate.of(2025, 1, 1);
 
-    private final SubscriptionRepository subscriptionRepository;
-    private final SubscriptionPriceRepository subscriptionPriceRepository;
+    private final SubscriptionPersistencePort subscriptionPersistencePort;
+    private final SubscriptionPricePersistencePort subscriptionPricePersistencePort;
     private final ApplyhomeApiClient applyhomeApiAdapter;
     private final RealTransactionCollectionService realTransactionCollectionService;
 
@@ -42,7 +42,7 @@ public class AdminDataCollectionController {
         try {
             log.info("[데이터 수집] 분양가 데이터 수집 시작");
 
-            List<SubscriptionEntity> subscriptions = findPriceCollectionTargets();
+            List<Subscription> subscriptions = findPriceCollectionTargets();
             log.info("[데이터 수집] 분양가 수집 대상: {}건", subscriptions.size());
 
             CollectionResult result = collectPriceDetails(subscriptions);
@@ -75,20 +75,20 @@ public class AdminDataCollectionController {
         return "redirect:/admin/system";
     }
 
-    private List<SubscriptionEntity> findPriceCollectionTargets() {
-        return subscriptionRepository.findAll().stream()
+    private List<Subscription> findPriceCollectionTargets() {
+        return subscriptionPersistencePort.findAll().stream()
                 .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
                 .filter(s -> s.getHouseManageNo() != null && !s.getHouseManageNo().isEmpty())
                 .filter(s -> s.getReceiptStartDate() != null && !s.getReceiptStartDate().isBefore(PRICE_COLLECTION_START_DATE))
-                .filter(s -> !subscriptionPriceRepository.existsByHouseManageNo(s.getHouseManageNo()))
+                .filter(s -> !subscriptionPricePersistencePort.existsByHouseManageNo(s.getHouseManageNo()))
                 .toList();
     }
 
-    private CollectionResult collectPriceDetails(List<SubscriptionEntity> subscriptions) {
+    private CollectionResult collectPriceDetails(List<Subscription> subscriptions) {
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failCount = new AtomicInteger(0);
 
-        for (SubscriptionEntity subscription : subscriptions) {
+        for (Subscription subscription : subscriptions) {
             try {
                 applyhomeApiAdapter.fetchAndSavePriceDetails(
                         subscription.getHouseManageNo(),

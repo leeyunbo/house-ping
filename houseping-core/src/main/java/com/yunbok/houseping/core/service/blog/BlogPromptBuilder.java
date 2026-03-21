@@ -59,7 +59,7 @@ class BlogPromptBuilder {
                 sb.append("   - 주택유형: ").append(s.getHouseType()).append("\n");
             }
 
-            sb.append("   - 상태: ").append(s.getStatus() == SubscriptionStatus.ACTIVE ? "접수중" : "접수예정");
+            sb.append("   - 상태: ").append(s.getStatus(LocalDate.now()) == SubscriptionStatus.ACTIVE ? "접수중" : "접수예정");
             if (s.getReceiptStartDate() != null) {
                 sb.append(" (").append(s.getReceiptStartDate().format(DATE_FMT));
                 if (s.getReceiptEndDate() != null) {

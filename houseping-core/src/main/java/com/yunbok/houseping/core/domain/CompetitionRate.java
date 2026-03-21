@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * 청약 경쟁률 정보
@@ -52,4 +53,15 @@ public class CompetitionRate {
      * 순위 (1순위/2순위)
      */
     private Integer rank;
+
+    public BigDecimal getEffectiveRate() {
+        if (competitionRate != null) {
+            return competitionRate;
+        }
+        if (supplyCount != null && supplyCount > 0 && requestCount != null) {
+            return BigDecimal.valueOf(requestCount)
+                    .divide(BigDecimal.valueOf(supplyCount), 2, RoundingMode.HALF_UP);
+        }
+        return null;
+    }
 }

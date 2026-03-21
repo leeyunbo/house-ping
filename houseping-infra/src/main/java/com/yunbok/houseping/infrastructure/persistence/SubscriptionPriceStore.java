@@ -24,6 +24,11 @@ public class SubscriptionPriceStore implements SubscriptionPricePersistencePort 
                 .toList();
     }
 
+    @Override
+    public boolean existsByHouseManageNo(String houseManageNo) {
+        return subscriptionPriceRepository.existsByHouseManageNo(houseManageNo);
+    }
+
     /**
      * Entity -> Domain Model 변환
      */

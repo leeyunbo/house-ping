@@ -3,11 +3,10 @@ package com.yunbok.houseping.core.service.notification;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.support.dto.NotificationTarget;
+import com.yunbok.houseping.core.port.NotificationHistoryPersistencePort;
 import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.port.NotificationSender;
 import com.yunbok.houseping.core.service.subscription.SubscriptionCollector;
-import com.yunbok.houseping.entity.NotificationHistoryEntity;
-import com.yunbok.houseping.repository.NotificationHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,7 @@ public class DailyNotificationService {
     private final SubscriptionCollector subscriptionCollector;
     private final NotificationSubscriptionPersistencePort persistencePort;
     private final Optional<NotificationSender> notificationSender;
-    private final NotificationHistoryRepository historyRepository;
+    private final NotificationHistoryPersistencePort historyPort;
 
     /**
      * 일일 종합 알림 리포트 생성 (미리보기용, 발송 안함)
@@ -73,7 +72,7 @@ public class DailyNotificationService {
     private void sendDailyReport(String triggeredBy) {
         if (notificationSender.isEmpty()) {
             log.debug("[일일 알림 서비스] 알림 발송기가 비활성화 상태입니다.");
-            saveHistory("DAILY_REPORT", "ALL", false,
+            historyPort.save("DAILY_REPORT", "ALL", false,
                     "알림 발송기 비활성화", null, "알림 발송기가 비활성화 상태입니다.", triggeredBy);
             return;
         }
@@ -100,13 +99,13 @@ public class DailyNotificationService {
             markNotificationsAsSent(report.receiptEndToday(), report.receiptStartTomorrow());
 
             // 성공 이력 저장
-            saveHistory("DAILY_REPORT", "ALL", true, summary, detail, null, triggeredBy);
+            historyPort.save("DAILY_REPORT", "ALL", true, summary, detail, null, triggeredBy);
 
             log.info("[일일 알림 서비스] 일일 리포트 발송 완료");
         } catch (Exception e) {
             log.error("[일일 알림 서비스] 일일 리포트 발송 실패", e);
             // 실패 이력 저장
-            saveHistory("DAILY_REPORT", "ALL", false, summary, detail, e.getMessage(), triggeredBy);
+            historyPort.save("DAILY_REPORT", "ALL", false, summary, detail, e.getMessage(), triggeredBy);
             throw e;
         }
     }
@@ -122,20 +121,6 @@ public class DailyNotificationService {
         for (NotificationTarget target : receiptStartTargets) {
             persistencePort.markReceiptStartNotified(target.notificationId());
         }
-    }
-
-    private void saveHistory(String type, String channel, boolean success,
-                             String summary, String detail, String errorMessage, String triggeredBy) {
-        NotificationHistoryEntity history = NotificationHistoryEntity.builder()
-                .notificationType(type)
-                .channel(channel)
-                .success(success)
-                .summary(summary)
-                .detail(detail)
-                .errorMessage(errorMessage)
-                .triggeredBy(triggeredBy)
-                .build();
-        historyRepository.save(history);
     }
 
     private String buildDetailJson(DailyNotificationReport report) {

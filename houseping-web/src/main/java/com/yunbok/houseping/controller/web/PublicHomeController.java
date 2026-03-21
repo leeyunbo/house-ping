@@ -59,7 +59,7 @@ public class PublicHomeController {
      */
     @GetMapping("/{year}/{month}")
     public String monthly(@PathVariable int year, @PathVariable int month, Model model) {
-        if (month < 1 || month > 12) {
+        if (year < 2020 || year > 2030 || month < 1 || month > 12) {
             return "redirect:/home";
         }
 
@@ -144,6 +144,7 @@ public class PublicHomeController {
 
         model.addAttribute("analysis", analysis);
         model.addAttribute("subscription", subscription);
+        model.addAttribute("statusLabel", subscription.getStatusLabel(LocalDate.now()));
         model.addAttribute("canonicalPath", "/home/analysis/" + id);
         model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);
 

@@ -3,14 +3,12 @@ package com.yunbok.houseping.config;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 /**
  * 청약 관련 설정을 외부화하는 Properties 클래스
  */
-@Configuration
 @ConfigurationProperties(prefix = "subscription")
 @Getter
 @Setter

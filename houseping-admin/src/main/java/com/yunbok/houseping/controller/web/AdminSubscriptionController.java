@@ -2,12 +2,9 @@ package com.yunbok.houseping.controller.web;
 
 import com.yunbok.houseping.service.dto.AdminSubscriptionDto;
 import com.yunbok.houseping.service.dto.AdminSubscriptionSearchCriteria;
-import com.yunbok.houseping.support.dto.HouseTypeComparison;
-import com.yunbok.houseping.core.domain.RealTransaction;
 import com.yunbok.houseping.support.dto.CalendarEventDto;
 import com.yunbok.houseping.support.dto.SyncResult;
 import com.yunbok.houseping.service.AdminSubscriptionService;
-import com.yunbok.houseping.core.service.subscription.SubscriptionAnalysisService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,9 +27,6 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.yunbok.houseping.entity.SubscriptionPriceEntity;
-import com.yunbok.houseping.repository.SubscriptionPriceRepository;
-
 @Controller
 @RequestMapping("/admin/subscriptions")
 @RequiredArgsConstructor
@@ -40,8 +34,6 @@ public class AdminSubscriptionController {
 
     private final AdminSubscriptionService queryService;
     private final SubscriptionManagementService managementUseCase;
-    private final SubscriptionPriceRepository priceRepository;
-    private final SubscriptionAnalysisService analysisUseCase;
 
     @Value("${kakao.map.app-key:}")
     private String kakaoMapAppKey;
@@ -92,9 +84,6 @@ public class AdminSubscriptionController {
         return "redirect:/admin/subscriptions";
     }
 
-    /**
-     * 알림 구독 토글
-     */
     @PostMapping("/{id}/notification")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> toggleNotification(@PathVariable Long id) {
@@ -106,9 +95,6 @@ public class AdminSubscriptionController {
         ));
     }
 
-    /**
-     * 알림 구독 해제
-     */
     @DeleteMapping("/{id}/notification")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> removeNotification(@PathVariable Long id) {
@@ -119,9 +105,6 @@ public class AdminSubscriptionController {
         ));
     }
 
-    /**
-     * 일괄 알림 설정
-     */
     @PostMapping("/notifications/bulk")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> bulkEnableNotifications(@RequestBody BulkNotificationRequest request) {
@@ -135,163 +118,15 @@ public class AdminSubscriptionController {
 
     public record BulkNotificationRequest(List<Long> ids) {}
 
-    /**
-     * 분양가 상세 조회
-     */
     @GetMapping("/{id}/prices")
     @ResponseBody
-    public ResponseEntity<List<PriceDto>> getPrices(@PathVariable Long id) {
-        return queryService.findById(id)
-                .map(sub -> {
-                    if (sub.houseManageNo() == null || sub.houseManageNo().isEmpty()) {
-                        return ResponseEntity.ok(List.<PriceDto>of());
-                    }
-                    List<PriceDto> prices = priceRepository.findByHouseManageNo(sub.houseManageNo())
-                            .stream()
-                            .map(PriceDto::from)
-                            .toList();
-                    return ResponseEntity.ok(prices);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<List<AdminSubscriptionService.PriceDto>> getPrices(@PathVariable Long id) {
+        return ResponseEntity.ok(queryService.getPrices(id));
     }
 
-    public record PriceDto(
-            String houseType,
-            Double supplyArea,
-            Integer supplyCount,
-            Integer specialSupplyCount,
-            Long topAmount,
-            Long pricePerPyeong
-    ) {
-        public static PriceDto from(SubscriptionPriceEntity entity) {
-            return new PriceDto(
-                    entity.getHouseType(),
-                    entity.getSupplyArea() != null ? entity.getSupplyArea().doubleValue() : null,
-                    entity.getSupplyCount(),
-                    entity.getSpecialSupplyCount(),
-                    entity.getTopAmount(),
-                    entity.getPricePerPyeong()
-            );
-        }
-    }
-
-    /**
-     * 실거래가 시세 조회 (주택형별 비교 포함)
-     */
     @GetMapping("/{id}/market-analysis")
     @ResponseBody
-    public ResponseEntity<MarketAnalysisDto> getMarketAnalysis(@PathVariable Long id) {
-        try {
-            var analysis = analysisUseCase.analyze(id);
-            var market = analysis.getMarketAnalysis();
-
-            // 주택형별 비교 정보
-            List<HouseTypeComparisonDto> comparisons = analysis.getHouseTypeComparisons().stream()
-                    .map(HouseTypeComparisonDto::from)
-                    .toList();
-
-            if (market == null) {
-                return ResponseEntity.ok(new MarketAnalysisDto(
-                        null, null, null, null, 0,
-                        analysis.getDongName(),
-                        List.of(),
-                        comparisons
-                ));
-            }
-
-            List<TransactionDto> transactions = analysis.getRecentTransactions().stream()
-                    .limit(5)
-                    .map(TransactionDto::from)
-                    .toList();
-
-            return ResponseEntity.ok(new MarketAnalysisDto(
-                    market.getAverageAmountFormatted(),
-                    formatPricePerPyeong(market.getAveragePricePerPyeong()),
-                    market.getMaxAmountFormatted(),
-                    market.getMinAmountFormatted(),
-                    market.getTransactionCount(),
-                    analysis.getDongName(),
-                    transactions,
-                    comparisons
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new MarketAnalysisDto(null, null, null, null, 0, null, List.of(), List.of()));
-        }
-    }
-
-    private String formatPricePerPyeong(long price) {
-        if (price == 0) return "-";
-        return String.format("%,d만/평", price);
-    }
-
-    public record MarketAnalysisDto(
-            String averageAmount,
-            String pricePerPyeong,
-            String maxAmount,
-            String minAmount,
-            int transactionCount,
-            String dongName,
-            List<TransactionDto> recentTransactions,
-            List<HouseTypeComparisonDto> houseTypeComparisons
-    ) {}
-
-    public record HouseTypeComparisonDto(
-            String houseType,
-            String supplyArea,
-            String supplyPrice,
-            String marketPrice,
-            String estimatedProfit,
-            String transactionInfo,
-            int transactionCount,
-            boolean hasProfit
-    ) {
-        public static HouseTypeComparisonDto from(HouseTypeComparison c) {
-            String areaStr = c.getSupplyArea() != null
-                    ? c.getSupplyArea().setScale(0, java.math.RoundingMode.HALF_UP) + "㎡"
-                    : "-";
-
-            int txCount = c.getSimilarTransactions() != null ? c.getSimilarTransactions().size() : 0;
-
-            return new HouseTypeComparisonDto(
-                    c.getHouseType(),
-                    areaStr,
-                    c.getSupplyPriceFormatted(),
-                    c.getMarketPriceFormatted(),
-                    c.getEstimatedProfitFormatted(),
-                    c.getTransactionInfo(),
-                    txCount,
-                    c.hasProfit()
-            );
-        }
-    }
-
-    public record TransactionDto(
-            String aptName,
-            String area,
-            Integer floor,
-            String amount,
-            String dealDate
-    ) {
-        public static TransactionDto from(RealTransaction tx) {
-            String amountStr = tx.getDealAmount() >= 10000
-                    ? String.format("%.1f억", tx.getDealAmount() / 10000.0)
-                    : String.format("%,d만", tx.getDealAmount());
-
-            String dateStr = tx.getDealDate() != null
-                    ? tx.getDealDate().toString()
-                    : "-";
-
-            String areaStr = tx.getExclusiveArea() != null
-                    ? tx.getExclusiveArea().setScale(0, java.math.RoundingMode.HALF_UP) + "㎡"
-                    : "-";
-
-            return new TransactionDto(
-                    tx.getAptName(),
-                    areaStr,
-                    tx.getFloor(),
-                    amountStr,
-                    dateStr
-            );
-        }
+    public ResponseEntity<AdminSubscriptionService.MarketAnalysisDto> getMarketAnalysis(@PathVariable Long id) {
+        return ResponseEntity.ok(queryService.getMarketAnalysis(id));
     }
 }

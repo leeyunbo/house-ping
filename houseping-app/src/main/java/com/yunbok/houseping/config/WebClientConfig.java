@@ -1,18 +1,22 @@
 package com.yunbok.houseping.config;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
+
+import java.time.Duration;
 
 /**
  * WebClient 설정
- * ⭐ LH API용 WebClient 추가 (기존 청약Home WebClient는 그대로 유지)
  */
 @Slf4j
 @Configuration
@@ -35,101 +39,83 @@ public class WebClientConfig {
 
     private static final String TELEGRAM_API_BASE = "https://api.telegram.org/bot";
 
-    /**
-     * 기존 청약Home API용 WebClient (변경 없음)
-     */
     @Bean
-    public WebClient applyHomeWebClient() {
+    public HttpClient defaultHttpClient() {
+        return HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5_000)
+                .responseTimeout(Duration.ofSeconds(30));
+    }
+
+    private WebClient.Builder baseBuilder(HttpClient httpClient) {
         return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024));
+    }
+
+    @Bean
+    public WebClient applyHomeWebClient(HttpClient defaultHttpClient) {
+        return baseBuilder(defaultHttpClient)
                 .baseUrl(applyHomeBaseUrl)
                 .defaultHeader("Content-Type", "application/json")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
 
-    /**
-     * LH API용 WebClient (새로 추가)
-     */
     @Bean
-    public WebClient lhWebClient() {
-        return WebClient.builder()
+    public WebClient lhWebClient(HttpClient defaultHttpClient) {
+        return baseBuilder(defaultHttpClient)
                 .baseUrl(lhBaseUrl)
                 .defaultHeader("Content-Type", "application/json")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
 
-    /**
-     * 청약Home 웹 캘린더용 WebClient (API 다운 시 대체)
-     */
     @Bean
-    public WebClient applyHomeWebCalendarClient() {
-        return WebClient.builder()
+    public WebClient applyHomeWebCalendarClient(HttpClient defaultHttpClient) {
+        return baseBuilder(defaultHttpClient)
                 .baseUrl(applyHomeWebBaseUrl)
                 .defaultHeader("Content-Type", "application/json")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
 
-    /**
-     * LH 웹 캘린더용 WebClient
-     */
     @Bean
-    public WebClient lhWebCalendarClient() {
-        return WebClient.builder()
+    public WebClient lhWebCalendarClient(HttpClient defaultHttpClient) {
+        return baseBuilder(defaultHttpClient)
                 .baseUrl(lhWebBaseUrl)
                 .defaultHeader("Content-Type", "application/json")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
 
     @Bean
-    public WebClient telegramWebClient() {
-        return WebClient.builder()
+    public WebClient telegramWebClient(HttpClient defaultHttpClient) {
+        return baseBuilder(defaultHttpClient)
                 .baseUrl(TELEGRAM_API_BASE + botToken)
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
 
-    /**
-     * 청약홈 경쟁률 API용 WebClient
-     */
     @Bean
-    public WebClient competitionRateWebClient() {
-        return WebClient.builder()
+    public WebClient competitionRateWebClient(HttpClient defaultHttpClient) {
+        return baseBuilder(defaultHttpClient)
                 .baseUrl("https://api.odcloud.kr/api/ApplyhomeInfoCmpetRtSvc/v1")
                 .defaultHeader("Content-Type", "application/json")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
 
-    /**
-     * Claude API용 WebClient
-     */
     @Bean
-    public WebClient claudeWebClient(@Value("${claude.api.key:}") String apiKey) {
-        return WebClient.builder()
+    public WebClient claudeWebClient(HttpClient defaultHttpClient, @Value("${claude.api.key:}") String apiKey) {
+        return baseBuilder(defaultHttpClient)
                 .baseUrl("https://api.anthropic.com")
                 .defaultHeader("x-api-key", apiKey)
                 .defaultHeader("anthropic-version", "2023-06-01")
                 .defaultHeader("Content-Type", "application/json")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
 
-    /**
-     * 국토교통부 실거래가 API용 WebClient
-     * XML 응답을 Jackson으로 파싱
-     */
     @Bean
-    public WebClient realTransactionWebClient() {
-        // Jackson XmlMapper로 XML 처리
+    public WebClient realTransactionWebClient(HttpClient defaultHttpClient) {
         XmlMapper xmlMapper = new XmlMapper();
 
         ExchangeStrategies strategies = ExchangeStrategies.builder()
                 .codecs(configurer -> {
                     configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024);
-                    // XML 지원 추가 (application/xml, text/xml 등)
                     configurer.defaultCodecs().jackson2JsonDecoder(
                             new Jackson2JsonDecoder(xmlMapper, MediaType.APPLICATION_XML, MediaType.TEXT_XML)
                     );
@@ -137,6 +123,7 @@ public class WebClientConfig {
                 .build();
 
         return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(defaultHttpClient))
                 .baseUrl("https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev")
                 .exchangeStrategies(strategies)
                 .build();

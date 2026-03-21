@@ -1,10 +1,10 @@
 package com.yunbok.houseping.core.service.subscription;
 
+import com.yunbok.houseping.core.domain.CompetitionRate;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionStatus;
+import com.yunbok.houseping.core.port.CompetitionRatePersistencePort;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
-import com.yunbok.houseping.entity.CompetitionRateEntity;
-import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.support.dto.AnnouncedSubscriptionView;
 import com.yunbok.houseping.support.dto.HomePageResult;
 import com.yunbok.houseping.support.dto.MonthlyPageResult;
@@ -34,7 +34,7 @@ public class SubscriptionSearchService {
     private static final List<String> SUPPORTED_AREAS = List.of("서울", "경기");
 
     private final SubscriptionPersistencePort subscriptionQueryPort;
-    private final CompetitionRateRepository competitionRateRepository;
+    private final CompetitionRatePersistencePort competitionRatePort;
     private final PriceBadgeCalculator priceBadgeCalculator;
 
     public Optional<Subscription> findById(Long id) {
@@ -43,8 +43,8 @@ public class SubscriptionSearchService {
 
     public List<Subscription> findActiveAndUpcomingSubscriptions(String area) {
         return findByAreaWithFilter(area).stream()
-                .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE
-                        || s.getStatus() == SubscriptionStatus.UPCOMING)
+                .filter(s -> s.getStatus(LocalDate.now()) == SubscriptionStatus.ACTIVE
+                        || s.getStatus(LocalDate.now()) == SubscriptionStatus.UPCOMING)
                 .toList();
     }
 
@@ -77,11 +77,11 @@ public class SubscriptionSearchService {
     }
 
     public List<AnnouncedSubscriptionView> findAnnouncedSubscriptions(String area) {
-        Set<String> houseManageNosWithRates = new HashSet<>(competitionRateRepository.findDistinctHouseManageNos());
+        Set<String> houseManageNosWithRates = new HashSet<>(competitionRatePort.findDistinctHouseManageNos());
         LocalDate twoWeeksAgo = LocalDate.now().minusWeeks(2);
 
         return findByAreaWithFilter(area).stream()
-                .filter(s -> s.getStatus() == SubscriptionStatus.CLOSED)
+                .filter(s -> s.getStatus(LocalDate.now()) == SubscriptionStatus.CLOSED)
                 .filter(s -> s.getReceiptEndDate() != null && !s.getReceiptEndDate().isBefore(twoWeeksAgo))
                 .filter(s -> s.getHouseManageNo() != null && houseManageNosWithRates.contains(s.getHouseManageNo()))
                 .map(s -> {
@@ -98,11 +98,11 @@ public class SubscriptionSearchService {
     }
 
     private BigDecimal computeTopRate(String houseManageNo) {
-        List<CompetitionRateEntity> rates = competitionRateRepository.findByHouseManageNo(houseManageNo);
+        List<CompetitionRate> rates = competitionRatePort.findByHouseManageNo(houseManageNo);
         return rates.stream()
                 .filter(r -> r.getRank() != null && r.getRank() == 1)
                 .filter(r -> "해당지역".equals(r.getResidenceArea()))
-                .map(CompetitionRateEntity::getEffectiveRate)
+                .map(CompetitionRate::getEffectiveRate)
                 .filter(rate -> rate != null)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
@@ -110,13 +110,13 @@ public class SubscriptionSearchService {
 
     private List<Subscription> filterActiveSubscriptions(List<Subscription> subscriptions) {
         return subscriptions.stream()
-                .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE)
+                .filter(s -> s.getStatus(LocalDate.now()) == SubscriptionStatus.ACTIVE)
                 .toList();
     }
 
     private List<Subscription> filterUpcomingSubscriptions(List<Subscription> subscriptions) {
         return subscriptions.stream()
-                .filter(s -> s.getStatus() == SubscriptionStatus.UPCOMING)
+                .filter(s -> s.getStatus(LocalDate.now()) == SubscriptionStatus.UPCOMING)
                 .toList();
     }
 
@@ -127,7 +127,7 @@ public class SubscriptionSearchService {
                 .activeSubscriptions(filterActiveSubscriptions(subscriptions))
                 .upcomingSubscriptions(filterUpcomingSubscriptions(subscriptions))
                 .closedSubscriptions(subscriptions.stream()
-                        .filter(s -> s.getStatus() == SubscriptionStatus.CLOSED)
+                        .filter(s -> s.getStatus(LocalDate.now()) == SubscriptionStatus.CLOSED)
                         .toList())
                 .build();
     }

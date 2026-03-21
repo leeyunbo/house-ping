@@ -41,6 +41,18 @@ public class CompetitionRateDbStore implements CompetitionRatePersistencePort {
         return repository.existsByHouseManageNoAndPblancNo(houseManageNo, pblancNo);
     }
 
+    @Override
+    public List<CompetitionRate> findByHouseManageNo(String houseManageNo) {
+        return repository.findByHouseManageNo(houseManageNo).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<String> findDistinctHouseManageNos() {
+        return repository.findDistinctHouseManageNos();
+    }
+
     private CompetitionRateEntity toEntity(CompetitionRate domain) {
         return CompetitionRateEntity.builder()
                 .houseManageNo(domain.getHouseManageNo())

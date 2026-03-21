@@ -4,7 +4,6 @@ import com.yunbok.houseping.core.domain.BlogPost;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.service.blog.BlogPublishService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionSearchService;
-import com.yunbok.houseping.entity.BlogCardImageEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -47,11 +46,11 @@ public class PublicBlogController {
     @GetMapping("/{postId}/card/{rank}.png")
     @ResponseBody
     public ResponseEntity<byte[]> cardImage(@PathVariable Long postId, @PathVariable int rank) {
-        BlogCardImageEntity card = blogPublishService.findCardImage(postId, rank);
+        byte[] imageData = blogPublishService.findCardImageData(postId, rank);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS).cachePublic())
-                .body(card.getImageData());
+                .body(imageData);
     }
 
 }

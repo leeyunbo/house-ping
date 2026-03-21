@@ -25,6 +25,7 @@ public record ApplyhomePriceDetailItem(
     @JsonProperty("INSTT_RECOMEND_HSHLDCO") Integer institutionRecommendCount,
     @JsonProperty("LTTOT_TOP_AMOUNT") String topAmountRaw  // API가 쉼표 포함 문자열로 반환
 ) {
+    private static final BigDecimal SQM_PER_PYEONG = BigDecimal.valueOf(3.3058);
     /**
      * 분양가 (만원) - 쉼표 제거 후 파싱
      */
@@ -47,8 +48,7 @@ public record ApplyhomePriceDetailItem(
         if (amount == null || supplyArea == null || supplyArea.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
-        // 1평 = 3.3058 제곱미터
-        BigDecimal pyeong = supplyArea.divide(BigDecimal.valueOf(3.3058), 2, java.math.RoundingMode.HALF_UP);
+        BigDecimal pyeong = supplyArea.divide(SQM_PER_PYEONG, 2, java.math.RoundingMode.HALF_UP);
         if (pyeong.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }

@@ -7,6 +7,7 @@ import com.yunbok.houseping.support.dto.HouseTypeComparison;
 import com.yunbok.houseping.support.util.PriceFormatter;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -36,7 +37,7 @@ class BlogNarrativeBuilder {
         }
 
         // 접수 상태
-        if (subscription.getStatus() == SubscriptionStatus.ACTIVE) {
+        if (subscription.getStatus(LocalDate.now()) == SubscriptionStatus.ACTIVE) {
             sb.append("현재 접수 중입니다");
         } else {
             sb.append("접수 예정입니다");

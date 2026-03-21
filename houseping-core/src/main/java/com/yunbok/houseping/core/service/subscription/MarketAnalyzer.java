@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 시장 분석 담당
@@ -16,9 +17,9 @@ public class MarketAnalyzer {
     /**
      * 거래 내역 기반 시장 분석
      */
-    public MarketAnalysis analyze(List<RealTransaction> transactions) {
+    public Optional<MarketAnalysis> analyze(List<RealTransaction> transactions) {
         if (transactions.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
 
         long avgAmount = (long) transactions.stream()
@@ -43,12 +44,12 @@ public class MarketAnalyzer {
                 .min()
                 .orElse(0);
 
-        return MarketAnalysis.builder()
+        return Optional.of(MarketAnalysis.builder()
                 .averageAmount(avgAmount)
                 .averagePricePerPyeong(avgPricePerPyeong)
                 .maxAmount(maxAmount)
                 .minAmount(minAmount)
                 .transactionCount(transactions.size())
-                .build();
+                .build());
     }
 }

@@ -32,6 +32,8 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class SubscriptionPriceEntity {
 
+    private static final BigDecimal SQM_PER_PYEONG = BigDecimal.valueOf(3.3058);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -105,8 +107,7 @@ public class SubscriptionPriceEntity {
             this.pricePerPyeong = null;
             return;
         }
-        // 1평 = 3.3058 제곱미터
-        BigDecimal pyeong = supplyArea.divide(BigDecimal.valueOf(3.3058), 2, java.math.RoundingMode.HALF_UP);
+        BigDecimal pyeong = supplyArea.divide(SQM_PER_PYEONG, 2, java.math.RoundingMode.HALF_UP);
         if (pyeong.compareTo(BigDecimal.ZERO) == 0) {
             this.pricePerPyeong = null;
             return;

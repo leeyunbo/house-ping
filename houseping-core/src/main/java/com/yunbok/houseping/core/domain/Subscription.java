@@ -52,22 +52,19 @@ public class Subscription {
         return String.format("[%s] %s", area, houseName);
     }
 
-    public boolean isReceiptInProgress() {
-        LocalDate today = LocalDate.now();
+    public boolean isReceiptInProgress(LocalDate today) {
         LocalDate start = getReceiptStartDate();
         LocalDate end = getReceiptEndDate();
         return start != null && !today.isBefore(start)
             && (end == null || !today.isAfter(end));
     }
 
-    public boolean isUpcoming() {
-        LocalDate today = LocalDate.now();
+    public boolean isUpcoming(LocalDate today) {
         LocalDate start = getReceiptStartDate();
         return start != null && today.isBefore(start);
     }
 
-    public boolean isExpired() {
-        LocalDate today = LocalDate.now();
+    public boolean isExpired(LocalDate today) {
         LocalDate end = getReceiptEndDate();
         return end != null && today.isAfter(end);
     }
@@ -85,10 +82,10 @@ public class Subscription {
     /**
      * 청약 상태 반환
      */
-    public SubscriptionStatus getStatus() {
-        if (isReceiptInProgress()) {
+    public SubscriptionStatus getStatus(LocalDate today) {
+        if (isReceiptInProgress(today)) {
             return SubscriptionStatus.ACTIVE;
-        } else if (isUpcoming()) {
+        } else if (isUpcoming(today)) {
             return SubscriptionStatus.UPCOMING;
         } else {
             return SubscriptionStatus.CLOSED;
@@ -98,7 +95,7 @@ public class Subscription {
     /**
      * 상태 라벨 반환
      */
-    public String getStatusLabel() {
-        return getStatus().getLabel();
+    public String getStatusLabel(LocalDate today) {
+        return getStatus(today).getLabel();
     }
 }

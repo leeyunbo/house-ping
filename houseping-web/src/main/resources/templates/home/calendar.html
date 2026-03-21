@@ -571,6 +571,20 @@
             calendar.render();
         });
 
+        function escapeHtml(str) {
+            if (str == null) return '';
+            var div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        function sanitizeUrl(url) {
+            if (!url) return '';
+            var u = String(url).trim();
+            if (/^https?:\/\//i.test(u)) return u;
+            return '';
+        }
+
         function showEventModal(event) {
             const props = event.extendedProps;
             const modalTitle = document.getElementById('eventModalTitle');
@@ -601,17 +615,17 @@
                     <div class="event-info-row">
                         <div class="event-info-item">
                             <span class="event-info-label">지역</span>
-                            <span class="event-info-value">${props.area || '-'}</span>
+                            <span class="event-info-value">${escapeHtml(props.area) || '-'}</span>
                         </div>
                         <div class="event-info-item">
                             <span class="event-info-label">주택유형</span>
-                            <span class="event-info-value">${props.houseType || '-'}</span>
+                            <span class="event-info-value">${escapeHtml(props.houseType) || '-'}</span>
                         </div>
                     </div>
 
                     <div class="event-info-item">
                         <span class="event-info-label">공급세대수</span>
-                        <span class="event-info-value">${props.totalSupplyCount ? props.totalSupplyCount.toLocaleString() + '세대' : '-'}</span>
+                        <span class="event-info-value">${props.totalSupplyCount ? Number(props.totalSupplyCount).toLocaleString() + '세대' : '-'}</span>
                     </div>
 
                     <div class="event-divider"></div>
@@ -630,7 +644,7 @@
 
             if (props.hasAnalysis) {
                 html += `
-                    <a href="/home/analysis/${event.id}" class="event-btn-analysis">
+                    <a href="/home/analysis/${encodeURIComponent(event.id)}" class="event-btn-analysis">
                         시세 분석 보기
                     </a>
                 `;
@@ -645,9 +659,10 @@
                 `;
             }
 
-            if (props.detailUrl) {
+            const safeDetailUrl = sanitizeUrl(props.detailUrl);
+            if (safeDetailUrl) {
                 html += `
-                    <a href="${props.detailUrl}" target="_blank" class="event-btn-detail">
+                    <a href="${escapeHtml(safeDetailUrl)}" target="_blank" class="event-btn-detail">
                         상세 페이지 보기 →
                     </a>
                 `;

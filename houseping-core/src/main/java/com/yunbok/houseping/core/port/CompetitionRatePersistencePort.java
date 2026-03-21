@@ -13,4 +13,8 @@ public interface CompetitionRatePersistencePort {
     List<CompetitionRate> findByHouseManageNoAndPblancNo(String houseManageNo, String pblancNo);
 
     boolean existsByHouseManageNoAndPblancNo(String houseManageNo, String pblancNo);
+
+    List<CompetitionRate> findByHouseManageNo(String houseManageNo);
+
+    List<String> findDistinctHouseManageNos();
 }

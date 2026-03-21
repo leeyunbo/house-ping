@@ -2,8 +2,8 @@ package com.yunbok.houseping.core.service.subscription;
 
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
-import com.yunbok.houseping.entity.CompetitionRateEntity;
-import com.yunbok.houseping.repository.CompetitionRateRepository;
+import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.core.port.CompetitionRatePersistencePort;
 import com.yunbok.houseping.support.dto.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +30,7 @@ class SubscriptionSearchServiceTest {
     private SubscriptionPersistencePort subscriptionQueryPort;
 
     @Mock
-    private CompetitionRateRepository competitionRateRepository;
+    private CompetitionRatePersistencePort competitionRatePort;
 
     @Mock
     private PriceBadgeCalculator priceBadgeCalculator;
@@ -39,7 +39,7 @@ class SubscriptionSearchServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new SubscriptionSearchService(subscriptionQueryPort, competitionRateRepository, priceBadgeCalculator);
+        service = new SubscriptionSearchService(subscriptionQueryPort, competitionRatePort, priceBadgeCalculator);
     }
 
     @Nested
@@ -179,7 +179,7 @@ class SubscriptionSearchServiceTest {
                     LocalDate.now().plusDays(1), LocalDate.now().plusDays(10));
             when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(active, upcoming));
             when(priceBadgeCalculator.computePriceBadge(any())).thenReturn(PriceBadge.UNKNOWN);
-            when(competitionRateRepository.findDistinctHouseManageNos()).thenReturn(List.of());
+            when(competitionRatePort.findDistinctHouseManageNos()).thenReturn(List.of());
 
             // when
             HomePageResult result = service.getHomeData(null);
@@ -202,9 +202,9 @@ class SubscriptionSearchServiceTest {
             Subscription closed = createSubscriptionWithHouseManageNo(1L, "서울", "발표아파트",
                     LocalDate.now().minusDays(5), LocalDate.now().minusDays(1), "H001");
             when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(closed));
-            when(competitionRateRepository.findDistinctHouseManageNos()).thenReturn(List.of("H001"));
-            when(competitionRateRepository.findByHouseManageNo("H001")).thenReturn(List.of(
-                    CompetitionRateEntity.builder()
+            when(competitionRatePort.findDistinctHouseManageNos()).thenReturn(List.of("H001"));
+            when(competitionRatePort.findByHouseManageNo("H001")).thenReturn(List.of(
+                    CompetitionRate.builder()
                             .houseManageNo("H001")
                             .rank(1)
                             .residenceArea("해당지역")
@@ -227,7 +227,7 @@ class SubscriptionSearchServiceTest {
             Subscription oldClosed = createSubscriptionWithHouseManageNo(1L, "서울", "오래된아파트",
                     LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), "H001");
             when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(oldClosed));
-            when(competitionRateRepository.findDistinctHouseManageNos()).thenReturn(List.of("H001"));
+            when(competitionRatePort.findDistinctHouseManageNos()).thenReturn(List.of("H001"));
 
             // when
             List<AnnouncedSubscriptionView> result = service.findAnnouncedSubscriptions(null);

@@ -4,6 +4,7 @@ import com.yunbok.houseping.core.domain.User;
 import com.yunbok.houseping.core.domain.UserRole;
 import com.yunbok.houseping.core.domain.UserStatus;
 import com.yunbok.houseping.core.port.UserPersistencePort;
+import com.yunbok.houseping.support.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -98,7 +99,7 @@ class UserManagementServiceTest {
 
             // when & then
             assertThatThrownBy(() -> service.approveUser(99L))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("사용자를 찾을 수 없습니다");
         }
     }
@@ -129,7 +130,7 @@ class UserManagementServiceTest {
 
             // when & then
             assertThatThrownBy(() -> service.deleteUser(99L))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("사용자를 찾을 수 없습니다");
         }
     }
@@ -161,7 +162,7 @@ class UserManagementServiceTest {
 
             // when & then
             assertThatThrownBy(() -> service.promoteToAdmin(99L))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("사용자를 찾을 수 없습니다");
         }
 
@@ -206,7 +207,7 @@ class UserManagementServiceTest {
 
             // when & then
             assertThatThrownBy(() -> service.demoteToUser(99L))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("사용자를 찾을 수 없습니다");
         }
 

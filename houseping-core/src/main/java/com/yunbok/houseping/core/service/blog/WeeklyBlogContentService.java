@@ -132,7 +132,7 @@ public class WeeklyBlogContentService {
             score += (int) Math.min(rep.getEstimatedProfit() / SCORE_PROFIT_PER_UNIT, SCORE_PROFIT_MAX);
         }
 
-        if (subscription.getStatus() == SubscriptionStatus.ACTIVE) {
+        if (subscription.getStatus(LocalDate.now()) == SubscriptionStatus.ACTIVE) {
             score += SCORE_ACTIVE_STATUS;
         }
 

@@ -6,7 +6,7 @@ import com.yunbok.houseping.support.dto.NotificationTarget;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.port.NotificationSender;
-import com.yunbok.houseping.repository.NotificationHistoryRepository;
+import com.yunbok.houseping.core.port.NotificationHistoryPersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("DailyNotificationService - 일일 종합 알림 서비스")
@@ -38,7 +38,7 @@ class DailyNotificationServiceTest {
     private NotificationSender notificationSender;
 
     @Mock
-    private NotificationHistoryRepository historyRepository;
+    private NotificationHistoryPersistencePort historyPort;
 
     private DailyNotificationService service;
 
@@ -48,7 +48,7 @@ class DailyNotificationServiceTest {
                 subscriptionCollector,
                 persistencePort,
                 Optional.of(notificationSender),
-                historyRepository
+                historyPort
         );
     }
 
@@ -163,7 +163,7 @@ class DailyNotificationServiceTest {
                     subscriptionCollector,
                     persistencePort,
                     Optional.empty(),
-                    historyRepository
+                    historyPort
             );
 
             // when
@@ -196,7 +196,7 @@ class DailyNotificationServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("발송 실패");
 
-            verify(historyRepository).save(any());
+            verify(historyPort).save(anyString(), anyString(), eq(false), anyString(), any(), anyString(), anyString());
         }
     }
 

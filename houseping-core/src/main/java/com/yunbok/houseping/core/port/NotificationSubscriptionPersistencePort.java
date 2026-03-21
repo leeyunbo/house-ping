@@ -14,4 +14,8 @@ public interface NotificationSubscriptionPersistencePort {
     void markReceiptStartNotified(Long notificationId);
 
     void markReceiptEndNotified(Long notificationId);
+
+    void resetNotificationStatus(Long notificationId);
+
+    int resetAllNotificationStatuses();
 }

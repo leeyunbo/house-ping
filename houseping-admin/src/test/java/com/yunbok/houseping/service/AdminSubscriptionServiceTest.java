@@ -4,6 +4,8 @@ import com.yunbok.houseping.support.dto.CalendarEventDto;
 import com.yunbok.houseping.service.dto.AdminSubscriptionDto;
 import com.yunbok.houseping.service.dto.AdminSubscriptionSearchCriteria;
 
+import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
+import com.yunbok.houseping.core.service.subscription.SubscriptionAnalysisService;
 import com.yunbok.houseping.entity.NotificationSubscriptionEntity;
 import com.yunbok.houseping.repository.NotificationSubscriptionRepository;
 import com.yunbok.houseping.entity.SubscriptionEntity;
@@ -40,11 +42,18 @@ class AdminSubscriptionServiceTest {
     @Mock
     private NotificationSubscriptionRepository notificationSubscriptionRepository;
 
+    @Mock
+    private SubscriptionPricePersistencePort subscriptionPricePersistencePort;
+
+    @Mock
+    private SubscriptionAnalysisService analysisService;
+
     private AdminSubscriptionService service;
 
     @BeforeEach
     void setUp() {
-        service = new AdminSubscriptionService(subscriptionRepository, notificationSubscriptionRepository);
+        service = new AdminSubscriptionService(subscriptionRepository, notificationSubscriptionRepository,
+                subscriptionPricePersistencePort, analysisService);
     }
 
     @Nested

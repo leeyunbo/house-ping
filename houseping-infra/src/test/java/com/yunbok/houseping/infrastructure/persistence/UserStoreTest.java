@@ -142,11 +142,9 @@ class UserStoreTest {
                     .status(UserStatus.ACTIVE)
                     .build();
 
-            when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
-                UserEntity entity = invocation.getArgument(0);
-                entity.setId(1L);
-                return entity;
-            });
+            when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation ->
+                invocation.getArgument(0)
+            );
 
             // when
             adapter.save(user);

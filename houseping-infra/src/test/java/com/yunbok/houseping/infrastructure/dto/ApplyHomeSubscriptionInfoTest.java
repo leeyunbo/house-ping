@@ -143,7 +143,7 @@ class ApplyHomeSubscriptionInfoTest {
                     .receiptEndDate(today.plusDays(1))
                     .build().toSubscription();
 
-            assertThat(subscription.isReceiptInProgress()).isTrue();
+            assertThat(subscription.isReceiptInProgress(today)).isTrue();
         }
 
         @Test
@@ -156,8 +156,8 @@ class ApplyHomeSubscriptionInfoTest {
                     .receiptEndDate(today.plusDays(10))
                     .build().toSubscription();
 
-            assertThat(subscription.isUpcoming()).isTrue();
-            assertThat(subscription.isReceiptInProgress()).isFalse();
+            assertThat(subscription.isUpcoming(today)).isTrue();
+            assertThat(subscription.isReceiptInProgress(today)).isFalse();
         }
 
         @Test
@@ -170,8 +170,8 @@ class ApplyHomeSubscriptionInfoTest {
                     .receiptEndDate(today.minusDays(1))
                     .build().toSubscription();
 
-            assertThat(subscription.isExpired()).isTrue();
-            assertThat(subscription.isReceiptInProgress()).isFalse();
+            assertThat(subscription.isExpired(today)).isTrue();
+            assertThat(subscription.isReceiptInProgress(today)).isFalse();
         }
 
         @Test

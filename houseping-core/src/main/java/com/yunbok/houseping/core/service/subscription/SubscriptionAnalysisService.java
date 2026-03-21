@@ -1,11 +1,11 @@
 package com.yunbok.houseping.core.service.subscription;
 
+import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.core.port.CompetitionRatePersistencePort;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.core.port.RealTransactionPersistencePort;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
-import com.yunbok.houseping.entity.CompetitionRateEntity;
-import com.yunbok.houseping.repository.CompetitionRateRepository;
 import com.yunbok.houseping.support.dto.CompetitionRateDetailRow;
 import com.yunbok.houseping.support.dto.HouseTypeComparison;
 import com.yunbok.houseping.support.dto.MarketAnalysis;
@@ -33,7 +33,7 @@ public class SubscriptionAnalysisService {
     private final SubscriptionPricePersistencePort subscriptionPriceQueryPort;
     private final RealTransactionPersistencePort realTransactionQueryPort;
     private final RealTransactionFetchPort realTransactionFetchPort;
-    private final CompetitionRateRepository competitionRateRepository;
+    private final CompetitionRatePersistencePort competitionRatePort;
 
     private final AddressHelper addressParser;
     private final HouseTypeComparisonBuilder comparisonBuilder;
@@ -69,7 +69,7 @@ public class SubscriptionAnalysisService {
         // 분석 수행 (신축 거래 있을 때만 시세 비교 제공)
         List<HouseTypeComparison> comparisons = newBuildBased
                 ? comparisonBuilder.build(prices, newBuildTx) : List.of();
-        MarketAnalysis marketAnalysis = marketAnalyzer.analyze(dongTransactions);
+        MarketAnalysis marketAnalysis = marketAnalyzer.analyze(dongTransactions).orElse(null);
 
         // 경쟁률 로드
         List<CompetitionRateDetailRow> competitionRates = loadCompetitionRates(subscription.getHouseManageNo());
@@ -90,7 +90,7 @@ public class SubscriptionAnalysisService {
         if (houseManageNo == null || houseManageNo.isBlank()) {
             return List.of();
         }
-        List<CompetitionRateEntity> rates = competitionRateRepository.findByHouseManageNo(houseManageNo);
+        List<CompetitionRate> rates = competitionRatePort.findByHouseManageNo(houseManageNo);
         if (rates.isEmpty()) {
             return List.of();
         }

@@ -70,6 +70,25 @@ public class NotificationSubscriptionStore implements NotificationSubscriptionPe
                 .ifPresent(NotificationSubscriptionEntity::markReceiptEndNotified);
     }
 
+    @Override
+    public void resetNotificationStatus(Long notificationId) {
+        notificationSubscriptionRepository.findById(notificationId)
+                .ifPresent(entity -> {
+                    entity.resetNotificationStatus();
+                    notificationSubscriptionRepository.save(entity);
+                });
+    }
+
+    @Override
+    public int resetAllNotificationStatuses() {
+        var all = notificationSubscriptionRepository.findAll();
+        for (var entity : all) {
+            entity.resetNotificationStatus();
+        }
+        notificationSubscriptionRepository.saveAll(all);
+        return all.size();
+    }
+
     private Map<Long, SubscriptionEntity> getSubscriptionMap(List<NotificationSubscriptionEntity> notifications) {
         List<Long> subscriptionIds = notifications.stream()
                 .map(NotificationSubscriptionEntity::getSubscriptionId)

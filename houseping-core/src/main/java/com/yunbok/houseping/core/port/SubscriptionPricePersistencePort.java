@@ -7,4 +7,6 @@ import java.util.List;
 public interface SubscriptionPricePersistencePort {
 
     List<SubscriptionPrice> findByHouseManageNo(String houseManageNo);
+
+    boolean existsByHouseManageNo(String houseManageNo);
 }

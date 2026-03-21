@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @Builder
 public class RealTransaction {
 
+    private static final BigDecimal SQM_PER_PYEONG = BigDecimal.valueOf(3.3058);
+
     private final Long id;
     private final String lawdCd;
     private final String dealYmd;
@@ -33,7 +35,7 @@ public class RealTransaction {
         if (exclusiveArea == null || exclusiveArea.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
-        BigDecimal pyeong = exclusiveArea.divide(BigDecimal.valueOf(3.3058), 2, java.math.RoundingMode.HALF_UP);
+        BigDecimal pyeong = exclusiveArea.divide(SQM_PER_PYEONG, 2, java.math.RoundingMode.HALF_UP);
         return BigDecimal.valueOf(dealAmount).divide(pyeong, 0, java.math.RoundingMode.HALF_UP).longValue();
     }
 

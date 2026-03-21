@@ -31,6 +31,8 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class RealTransactionCacheEntity {
 
+    private static final BigDecimal SQM_PER_PYEONG = BigDecimal.valueOf(3.3058);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -114,8 +116,7 @@ public class RealTransactionCacheEntity {
         if (excluUseAr == null || excluUseAr.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
-        // 1평 = 3.3058㎡
-        BigDecimal pyeong = excluUseAr.divide(BigDecimal.valueOf(3.3058), 2, java.math.RoundingMode.HALF_UP);
+        BigDecimal pyeong = excluUseAr.divide(SQM_PER_PYEONG, 2, java.math.RoundingMode.HALF_UP);
         return BigDecimal.valueOf(dealAmount).divide(pyeong, 0, java.math.RoundingMode.HALF_UP).longValue();
     }
 }

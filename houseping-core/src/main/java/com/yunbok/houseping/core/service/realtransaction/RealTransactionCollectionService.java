@@ -1,10 +1,10 @@
 package com.yunbok.houseping.core.service.realtransaction;
 
+import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import com.yunbok.houseping.core.service.region.RegionCodeService;
-import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
-import com.yunbok.houseping.repository.SubscriptionRepository;
 import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RealTransactionCollectionService {
 
-    private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionPersistencePort subscriptionPersistencePort;
     private final RegionCodeService regionCodeService;
     private final RealTransactionFetchPort realTransactionFetchPort;
 
@@ -30,7 +30,7 @@ public class RealTransactionCollectionService {
 
         LocalDate today = LocalDate.now();
 
-        List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll().stream()
+        List<Subscription> subscriptions = subscriptionPersistencePort.findAll().stream()
                 .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
                 .filter(s -> s.getReceiptStartDate() != null)
                 .filter(s -> {
@@ -42,7 +42,7 @@ public class RealTransactionCollectionService {
         log.info("[실거래가] 대상 청약: {}건", subscriptions.size());
 
         Set<String> lawdCodes = new HashSet<>();
-        for (SubscriptionEntity subscription : subscriptions) {
+        for (Subscription subscription : subscriptions) {
             Optional<String> lawdCd = regionCodeService.findLawdCdByAddress(subscription.getAddress());
             lawdCd.ifPresent(lawdCodes::add);
         }

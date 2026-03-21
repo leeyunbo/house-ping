@@ -484,8 +484,8 @@
 
             <div>
                 <span class="hero-status"
-                      th:classappend="${subscription.statusLabel == '접수중'} ? 'active' : (${subscription.statusLabel == '접수예정'} ? 'upcoming' : 'closed')"
-                      th:text="${subscription.statusLabel}">접수중</span>
+                      th:classappend="${statusLabel == '접수중'} ? 'active' : (${statusLabel == '접수예정'} ? 'upcoming' : 'closed')"
+                      th:text="${statusLabel}">접수중</span>
             </div>
 
             <h1 th:text="${subscription.houseName}">청약 아파트명</h1>
@@ -830,46 +830,53 @@
     <footer th:replace="~{fragments/home-layout :: footer}"></footer>
 
     <!-- JSON-LD 구조화 데이터 -->
-    <script th:inline="javascript" type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Event",
-        "name": /*[[${subscription.houseName + ' 청약'}]]*/ "청약",
-        "startDate": /*[[${subscription.receiptStartDate}]]*/ "",
-        "endDate": /*[[${subscription.receiptEndDate}]]*/ "",
-        "eventStatus": "https://schema.org/EventScheduled",
-        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-        "location": {
-            "@type": "Place",
-            "name": /*[[${subscription.area}]]*/ "",
-            "address": /*[[${subscription.address}]]*/ ""
-        },
-        "organizer": {
-            "@type": "Organization",
-            "name": "Houseping",
-            "url": "https://house-ping.com"
-        }
-    }
+    <script th:id="jsonld-event" type="application/ld+json"
+            th:attr="data-name=${subscription.houseName + ' 청약'},
+                     data-start=${subscription.receiptStartDate},
+                     data-end=${subscription.receiptEndDate},
+                     data-area=${subscription.area},
+                     data-address=${subscription.address}">
     </script>
-    <script th:inline="javascript" type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "홈",
-                "item": "https://house-ping.com/home"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": /*[[${subscription.houseName + ' 청약 분석'}]]*/ "청약 분석",
-                "item": /*[[${'https://house-ping.com/home/analysis/' + subscription.id}]]*/ ""
-            }
-        ]
-    }
+    <script th:id="jsonld-breadcrumb" type="application/ld+json"
+            th:attr="data-name=${subscription.houseName + ' 청약 분석'},
+                     data-url=${'https://house-ping.com/home/analysis/' + subscription.id}">
+    </script>
+    <script>
+    (function() {
+        var eventEl = document.getElementById('jsonld-event');
+        if (eventEl) {
+            eventEl.textContent = JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Event",
+                "name": eventEl.dataset.name,
+                "startDate": eventEl.dataset.start || "",
+                "endDate": eventEl.dataset.end || "",
+                "eventStatus": "https://schema.org/EventScheduled",
+                "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+                "location": {
+                    "@type": "Place",
+                    "name": eventEl.dataset.area || "",
+                    "address": eventEl.dataset.address || ""
+                },
+                "organizer": {
+                    "@type": "Organization",
+                    "name": "Houseping",
+                    "url": "https://house-ping.com"
+                }
+            });
+        }
+        var bcEl = document.getElementById('jsonld-breadcrumb');
+        if (bcEl) {
+            bcEl.textContent = JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://house-ping.com/home"},
+                    {"@type": "ListItem", "position": 2, "name": bcEl.dataset.name, "item": bcEl.dataset.url}
+                ]
+            });
+        }
+    })();
     </script>
 
     <script th:if="${kakaoMapAppKey != null and kakaoMapAppKey != ''}"
@@ -916,7 +923,7 @@
                                 position: coords
                             });
                             const infowindow = new kakao.maps.InfoWindow({
-                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
+                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName.replace(/[&<>"']/g, function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</div>'
                             });
                             infowindow.open(map, marker);
                         }, 100);
@@ -948,7 +955,7 @@
                             map.setCenter(coords);
                             var marker = new kakao.maps.Marker({ map: map, position: coords });
                             var infowindow = new kakao.maps.InfoWindow({
-                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName + '</div>'
+                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName.replace(/[&<>"']/g, function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</div>'
                             });
                             infowindow.open(map, marker);
                         }, 100);

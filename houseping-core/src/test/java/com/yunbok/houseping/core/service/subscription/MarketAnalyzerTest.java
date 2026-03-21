@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,13 +29,13 @@ class MarketAnalyzerTest {
     class Analyze {
 
         @Test
-        @DisplayName("빈 리스트를 입력하면 null을 반환한다")
-        void returnsNullForEmptyList() {
+        @DisplayName("빈 리스트를 입력하면 빈 Optional을 반환한다")
+        void returnsEmptyForEmptyList() {
             // when
-            MarketAnalysis result = analyzer.analyze(List.of());
+            Optional<MarketAnalysis> result = analyzer.analyze(List.of());
 
             // then
-            assertThat(result).isNull();
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -48,7 +49,7 @@ class MarketAnalyzerTest {
             );
 
             // when
-            MarketAnalysis result = analyzer.analyze(transactions);
+            MarketAnalysis result = analyzer.analyze(transactions).orElse(null);
 
             // then
             assertThat(result).isNotNull();
@@ -68,7 +69,7 @@ class MarketAnalyzerTest {
             );
 
             // when
-            MarketAnalysis result = analyzer.analyze(transactions);
+            MarketAnalysis result = analyzer.analyze(transactions).orElse(null);
 
             // then
             assertThat(result).isNotNull();
@@ -88,7 +89,7 @@ class MarketAnalyzerTest {
             );
 
             // when
-            MarketAnalysis result = analyzer.analyze(transactions);
+            MarketAnalysis result = analyzer.analyze(transactions).orElse(null);
 
             // then
             assertThat(result).isNotNull();

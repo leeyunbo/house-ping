@@ -2,8 +2,8 @@ package com.yunbok.houseping.core.service.realtransaction;
 
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.core.service.region.RegionCodeService;
-import com.yunbok.houseping.entity.SubscriptionEntity;
-import com.yunbok.houseping.repository.SubscriptionRepository;
+import com.yunbok.houseping.core.domain.Subscription;
+import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class RealTransactionCollectionServiceTest {
 
     @Mock
-    private SubscriptionRepository subscriptionRepository;
+    private SubscriptionPersistencePort subscriptionPersistencePort;
 
     @Mock
     private RegionCodeService regionCodeService;
@@ -36,7 +36,7 @@ class RealTransactionCollectionServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new RealTransactionCollectionService(subscriptionRepository, regionCodeService, realTransactionFetchPort);
+        service = new RealTransactionCollectionService(subscriptionPersistencePort, regionCodeService, realTransactionFetchPort);
     }
 
     @Nested
@@ -47,9 +47,9 @@ class RealTransactionCollectionServiceTest {
         @DisplayName("ApplyHome 활성 청약의 실거래가를 수집한다")
         void collectsForActiveApplyHomeSubscriptions() {
             // given
-            SubscriptionEntity active = createEntity("ApplyHome", "서울시 강남구 역삼동",
+            Subscription active = createSubscription("ApplyHome", "서울시 강남구 역삼동",
                     LocalDate.now(), LocalDate.now().plusDays(5));
-            when(subscriptionRepository.findAll()).thenReturn(List.of(active));
+            when(subscriptionPersistencePort.findAll()).thenReturn(List.of(active));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 역삼동"))
                     .thenReturn(Optional.of("11680"));
             when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 6))
@@ -66,9 +66,9 @@ class RealTransactionCollectionServiceTest {
         @DisplayName("LH 청약은 제외한다")
         void excludesLhSubscriptions() {
             // given
-            SubscriptionEntity lh = createEntity("LH", "서울시 강남구",
+            Subscription lh = createSubscription("LH", "서울시 강남구",
                     LocalDate.now(), LocalDate.now().plusDays(5));
-            when(subscriptionRepository.findAll()).thenReturn(List.of(lh));
+            when(subscriptionPersistencePort.findAll()).thenReturn(List.of(lh));
 
             // when
             service.collectRealTransactions();
@@ -82,9 +82,9 @@ class RealTransactionCollectionServiceTest {
         @DisplayName("만료된 청약은 제외한다")
         void excludesExpiredSubscriptions() {
             // given
-            SubscriptionEntity expired = createEntity("ApplyHome", "서울시 강남구",
+            Subscription expired = createSubscription("ApplyHome", "서울시 강남구",
                     LocalDate.now().minusDays(10), LocalDate.now().minusDays(5));
-            when(subscriptionRepository.findAll()).thenReturn(List.of(expired));
+            when(subscriptionPersistencePort.findAll()).thenReturn(List.of(expired));
 
             // when
             service.collectRealTransactions();
@@ -97,11 +97,11 @@ class RealTransactionCollectionServiceTest {
         @DisplayName("lawdCd 중복을 제거하여 1회만 호출한다")
         void deduplicatesLawdCodes() {
             // given
-            SubscriptionEntity sub1 = createEntity("ApplyHome", "서울시 강남구 역삼동",
+            Subscription sub1 = createSubscription("ApplyHome", "서울시 강남구 역삼동",
                     LocalDate.now(), LocalDate.now().plusDays(5));
-            SubscriptionEntity sub2 = createEntity("ApplyHome", "서울시 강남구 삼성동",
+            Subscription sub2 = createSubscription("ApplyHome", "서울시 강남구 삼성동",
                     LocalDate.now(), LocalDate.now().plusDays(5));
-            when(subscriptionRepository.findAll()).thenReturn(List.of(sub1, sub2));
+            when(subscriptionPersistencePort.findAll()).thenReturn(List.of(sub1, sub2));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 역삼동")).thenReturn(Optional.of("11680"));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 삼성동")).thenReturn(Optional.of("11680")); // 같은 코드
             when(realTransactionFetchPort.fetchAndCacheRecentTransactions(anyString(), eq(6)))
@@ -118,11 +118,11 @@ class RealTransactionCollectionServiceTest {
         @DisplayName("API 실패 시 다음 지역 수집을 계속한다")
         void continuesOnApiFail() {
             // given
-            SubscriptionEntity sub1 = createEntity("ApplyHome", "서울시 강남구 역삼동",
+            Subscription sub1 = createSubscription("ApplyHome", "서울시 강남구 역삼동",
                     LocalDate.now(), LocalDate.now().plusDays(5));
-            SubscriptionEntity sub2 = createEntity("ApplyHome", "경기도 수원시 장안구",
+            Subscription sub2 = createSubscription("ApplyHome", "경기도 수원시 장안구",
                     LocalDate.now(), LocalDate.now().plusDays(5));
-            when(subscriptionRepository.findAll()).thenReturn(List.of(sub1, sub2));
+            when(subscriptionPersistencePort.findAll()).thenReturn(List.of(sub1, sub2));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 역삼동")).thenReturn(Optional.of("11680"));
             when(regionCodeService.findLawdCdByAddress("경기도 수원시 장안구")).thenReturn(Optional.of("41111"));
             when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 6))
@@ -139,9 +139,9 @@ class RealTransactionCollectionServiceTest {
         }
     }
 
-    private SubscriptionEntity createEntity(String source, String address,
+    private Subscription createSubscription(String source, String address,
                                              LocalDate receiptStart, LocalDate receiptEnd) {
-        return SubscriptionEntity.builder()
+        return Subscription.builder()
                 .id(1L)
                 .source(source)
                 .houseName("테스트아파트")

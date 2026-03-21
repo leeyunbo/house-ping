@@ -2,12 +2,13 @@ package com.yunbok.houseping.controller.web;
 
 import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
 import com.yunbok.houseping.infrastructure.formatter.TelegramMessageFormatter;
+import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.service.notification.DailyNotificationService;
-import com.yunbok.houseping.repository.NotificationSubscriptionRepository;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +28,7 @@ public class AdminNotificationController {
     private final DailyNotificationService dailyNotificationService;
     private final SlackMessageFormatter slackMessageFormatter;
     private final TelegramMessageFormatter telegramMessageFormatter;
-    private final NotificationSubscriptionRepository notificationSubscriptionRepository;
+    private final NotificationSubscriptionPersistencePort notificationSubscriptionPort;
 
     /**
      * 일일 알림 미리보기 (발송 안함)
@@ -77,18 +78,12 @@ public class AdminNotificationController {
     /**
      * 알림 발송 상태 리셋 (테스트용)
      */
+    @Transactional
     @PostMapping("/reset-notification/{id}")
     public String resetNotification(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            var notification = notificationSubscriptionRepository.findById(id);
-            if (notification.isPresent()) {
-                var entity = notification.get();
-                entity.resetNotificationStatus();
-                notificationSubscriptionRepository.save(entity);
-                redirectAttributes.addFlashAttribute("message", "알림 상태가 리셋되었습니다. (ID: " + id + ")");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "알림을 찾을 수 없습니다.");
-            }
+            notificationSubscriptionPort.resetNotificationStatus(id);
+            redirectAttributes.addFlashAttribute("message", "알림 상태가 리셋되었습니다. (ID: " + id + ")");
         } catch (Exception e) {
             log.error("[알림 관리] 알림 리셋 실패", e);
             redirectAttributes.addFlashAttribute("error", "리셋 실패: " + e.getMessage());
@@ -99,15 +94,12 @@ public class AdminNotificationController {
     /**
      * 모든 알림 발송 상태 리셋 (테스트용)
      */
+    @Transactional
     @PostMapping("/reset-all-notifications")
     public String resetAllNotifications(RedirectAttributes redirectAttributes) {
         try {
-            var all = notificationSubscriptionRepository.findAll();
-            for (var entity : all) {
-                entity.resetNotificationStatus();
-            }
-            notificationSubscriptionRepository.saveAll(all);
-            redirectAttributes.addFlashAttribute("message", "모든 알림 상태가 리셋되었습니다. (" + all.size() + "건)");
+            int count = notificationSubscriptionPort.resetAllNotificationStatuses();
+            redirectAttributes.addFlashAttribute("message", "모든 알림 상태가 리셋되었습니다. (" + count + "건)");
         } catch (Exception e) {
             log.error("[알림 관리] 전체 알림 리셋 실패", e);
             redirectAttributes.addFlashAttribute("error", "리셋 실패: " + e.getMessage());

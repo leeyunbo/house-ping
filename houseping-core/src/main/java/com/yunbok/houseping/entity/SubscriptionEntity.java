@@ -159,7 +159,8 @@ public class SubscriptionEntity {
 
     @PreUpdate
     protected void onUpdate() {
-        collectedAt = LocalDateTime.now();
+        // collectedAt은 API에서 수집된 시점을 의미하므로 업데이트 시 덮어쓰지 않음
+        // updatedAt(@LastModifiedDate)이 수정 시각을 관리
     }
 
     /**
@@ -168,21 +169,19 @@ public class SubscriptionEntity {
     public boolean needsUpdate(SubscriptionEntity other) {
         if (other == null) return false;
 
-        return !equals(houseManageNo, other.houseManageNo)
-            || !equals(pblancNo, other.pblancNo)
-            || !equals(receiptStartDate, other.receiptStartDate)
-            || !equals(receiptEndDate, other.receiptEndDate)
-            || !equals(winnerAnnounceDate, other.winnerAnnounceDate)
-            || !equals(detailUrl, other.detailUrl)
-            || !equals(totalSupplyCount, other.totalSupplyCount)
-            || !equals(address, other.address)
-            || !equals(zipCode, other.zipCode);
+        return !fieldEquals(houseManageNo, other.houseManageNo)
+            || !fieldEquals(pblancNo, other.pblancNo)
+            || !fieldEquals(receiptStartDate, other.receiptStartDate)
+            || !fieldEquals(receiptEndDate, other.receiptEndDate)
+            || !fieldEquals(winnerAnnounceDate, other.winnerAnnounceDate)
+            || !fieldEquals(detailUrl, other.detailUrl)
+            || !fieldEquals(totalSupplyCount, other.totalSupplyCount)
+            || !fieldEquals(address, other.address)
+            || !fieldEquals(zipCode, other.zipCode);
     }
 
-    private boolean equals(Object a, Object b) {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        return a.equals(b);
+    private static boolean fieldEquals(Object a, Object b) {
+        return java.util.Objects.equals(a, b);
     }
 
     /**

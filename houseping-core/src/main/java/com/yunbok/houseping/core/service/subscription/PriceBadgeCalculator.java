@@ -45,7 +45,12 @@ public class PriceBadgeCalculator {
             return PriceBadge.UNKNOWN;
         }
 
-        BigDecimal area = findRepresentativeArea(subscription);
+        List<SubscriptionPrice> prices = subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo());
+        if (prices.isEmpty()) {
+            return PriceBadge.UNKNOWN;
+        }
+
+        BigDecimal area = findRepresentativeArea(prices);
         if (area == null) {
             return PriceBadge.UNKNOWN;
         }
@@ -66,17 +71,11 @@ public class PriceBadgeCalculator {
             return PriceBadge.UNKNOWN;
         }
 
-        long supplyPrice = selectRepresentativePrice(
-                subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo())
-        ).getTopAmount();
+        long supplyPrice = selectRepresentativePrice(prices).getTopAmount();
         return determineBadge(supplyPrice, median);
     }
 
-    private BigDecimal findRepresentativeArea(Subscription subscription) {
-        List<SubscriptionPrice> prices = subscriptionPriceQueryPort.findByHouseManageNo(subscription.getHouseManageNo());
-        if (prices.isEmpty()) {
-            return null;
-        }
+    private BigDecimal findRepresentativeArea(List<SubscriptionPrice> prices) {
         SubscriptionPrice representative = selectRepresentativePrice(prices);
         if (representative == null || representative.getTopAmount() == null) {
             return null;
