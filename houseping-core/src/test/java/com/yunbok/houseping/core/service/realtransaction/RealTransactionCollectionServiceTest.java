@@ -1,5 +1,6 @@
 package com.yunbok.houseping.core.service.realtransaction;
 
+import com.yunbok.houseping.core.port.ApartmentGeocodingPort;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.core.service.region.RegionCodeService;
 import com.yunbok.houseping.core.domain.Subscription;
@@ -32,11 +33,14 @@ class RealTransactionCollectionServiceTest {
     @Mock
     private RealTransactionFetchPort realTransactionFetchPort;
 
+    @Mock
+    private ApartmentGeocodingPort geocodingPort;
+
     private RealTransactionCollectionService service;
 
     @BeforeEach
     void setUp() {
-        service = new RealTransactionCollectionService(subscriptionPersistencePort, regionCodeService, realTransactionFetchPort);
+        service = new RealTransactionCollectionService(subscriptionPersistencePort, regionCodeService, realTransactionFetchPort, geocodingPort);
     }
 
     @Nested

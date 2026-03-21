@@ -3,6 +3,7 @@ package com.yunbok.houseping.core.service.subscription;
 import com.yunbok.houseping.core.domain.RealTransaction;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionPrice;
+import com.yunbok.houseping.core.port.ApartmentLocationPort;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.core.port.RealTransactionPersistencePort;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
@@ -50,6 +51,9 @@ class SubscriptionAnalysisServiceTest {
     private CompetitionRatePersistencePort competitionRatePort;
 
     @Mock
+    private ApartmentLocationPort apartmentLocationPort;
+
+    @Mock
     private AddressHelper addressParser;
 
     @Mock
@@ -65,7 +69,8 @@ class SubscriptionAnalysisServiceTest {
         service = new SubscriptionAnalysisService(
                 subscriptionQueryPort, subscriptionPriceQueryPort,
                 realTransactionQueryPort, realTransactionFetchPort,
-                competitionRatePort, addressParser, comparisonBuilder, marketAnalyzer);
+                competitionRatePort, apartmentLocationPort,
+                addressParser, comparisonBuilder, marketAnalyzer);
     }
 
     @Nested

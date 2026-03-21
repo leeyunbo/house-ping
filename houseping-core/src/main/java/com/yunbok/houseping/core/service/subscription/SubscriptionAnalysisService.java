@@ -1,6 +1,7 @@
 package com.yunbok.houseping.core.service.subscription;
 
 import com.yunbok.houseping.core.domain.CompetitionRate;
+import com.yunbok.houseping.core.port.ApartmentLocationPort;
 import com.yunbok.houseping.core.port.CompetitionRatePersistencePort;
 import com.yunbok.houseping.core.port.RealTransactionFetchPort;
 import com.yunbok.houseping.core.port.RealTransactionPersistencePort;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 청약 분석 서비스
@@ -34,6 +36,7 @@ public class SubscriptionAnalysisService {
     private final RealTransactionPersistencePort realTransactionQueryPort;
     private final RealTransactionFetchPort realTransactionFetchPort;
     private final CompetitionRatePersistencePort competitionRatePort;
+    private final ApartmentLocationPort apartmentLocationPort;
 
     private final AddressHelper addressParser;
     private final HouseTypeComparisonBuilder comparisonBuilder;
@@ -74,6 +77,11 @@ public class SubscriptionAnalysisService {
         // 경쟁률 로드
         List<CompetitionRateDetailRow> competitionRates = loadCompetitionRates(subscription.getHouseManageNo());
 
+        // 아파트 좌표 로드
+        Map<String, double[]> apartmentLocations = lawdCd != null
+                ? apartmentLocationPort.findLocationsByLawdCd(lawdCd)
+                : Map.of();
+
         return SubscriptionAnalysisResult.builder()
                 .subscription(subscription)
                 .prices(prices)
@@ -83,6 +91,7 @@ public class SubscriptionAnalysisService {
                 .marketAnalysis(marketAnalysis)
                 .houseTypeComparisons(comparisons)
                 .competitionRates(competitionRates)
+                .apartmentLocations(apartmentLocations)
                 .build();
     }
 

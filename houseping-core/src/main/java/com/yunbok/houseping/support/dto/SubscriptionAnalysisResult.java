@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 청약 분석 결과 도메인 모델
@@ -26,6 +27,7 @@ public class SubscriptionAnalysisResult {
     private final List<CompetitionRateDetailRow> competitionRates;
     private final String dongName;
     private final boolean newBuildBased;
+    private final Map<String, double[]> apartmentLocations;
 
     /**
      * 분양가 정보 존재 여부

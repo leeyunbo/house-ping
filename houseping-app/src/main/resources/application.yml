@@ -121,10 +121,12 @@ slack:
     url: ${SLACK_WEBHOOK_URL}
     error-url: ${SLACK_ERROR_WEBHOOK_URL:}
 
-# 카카오맵 설정
+# 카카오 설정
 kakao:
   map:
     app-key: ${KAKAO_MAP_APP_KEY:}
+  api:
+    rest-key: ${KAKAO_REST_API_KEY:}
 
 # 국토교통부 실거래가 API 설정
 realtransaction:

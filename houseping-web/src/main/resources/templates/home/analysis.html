@@ -889,44 +889,37 @@
                 return;
             }
 
-            const mapContainer = document.getElementById('kakaoMap');
-            const mapLoading = document.getElementById('mapLoading');
+            var mapContainer = document.getElementById('kakaoMap');
+            var mapLoading = document.getElementById('mapLoading');
             if (!mapContainer) return;
 
-            const address = /*[[${subscription.address}]]*/ '';
-            const houseName = /*[[${subscription.houseName}]]*/ '';
+            var address = /*[[${subscription.address}]]*/ '';
+            var houseName = /*[[${subscription.houseName}]]*/ '';
 
-            const options = {
+            // 주변 아파트 좌표 + 실거래 데이터
+            var aptLocations = /*[[${analysis.apartmentLocations}]]*/ {};
+            var recentTx = [];
+            /*[# th:each="tx : ${analysis.recentTransactions}"]*/
+            recentTx.push({
+                aptName: /*[[${tx.aptName}]]*/ '',
+                dealAmount: /*[[${tx.dealAmount}]]*/ 0,
+                exclusiveArea: /*[[${tx.exclusiveArea}]]*/ 0,
+                dealDate: /*[[${tx.dealDate}]]*/ ''
+            });
+            /*[/]*/
+
+            var map = new kakao.maps.Map(mapContainer, {
                 center: new kakao.maps.LatLng(37.566826, 126.9786567),
-                level: 3
-            };
+                level: 5
+            });
+            var geocoder = new kakao.maps.services.Geocoder();
 
-            const map = new kakao.maps.Map(mapContainer, options);
-            const geocoder = new kakao.maps.services.Geocoder();
+            searchAddress(address);
 
-            searchAddress(address, false);
-
-            function searchAddress(addr, isRetry) {
+            function searchAddress(addr) {
                 geocoder.addressSearch(addr, function(result, status) {
                     if (status === kakao.maps.services.Status.OK) {
-                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                        mapLoading.style.display = 'none';
-                        mapContainer.style.display = 'block';
-
-                        setTimeout(function() {
-                            map.relayout();
-                            map.setCenter(coords);
-
-                            const marker = new kakao.maps.Marker({
-                                map: map,
-                                position: coords
-                            });
-                            const infowindow = new kakao.maps.InfoWindow({
-                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName.replace(/[&<>"']/g, function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</div>'
-                            });
-                            infowindow.open(map, marker);
-                        }, 100);
+                        showMap(new kakao.maps.LatLng(result[0].y, result[0].x));
                     } else {
                         var fallback = fallbackAddresses(address);
                         tryFallback(fallback, 0);
@@ -934,41 +927,97 @@
                 });
             }
 
+            function showMap(coords) {
+                mapLoading.style.display = 'none';
+                mapContainer.style.display = 'block';
+
+                setTimeout(function() {
+                    map.relayout();
+                    map.setCenter(coords);
+
+                    // 청약 위치 마커 (메인)
+                    var mainMarker = new kakao.maps.Marker({ map: map, position: coords });
+                    var mainInfo = new kakao.maps.InfoWindow({
+                        content: '<div style="width:160px;text-align:center;padding:8px 6px;font-size:12px;font-weight:700;color:#3182f6;">' + escapeHtml(houseName) + '</div>'
+                    });
+                    mainInfo.open(map, mainMarker);
+
+                    // 주변 실거래 마커
+                    addTransactionMarkers(map);
+                }, 100);
+            }
+
+            function addTransactionMarkers(map) {
+                // 아파트별 평균가 계산
+                var aptStats = {};
+                for (var i = 0; i < recentTx.length; i++) {
+                    var tx = recentTx[i];
+                    if (!aptStats[tx.aptName]) {
+                        aptStats[tx.aptName] = { total: 0, count: 0 };
+                    }
+                    aptStats[tx.aptName].total += tx.dealAmount;
+                    aptStats[tx.aptName].count++;
+                }
+
+                var openInfo = null;
+                for (var aptName in aptLocations) {
+                    var loc = aptLocations[aptName];
+                    if (!loc || loc.length < 2) continue;
+
+                    var pos = new kakao.maps.LatLng(loc[0], loc[1]);
+                    var stat = aptStats[aptName];
+                    var label = stat ? formatPrice(Math.round(stat.total / stat.count)) : '';
+
+                    var marker = new kakao.maps.Marker({
+                        map: map,
+                        position: pos,
+                        opacity: 0.8
+                    });
+
+                    var content = '<div style="width:180px;padding:8px 10px;font-size:12px;">'
+                        + '<div style="font-weight:700;margin-bottom:4px;">' + escapeHtml(aptName) + '</div>';
+                    if (stat) {
+                        content += '<div style="color:#3182f6;font-weight:700;">평균 ' + label + '</div>';
+                        content += '<div style="color:#8b95a1;font-size:11px;">' + stat.count + '건 거래</div>';
+                    }
+                    content += '</div>';
+
+                    bindInfoWindow(map, marker, content);
+                }
+
+                function bindInfoWindow(map, marker, content) {
+                    var info = new kakao.maps.InfoWindow({ content: content });
+                    kakao.maps.event.addListener(marker, 'click', function() {
+                        if (openInfo) openInfo.close();
+                        info.open(map, marker);
+                        openInfo = info;
+                    });
+                }
+            }
+
+            function formatPrice(amount) {
+                if (amount >= 10000) {
+                    return (amount / 10000).toFixed(1).replace(/\.0$/, '') + '억';
+                }
+                return amount.toLocaleString() + '만';
+            }
+
             function tryFallback(list, idx) {
                 if (idx >= list.length) {
                     mapLoading.innerHTML = '<span>위치를 찾을 수 없습니다</span>';
                     return;
                 }
-                searchAddressDirect(list[idx], function(ok) {
-                    if (!ok) tryFallback(list, idx + 1);
-                });
-            }
-
-            function searchAddressDirect(addr, callback) {
-                geocoder.addressSearch(addr, function(result, status) {
+                geocoder.addressSearch(list[idx], function(result, status) {
                     if (status === kakao.maps.services.Status.OK) {
-                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-                        mapLoading.style.display = 'none';
-                        mapContainer.style.display = 'block';
-                        setTimeout(function() {
-                            map.relayout();
-                            map.setCenter(coords);
-                            var marker = new kakao.maps.Marker({ map: map, position: coords });
-                            var infowindow = new kakao.maps.InfoWindow({
-                                content: '<div style="width:150px;text-align:center;padding:6px 0;font-size:12px;">' + houseName.replace(/[&<>"']/g, function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</div>'
-                            });
-                            infowindow.open(map, marker);
-                        }, 100);
-                        callback(true);
+                        showMap(new kakao.maps.LatLng(result[0].y, result[0].x));
                     } else {
-                        callback(false);
+                        tryFallback(list, idx + 1);
                     }
                 });
             }
 
             function fallbackAddresses(address) {
                 var results = [];
-                // 1순위: 괄호 안 주소에서 동/리까지 추출
                 var parenMatch = address.match(/\(([^)]+)\)/);
                 if (parenMatch) {
                     var inner = parenMatch[1].trim();
@@ -976,7 +1025,6 @@
                     if (dongAddr) results.push(dongAddr);
                     if (inner !== dongAddr) results.push(inner);
                 }
-                // 2순위: 전체 주소에서 동/리까지 추출
                 var baseAddr = extractBaseAddress(address.replace(/\([^)]*\)/g, ''));
                 if (baseAddr) results.push(baseAddr);
                 return results;
@@ -986,16 +1034,20 @@
                 if (!address) return null;
                 var words = address.trim().split(/\s+/);
                 var suffixes = ['동', '리', '읍', '면', '가', '로'];
-
                 for (var i = 0; i < words.length; i++) {
-                    var word = words[i];
                     for (var j = 0; j < suffixes.length; j++) {
-                        if (word.endsWith(suffixes[j]) && word.length > 1) {
+                        if (words[i].endsWith(suffixes[j]) && words[i].length > 1) {
                             return words.slice(0, i + 1).join(' ');
                         }
                     }
                 }
                 return null;
+            }
+
+            function escapeHtml(str) {
+                return str.replace(/[&<>"']/g, function(c) {
+                    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+                });
             }
         });
     </script>
