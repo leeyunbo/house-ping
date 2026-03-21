@@ -42,7 +42,12 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     List<SubscriptionEntity> findByAreaAndReceiptStartDateGreaterThanEqual(String area, LocalDate fromDate);
 
     /**
-     * 중복 체크용: source + houseName + receiptStartDate로 조회
+     * 중복 체크용: house_manage_no로 조회 (ApplyHome 등 관리번호가 있는 경우)
+     */
+    Optional<SubscriptionEntity> findByHouseManageNo(String houseManageNo);
+
+    /**
+     * 중복 체크용: source + houseName + receiptStartDate로 조회 (LH 등 관리번호가 없는 경우)
      */
     Optional<SubscriptionEntity> findBySourceAndHouseNameAndReceiptStartDate(
             String source,

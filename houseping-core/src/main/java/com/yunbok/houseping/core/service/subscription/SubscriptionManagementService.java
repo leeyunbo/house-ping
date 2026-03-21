@@ -22,7 +22,6 @@ public class SubscriptionManagementService {
     private final List<SubscriptionProviderChain> chains;
     private final SubscriptionConfig config;
 
-    @Transactional
     public SyncResult sync() {
         SyncResult totalResult = SyncResult.empty();
         for (String area : config.targetAreas()) {
@@ -45,18 +44,31 @@ public class SubscriptionManagementService {
     }
 
     private SyncResult saveSubscriptions(List<Subscription> subscriptions, String source) {
-        int inserted = 0, updated = 0;
+        int inserted = 0, updated = 0, skipped = 0;
         for (Subscription subscription : subscriptions) {
-            Optional<Subscription> existing = subscriptionStore
-                    .findBySourceAndHouseNameAndReceiptStartDate(source, subscription.getHouseName(), subscription.getReceiptStartDate());
-            if (existing.isPresent()) {
-                subscriptionStore.update(subscription, source);
-                updated++;
-            } else {
-                subscriptionStore.save(subscription, source);
-                inserted++;
+            try {
+                Optional<Subscription> existing = findExisting(subscription, source);
+                if (existing.isPresent()) {
+                    subscriptionStore.update(subscription, source);
+                    updated++;
+                } else {
+                    subscriptionStore.save(subscription, source);
+                    inserted++;
+                }
+            } catch (Exception e) {
+                skipped++;
+                log.warn("[Sync] 저장 실패 (건너뜀): {} - {}", subscription.getHouseName(), e.getMessage());
             }
         }
-        return new SyncResult(inserted, updated, 0);
+        return new SyncResult(inserted, updated, skipped);
+    }
+
+    private Optional<Subscription> findExisting(Subscription subscription, String source) {
+        String houseManageNo = subscription.getHouseManageNo();
+        if (houseManageNo != null && !houseManageNo.isEmpty()) {
+            return subscriptionStore.findByHouseManageNo(houseManageNo);
+        }
+        return subscriptionStore.findBySourceAndHouseNameAndReceiptStartDate(
+                source, subscription.getHouseName(), subscription.getReceiptStartDate());
     }
 }

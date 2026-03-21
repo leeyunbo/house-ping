@@ -79,6 +79,11 @@ public class SubscriptionStore implements SubscriptionPersistencePort {
                 .toList();
     }
 
+    public Optional<Subscription> findByHouseManageNo(String houseManageNo) {
+        return subscriptionRepository.findByHouseManageNo(houseManageNo)
+                .map(this::toDomain);
+    }
+
     public Optional<Subscription> findBySourceAndHouseNameAndReceiptStartDate(
             String source, String houseName, LocalDate receiptStartDate) {
         return subscriptionRepository
@@ -108,9 +113,7 @@ public class SubscriptionStore implements SubscriptionPersistencePort {
     }
 
     public void update(Subscription subscription, String source) {
-        subscriptionRepository
-                .findBySourceAndHouseNameAndReceiptStartDate(
-                        source, subscription.getHouseName(), subscription.getReceiptStartDate())
+        findExistingEntity(subscription, source)
                 .ifPresent(existing -> {
                     SubscriptionEntity updated = toEntity(subscription, source);
                     if (existing.needsUpdate(updated)) {
@@ -118,6 +121,15 @@ public class SubscriptionStore implements SubscriptionPersistencePort {
                         subscriptionRepository.save(existing);
                     }
                 });
+    }
+
+    private Optional<SubscriptionEntity> findExistingEntity(Subscription subscription, String source) {
+        String houseManageNo = subscription.getHouseManageNo();
+        if (houseManageNo != null && !houseManageNo.isEmpty()) {
+            return subscriptionRepository.findByHouseManageNo(houseManageNo);
+        }
+        return subscriptionRepository.findBySourceAndHouseNameAndReceiptStartDate(
+                source, subscription.getHouseName(), subscription.getReceiptStartDate());
     }
 
     public int deleteOldSubscriptions(LocalDate cutoffDate) {

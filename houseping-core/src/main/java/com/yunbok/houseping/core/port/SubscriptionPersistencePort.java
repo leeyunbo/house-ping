@@ -25,6 +25,8 @@ public interface SubscriptionPersistencePort {
 
     List<Subscription> findRecentSubscriptions(int limit);
 
+    Optional<Subscription> findByHouseManageNo(String houseManageNo);
+
     Optional<Subscription> findBySourceAndHouseNameAndReceiptStartDate(String source, String houseName, LocalDate receiptStartDate);
 
     List<Subscription> findByAreaAndReceiptStartDate(String area, LocalDate receiptStartDate);
