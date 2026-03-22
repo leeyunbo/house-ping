@@ -9,14 +9,22 @@ repositories {
 }
 
 def jacocoExcludes = [
-    '**/persistence/*Entity.class',
-    '**/persistence/*Entity$*.class',
-    '**/api/*Response.class',
-    '**/api/*Response$*.class',
-    '**/api/*Item.class',
+    // JPA 엔티티 (Lombok builder/getter + JPA 생성 코드)
+    '**/entity/*Entity.class',
+    '**/entity/*Entity$*.class',
+    '**/entity/Q*.class',
+    // 포트 인터페이스
+    '**/port/*.class',
+    // 외부 API 응답 DTO
+    '**/external/*.class',
+    '**/external/*$*.class',
+    // DTO / 예외
     '**/dto/*.class',
+    '**/dto/*$*.class',
+    '**/exception/*.class',
+    // 설정 클래스
     '**/config/*.class',
-    '**/security/*.class'
+    '**/config/**/*.class',
 ]
 
 subprojects {
