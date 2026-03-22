@@ -959,38 +959,30 @@
                     aptStats[tx.aptName].count++;
                 }
 
-                var openInfo = null;
                 for (var aptName in aptLocations) {
                     var loc = aptLocations[aptName];
                     if (!loc || loc.length < 2) continue;
 
-                    var pos = new kakao.maps.LatLng(loc[0], loc[1]);
                     var stat = aptStats[aptName];
-                    var label = stat ? formatPrice(Math.round(stat.total / stat.count)) : '';
+                    if (!stat) continue;
 
-                    var marker = new kakao.maps.Marker({
+                    var pos = new kakao.maps.LatLng(loc[0], loc[1]);
+                    var avgPrice = formatPrice(Math.round(stat.total / stat.count));
+
+                    var content = '<div style="'
+                        + 'background:#fff;border:1px solid #ddd;border-radius:8px;'
+                        + 'padding:6px 10px;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,0.1);'
+                        + 'white-space:nowrap;cursor:pointer;'
+                        + '">'
+                        + '<div style="font-weight:700;color:#191f28;font-size:11px;margin-bottom:2px;">' + escapeHtml(aptName) + '</div>'
+                        + '<div style="font-weight:800;color:#3182f6;">' + avgPrice + '</div>'
+                        + '</div>';
+
+                    new kakao.maps.CustomOverlay({
                         map: map,
                         position: pos,
-                        opacity: 0.8
-                    });
-
-                    var content = '<div style="width:180px;padding:8px 10px;font-size:12px;">'
-                        + '<div style="font-weight:700;margin-bottom:4px;">' + escapeHtml(aptName) + '</div>';
-                    if (stat) {
-                        content += '<div style="color:#3182f6;font-weight:700;">평균 ' + label + '</div>';
-                        content += '<div style="color:#8b95a1;font-size:11px;">' + stat.count + '건 거래</div>';
-                    }
-                    content += '</div>';
-
-                    bindInfoWindow(map, marker, content);
-                }
-
-                function bindInfoWindow(map, marker, content) {
-                    var info = new kakao.maps.InfoWindow({ content: content });
-                    kakao.maps.event.addListener(marker, 'click', function() {
-                        if (openInfo) openInfo.close();
-                        info.open(map, marker);
-                        openInfo = info;
+                        content: content,
+                        yAnchor: 1.3
                     });
                 }
             }
