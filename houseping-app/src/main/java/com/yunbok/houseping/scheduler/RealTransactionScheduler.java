@@ -30,8 +30,11 @@ public class RealTransactionScheduler {
     public void collectRealTransactions() {
         log.info("[scheduler.realTransaction] 수집 시작");
         try {
-            realTransactionCollectionService.collectRealTransactions();
+            int failCount = realTransactionCollectionService.collectRealTransactions();
             evictPriceBadgeCache();
+            if (failCount > 0) {
+                errorNotifier.sendWarning("실거래가 수집", failCount + "개 지역 수집 실패");
+            }
         } catch (Exception e) {
             log.error("[scheduler.realTransaction] 수집 중 오류", e);
             errorNotifier.sendError("실거래가 수집", e);

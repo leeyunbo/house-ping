@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @ConditionalOnProperty(
         name = "feature.blog.ai-generation-enabled",
-        havingValue = "true",
-        matchIfMissing = false
+        havingValue = "true"
 )
 public class BlogGenerationScheduler {
 

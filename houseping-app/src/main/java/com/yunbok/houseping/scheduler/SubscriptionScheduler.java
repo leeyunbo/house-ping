@@ -22,7 +22,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class SubscriptionScheduler {
 
-    private final SubscriptionManagementService managementUseCase;
+    private final SubscriptionManagementService subscriptionManagementService;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionPriceRepository priceRepository;
     private final ApplyhomeApiClient applyhomeApiAdapter;
@@ -33,7 +33,7 @@ public class SubscriptionScheduler {
     public void syncRecentData() {
         try {
             // 1단계: 청약 데이터 동기화
-            managementUseCase.sync();
+            subscriptionManagementService.sync();
 
             // 2단계: 신규 청약 분양가 수집
             collectPriceData();
@@ -91,6 +91,6 @@ public class SubscriptionScheduler {
 
     @Scheduled(cron = "0 0 2 1 * *", zone = "Asia/Seoul")
     public void cleanupOldData() {
-        managementUseCase.cleanup();
+        subscriptionManagementService.cleanup();
     }
 }
