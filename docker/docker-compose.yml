@@ -3,6 +3,8 @@ name: houseping
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: houseping-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-houseping}
       POSTGRES_USER: ${DB_USER:-houseping}
@@ -11,6 +13,35 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  app:
+    image: houseping:latest
+    container_name: houseping-app
+    restart: unless-stopped
+    ports:
+      - "10030:10030"
+    environment:
+      - SPRING_PROFILE=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-houseping}
+      - DB_USER=${DB_USER:-houseping}
+      - DB_PASSWORD=${DB_PASSWORD:-houseping123}
+      - APPLYHOME_API_KEY=${APPLYHOME_API_KEY}
+      - LH_API_KEY=${LH_API_KEY}
+      - REAL_TRANSACTION_API_KEY=${REAL_TRANSACTION_API_KEY}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - SLACK_ERROR_WEBHOOK_URL=${SLACK_ERROR_WEBHOOK_URL:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_IDS=${TELEGRAM_CHAT_IDS:-}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - MASTER_ADMIN_NAVER_ID=${MASTER_ADMIN_NAVER_ID:-}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY:-}
+      - KAKAO_MAP_APP_KEY=${KAKAO_MAP_APP_KEY:-}
+      - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY:-}
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:
