@@ -104,22 +104,42 @@ class SubscriptionStoreTest {
     class Update {
 
         @Test
-        @DisplayName("기존 데이터가 있고 변경이 필요하면 업데이트한다")
-        void updatesWhenExistsAndNeedsUpdate() {
+        @DisplayName("houseManageNo로 기존 데이터를 찾아 업데이트한다")
+        void updatesWhenFoundByHouseManageNo() {
             // given
             Subscription info = createSubscription();
             SubscriptionEntity existing = createEntity();
-            when(subscriptionRepository.findBySourceAndHouseNameAndReceiptStartDate(
-                    "APPLYHOME", info.getHouseName(), info.getReceiptStartDate()))
+            when(subscriptionRepository.findByHouseManageNo("H001"))
                     .thenReturn(Optional.of(existing));
 
-            // needsUpdate가 true를 반환하도록 가정 (실제 로직은 Entity에 있음)
             // when
             adapter.update(info, "APPLYHOME");
 
             // then
+            verify(subscriptionRepository).findByHouseManageNo("H001");
+        }
+
+        @Test
+        @DisplayName("houseManageNo가 없으면 source+name+date로 찾는다")
+        void fallsBackToNameLookup() {
+            // given
+            Subscription info = Subscription.builder()
+                    .houseName("힐스테이트 강남")
+                    .area("서울")
+                    .receiptStartDate(LocalDate.of(2025, 6, 1))
+                    .build();
+            when(subscriptionRepository.findBySourceAndHouseNameAndReceiptStartDate(
+                    "APPLYHOME", "힐스테이트 강남", LocalDate.of(2025, 6, 1)))
+                    .thenReturn(Optional.empty());
+
+            // when
+            adapter.update(info, "APPLYHOME");
+
+            // then
+            verify(subscriptionRepository, never()).findByHouseManageNo(any());
             verify(subscriptionRepository).findBySourceAndHouseNameAndReceiptStartDate(
-                    "APPLYHOME", info.getHouseName(), info.getReceiptStartDate());
+                    "APPLYHOME", "힐스테이트 강남", LocalDate.of(2025, 6, 1));
+            verify(subscriptionRepository, never()).save(any());
         }
 
         @Test
@@ -127,8 +147,8 @@ class SubscriptionStoreTest {
         void doesNothingWhenNotExists() {
             // given
             Subscription info = createSubscription();
-            when(subscriptionRepository.findBySourceAndHouseNameAndReceiptStartDate(
-                    any(), any(), any())).thenReturn(Optional.empty());
+            when(subscriptionRepository.findByHouseManageNo("H001"))
+                    .thenReturn(Optional.empty());
 
             // when
             adapter.update(info, "APPLYHOME");
