@@ -65,8 +65,7 @@ public class SubscriptionScheduler {
                 applyhomeApiAdapter.fetchAndSavePriceDetails(
                         subscription.getHouseManageNo(),
                         subscription.getPblancNo(),
-                        subscription.getHouseType()
-                );
+                        subscription.getHouseType());
                 successCount++;
                 ApiRateLimiter.delay(100);
             } catch (Exception e) {
@@ -77,8 +76,10 @@ public class SubscriptionScheduler {
         return SchedulerResult.of(successCount, failures.size(), failures);
     }
 
+    @SchedulerMonitor("오래된 데이터 정리")
     @Scheduled(cron = "0 0 2 1 * *", zone = "Asia/Seoul")
-    public void cleanupOldData() {
-        subscriptionManagementService.cleanup();
+    public SchedulerResult cleanupOldData() {
+        int deleted = subscriptionManagementService.cleanup();
+        return SchedulerResult.success(deleted);
     }
 }
