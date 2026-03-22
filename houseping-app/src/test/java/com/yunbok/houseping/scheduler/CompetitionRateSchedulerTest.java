@@ -1,7 +1,7 @@
 package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.core.service.competition.CompetitionRateCollectorService;
-
+import com.yunbok.houseping.support.dto.SchedulerResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -10,9 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
-import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @DisplayName("CompetitionRateScheduler - 경쟁률 수집 스케줄러")
@@ -26,7 +24,7 @@ class CompetitionRateSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        scheduler = new CompetitionRateScheduler(collectorUseCase, new SchedulerErrorSlackClient("", new SlackMessageFormatter()));
+        scheduler = new CompetitionRateScheduler(collectorUseCase);
     }
 
     @Nested
@@ -34,28 +32,17 @@ class CompetitionRateSchedulerTest {
     class CollectCompetitionRates {
 
         @Test
-        @DisplayName("수집 서비스를 호출한다")
-        void callsCollectorService() {
+        @DisplayName("수집 결과를 SchedulerResult로 반환한다")
+        void returnsSchedulerResult() {
             // given
             when(collectorUseCase.collect()).thenReturn(10);
 
             // when
-            scheduler.collectCompetitionRates();
+            SchedulerResult result = scheduler.collectCompetitionRates();
 
             // then
-            verify(collectorUseCase).collect();
-        }
-
-        @Test
-        @DisplayName("예외가 발생해도 스케줄러가 중단되지 않는다")
-        void handlesException() {
-            // given
-            when(collectorUseCase.collect()).thenThrow(new RuntimeException("수집 실패"));
-
-            // when
-            scheduler.collectCompetitionRates();
-
-            // then - 예외 처리됨
+            assertThat(result.successCount()).isEqualTo(10);
+            assertThat(result.hasFailed()).isFalse();
             verify(collectorUseCase).collect();
         }
     }

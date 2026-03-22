@@ -26,7 +26,7 @@ public class RealTransactionCollectionService {
     private final RealTransactionFetchPort realTransactionFetchPort;
     private final ApartmentGeocodingPort geocodingPort;
 
-    public void collectRealTransactions() {
+    public int collectRealTransactions() {
         log.info("[collect.realTransaction] 수집 시작");
 
         LocalDate today = LocalDate.now();
@@ -69,6 +69,8 @@ public class RealTransactionCollectionService {
         log.info("[collect.realTransaction] 수집 완료 - 성공: {}개 지역, 실패: {}개 지역", successCount, failCount);
 
         geocodeApartments(allCollected);
+
+        return failCount;
     }
 
     private void geocodeApartments(List<RealTransaction> transactions) {

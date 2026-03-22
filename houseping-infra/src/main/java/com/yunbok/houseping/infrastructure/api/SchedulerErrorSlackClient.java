@@ -35,6 +35,20 @@ public class SchedulerErrorSlackClient {
         this.webClient = WebClient.create();
     }
 
+    public void sendWarning(String context, String message) {
+        if (errorWebhookUrl == null || errorWebhookUrl.isBlank()) {
+            return;
+        }
+        try {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            String text = String.format(":warning: *%s*\n%s\n_%s_", context, message, timestamp);
+            sendSlackMessage(text, context + ": " + message);
+            log.info("[notify.error] {} 경고 알림 발송 완료", context);
+        } catch (Exception sendError) {
+            log.error("[notify.error] 알림 발송 실패: {}", sendError.getMessage());
+        }
+    }
+
     public void sendError(String schedulerName, Exception e) {
         if (errorWebhookUrl == null || errorWebhookUrl.isBlank()) {
             return;

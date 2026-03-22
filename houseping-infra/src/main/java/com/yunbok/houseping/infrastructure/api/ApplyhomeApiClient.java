@@ -87,20 +87,17 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
     public List<Subscription> fetchAll(String areaName) {
         log.info("[api.applyhome] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
 
-        List<ApplyHomeSubscriptionInfo> allDtos = new ArrayList<>();
+        List<ApplyHomeSubscriptionInfo> subscriptionInfoList = new ArrayList<>();
         for (int i = 0; i < FETCH_TYPES.size(); i++) {
             HouseType type = FETCH_TYPES.get(i);
             String label = FETCH_TYPE_LABELS.get(i);
-            allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, null), label));
+            subscriptionInfoList.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, null), label));
         }
 
-        log.info("[api.applyhome] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allDtos.size());
-        return allDtos.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
+        log.info("[api.applyhome] {} 지역에서 총 {}개 데이터 수집 완료", areaName, subscriptionInfoList.size());
+        return subscriptionInfoList.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
     }
 
-    /**
-     * 개별 API 호출을 안전하게 실행 (실패해도 다른 API 수집 계속)
-     */
     private List<ApplyHomeSubscriptionInfo> fetchSafely(
             Supplier<List<ApplyHomeSubscriptionInfo>> fetcher, String type) {
         try {

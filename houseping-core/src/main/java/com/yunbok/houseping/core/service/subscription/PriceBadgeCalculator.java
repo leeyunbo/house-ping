@@ -5,6 +5,7 @@ import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
 import com.yunbok.houseping.core.domain.RealTransaction;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionPrice;
+import com.yunbok.houseping.support.CacheNames;
 import com.yunbok.houseping.support.dto.PriceBadge;
 import com.yunbok.houseping.support.util.AddressHelper;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class PriceBadgeCalculator {
      *   <li>그 외 → {@code UNKNOWN}</li>
      * </ol>
      */
-    @Cacheable(value = "priceBadge", key = "#subscription.houseManageNo", unless = "#subscription.houseManageNo == null")
+    @Cacheable(value = CacheNames.PRICE_BADGE, key = "#subscription.houseManageNo", unless = "#subscription.houseManageNo == null")
     public PriceBadge computePriceBadge(Subscription subscription) {
         if (subscription.getSource() != null && subscription.getSource().toUpperCase().contains("LH")) {
             return PriceBadge.UNKNOWN;

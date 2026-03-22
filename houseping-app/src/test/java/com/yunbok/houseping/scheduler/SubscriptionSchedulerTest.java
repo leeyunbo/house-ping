@@ -2,10 +2,9 @@ package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
-import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
-import com.yunbok.houseping.infrastructure.formatter.SlackMessageFormatter;
+import com.yunbok.houseping.support.CacheNames;
+import com.yunbok.houseping.support.dto.SchedulerResult;
 import com.yunbok.houseping.support.dto.SyncResult;
-
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 import com.yunbok.houseping.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @DisplayName("SubscriptionScheduler - 청약 정보 스케줄러")
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 class SubscriptionSchedulerTest {
 
     @Mock
-    private SubscriptionManagementService managementUseCase;
+    private SubscriptionManagementService subscriptionManagementService;
 
     @Mock
     private SubscriptionRepository subscriptionRepository;
@@ -40,50 +40,51 @@ class SubscriptionSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        CacheManager cacheManager = new ConcurrentMapCacheManager("priceBadge");
+        CacheManager cacheManager = new ConcurrentMapCacheManager(CacheNames.PRICE_BADGE);
         scheduler = new SubscriptionScheduler(
-                managementUseCase,
+                subscriptionManagementService,
                 subscriptionRepository,
                 priceRepository,
                 applyhomeApiAdapter,
-                new SchedulerErrorSlackClient("", new SlackMessageFormatter()),
                 cacheManager
         );
     }
 
     @Nested
-    @DisplayName("syncRecentData() - 데이터 동기화 (매일 3시)")
+    @DisplayName("syncRecentData() - 데이터 동기화")
     class SyncRecentData {
 
         @Test
-        @DisplayName("정상적으로 동기화를 수행한다")
-        void performsSync() {
+        @DisplayName("동기화 결과를 SchedulerResult로 반환한다")
+        void returnsSyncResult() {
             // given
-            when(managementUseCase.sync()).thenReturn(new SyncResult(10, 5, 3));
+            when(subscriptionManagementService.sync()).thenReturn(new SyncResult(10, 5, 2));
 
             // when
-            scheduler.syncRecentData();
+            SchedulerResult result = scheduler.syncRecentData();
 
             // then
-            verify(managementUseCase).sync();
+            assertThat(result.successCount()).isGreaterThanOrEqualTo(15);
+            assertThat(result.failCount()).isGreaterThanOrEqualTo(2);
+            verify(subscriptionManagementService).sync();
         }
     }
 
     @Nested
-    @DisplayName("cleanupOldData() - 오래된 데이터 정리 (매월 1일 2시)")
+    @DisplayName("cleanupOldData() - 오래된 데이터 정리")
     class CleanupOldData {
 
         @Test
         @DisplayName("오래된 데이터를 삭제한다")
         void deletesOldData() {
             // given
-            when(managementUseCase.cleanup()).thenReturn(100);
+            when(subscriptionManagementService.cleanup()).thenReturn(100);
 
             // when
             scheduler.cleanupOldData();
 
             // then
-            verify(managementUseCase).cleanup();
+            verify(subscriptionManagementService).cleanup();
         }
     }
 }
