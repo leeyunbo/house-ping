@@ -34,7 +34,7 @@ public class AddressHelper {
 
     // 동 이름 추출 패턴: 괄호 안 또는 일반 주소에서 "XX동" 추출
     private static final Pattern DONG_IN_PAREN_PATTERN = Pattern.compile("\\(.*?([가-힣]+동)\\)");
-    private static final Pattern DONG_PATTERN = Pattern.compile("([가-힣]+[0-9]*동)(?:\\s|$)");
+    private static final Pattern DONG_PATTERN = Pattern.compile("([가-힣]+[0-9]*동)(?:[0-9]*가)?(?:\\s|$)");
 
     /**
      * 주소에서 법정동코드 추출
@@ -108,7 +108,7 @@ public class AddressHelper {
      */
     public String normalizeDongName(String dongName) {
         if (dongName == null) return null;
-        return dongName.replaceAll("[0-9]+", "");
+        return dongName.replaceAll("[0-9]+가?$", "").replaceAll("[0-9]+", "");
     }
 
     /**

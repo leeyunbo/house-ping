@@ -93,6 +93,13 @@ class AddressHelperTest {
             // then
             assertThat(result).isNull();
         }
+
+        @Test
+        @DisplayName("'동+숫자+가' 패턴 주소에서 동 이름을 추출한다 (문래동5가 → 문래동)")
+        void extractsDongFromDongGaPattern() {
+            String result = addressHelper.extractDongName("서울특별시 영등포구 문래동5가 22번지 일원");
+            assertThat(result).isEqualTo("문래동");
+        }
     }
 
     @Nested
@@ -127,6 +134,14 @@ class AddressHelperTest {
 
             // then
             assertThat(result).isEqualTo("상현동");
+        }
+
+        @Test
+        @DisplayName("'동+숫자+가' 패턴에서 숫자와 가를 제거한다 (문래동5가 → 문래동)")
+        void removesDongGaPattern() {
+            assertThat(addressHelper.normalizeDongName("문래동5가")).isEqualTo("문래동");
+            assertThat(addressHelper.normalizeDongName("당산동3가")).isEqualTo("당산동");
+            assertThat(addressHelper.normalizeDongName("을지로동2가")).isEqualTo("을지로동");
         }
     }
 
