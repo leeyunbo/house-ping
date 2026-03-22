@@ -1,12 +1,14 @@
 package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
-import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 import com.yunbok.houseping.repository.SubscriptionRepository;
+import com.yunbok.houseping.support.annotation.SchedulerMonitor;
+import com.yunbok.houseping.support.dto.SchedulerResult;
+import com.yunbok.houseping.support.dto.SyncResult;
 import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,67 +29,52 @@ public class SubscriptionScheduler {
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionPriceRepository priceRepository;
     private final ApplyhomeApiClient applyhomeApiAdapter;
-    private final SchedulerErrorSlackClient errorNotifier;
     private final CacheManager cacheManager;
 
+    @SchedulerMonitor("청약 동기화")
     @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
-    public void syncRecentData() {
-        try {
-            // 1단계: 청약 데이터 동기화
-            subscriptionManagementService.sync();
+    public SchedulerResult syncRecentData() {
+        // 1단계: 청약 데이터 동기화
+        SyncResult syncResult = subscriptionManagementService.sync();
 
-            // 2단계: 신규 청약 분양가 수집
-            collectPriceData();
+        // 2단계: 청약Home 신규 청약 분양가 수집
+        SchedulerResult priceResult = collectApplyHomePriceData();
 
-            // 3단계: 분양가 변경 반영을 위해 캐시 초기화
-            Objects.requireNonNull(cacheManager.getCache("priceBadge")).clear();
-            log.info("[scheduler.sync] priceBadge 캐시 초기화 완료");
-        } catch (Exception e) {
-            log.error("[scheduler.sync] 데이터 동기화 실패", e);
-            errorNotifier.sendError("청약 데이터 동기화", e);
-        }
+        // 3단계: 캐시 초기화
+        Objects.requireNonNull(cacheManager.getCache("priceBadge")).clear();
+
+        return SchedulerResult.of(
+                syncResult.inserted() + syncResult.updated() + priceResult.successCount(),
+                syncResult.skipped() + priceResult.failCount(),
+                priceResult.failureDetails()
+        );
     }
 
-    /**
-     * ApplyHome 분양가 수집
-     * sync 이후 호출되어 신규 청약의 분양가 데이터 수집
-     */
-    public void collectPriceData() {
-        log.info("[scheduler.price] 분양가 수집 시작");
+    private SchedulerResult collectApplyHomePriceData() {
+        List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll().stream()
+                .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
+                .filter(s -> s.getHouseManageNo() != null && !s.getHouseManageNo().isEmpty())
+                .filter(s -> !priceRepository.existsByHouseManageNo(s.getHouseManageNo()))
+                .toList();
 
-        try {
-            // 분양가 데이터가 없는 ApplyHome 청약 조회
-            List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll().stream()
-                    .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
-                    .filter(s -> s.getHouseManageNo() != null && !s.getHouseManageNo().isEmpty())
-                    .filter(s -> !priceRepository.existsByHouseManageNo(s.getHouseManageNo()))
-                    .toList();
+        int successCount = 0;
+        List<String> failures = new ArrayList<>();
 
-            log.info("[scheduler.price] 수집 대상: {}건", subscriptions.size());
-
-            int successCount = 0;
-            int failCount = 0;
-
-            for (SubscriptionEntity subscription : subscriptions) {
-                try {
-                    applyhomeApiAdapter.fetchAndSavePriceDetails(
-                            subscription.getHouseManageNo(),
-                            subscription.getPblancNo(),
-                            subscription.getHouseType()
-                    );
-                    successCount++;
-                    ApiRateLimiter.delay(100); // API 과부하 방지
-                } catch (Exception e) {
-                    failCount++;
-                    log.warn("[scheduler.price] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
-                }
+        for (SubscriptionEntity subscription : subscriptions) {
+            try {
+                applyhomeApiAdapter.fetchAndSavePriceDetails(
+                        subscription.getHouseManageNo(),
+                        subscription.getPblancNo(),
+                        subscription.getHouseType()
+                );
+                successCount++;
+                ApiRateLimiter.delay(100);
+            } catch (Exception e) {
+                failures.add(subscription.getHouseName() + ": " + e.getMessage());
             }
-
-            log.info("[scheduler.price] 수집 완료 - 성공: {}건, 실패: {}건", successCount, failCount);
-        } catch (Exception e) {
-            log.error("[scheduler.price] 수집 중 오류", e);
-            errorNotifier.sendError("분양가 수집", e);
         }
+
+        return SchedulerResult.of(successCount, failures.size(), failures);
     }
 
     @Scheduled(cron = "0 0 2 1 * *", zone = "Asia/Seoul")

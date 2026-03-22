@@ -52,14 +52,11 @@ class ApplyhomeApiClientTest {
     @Mock
     private SubscriptionPriceRepository priceRepository;
 
-    @Mock
-    private SchedulerErrorSlackClient errorNotifier;
-
     private ApplyhomeApiClient adapter;
 
     @BeforeEach
     void setUp() {
-        adapter = new ApplyhomeApiClient(webClient, properties, priceRepository, errorNotifier);
+        adapter = new ApplyhomeApiClient(webClient, properties, priceRepository);
         ReflectionTestUtils.setField(adapter, "apiKey", "test-api-key");
 
         when(properties.getApi()).thenReturn(apiProperties);

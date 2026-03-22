@@ -56,17 +56,14 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
     private final WebClient webClient;
     private final SubscriptionProperties properties;
     private final SubscriptionPriceRepository priceRepository;
-    private final SchedulerErrorSlackClient errorNotifier;
 
     public ApplyhomeApiClient(
             @Qualifier(value = "applyHomeWebClient") WebClient webClient,
             SubscriptionProperties properties,
-            SubscriptionPriceRepository priceRepository,
-            SchedulerErrorSlackClient errorNotifier) {
+            SubscriptionPriceRepository priceRepository) {
         this.webClient = webClient;
         this.properties = properties;
         this.priceRepository = priceRepository;
-        this.errorNotifier = errorNotifier;
     }
 
     public String getSourceName() {
@@ -77,14 +74,12 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
         log.info("[api.applyhome] {} 지역 데이터 수집 시작 (날짜: {})", areaName, targetDate);
 
         List<ApplyHomeSubscriptionInfo> allDtos = new ArrayList<>();
-        List<String> failures = new ArrayList<>();
         for (int i = 0; i < FETCH_TYPES.size(); i++) {
             HouseType type = FETCH_TYPES.get(i);
             String label = FETCH_TYPE_LABELS.get(i);
-            allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, targetDate), label, failures));
+            allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, targetDate), label));
         }
 
-        notifyIfFailures("청약홈 API 수집 (" + areaName + ")", failures);
         log.info("[api.applyhome] {} 지역에서 {}개 데이터 수집 완료", areaName, allDtos.size());
         return allDtos.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
     }
@@ -92,37 +87,24 @@ public class ApplyhomeApiClient implements SubscriptionProvider {
     public List<Subscription> fetchAll(String areaName) {
         log.info("[api.applyhome] {} 지역 전체 데이터 수집 시작 (DB 동기화용)", areaName);
 
-        List<ApplyHomeSubscriptionInfo> allDtos = new ArrayList<>();
-        List<String> failures = new ArrayList<>();
+        List<ApplyHomeSubscriptionInfo> subscriptionInfoList = new ArrayList<>();
         for (int i = 0; i < FETCH_TYPES.size(); i++) {
             HouseType type = FETCH_TYPES.get(i);
             String label = FETCH_TYPE_LABELS.get(i);
-            allDtos.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, null), label, failures));
+            subscriptionInfoList.addAll(fetchSafely(() -> fetchSubscriptions(type, areaName, null), label));
         }
 
-        notifyIfFailures("청약홈 API 동기화 (" + areaName + ")", failures);
-        log.info("[api.applyhome] {} 지역에서 총 {}개 데이터 수집 완료", areaName, allDtos.size());
-        return allDtos.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
+        log.info("[api.applyhome] {} 지역에서 총 {}개 데이터 수집 완료", areaName, subscriptionInfoList.size());
+        return subscriptionInfoList.stream().map(ApplyHomeSubscriptionInfo::toSubscription).toList();
     }
 
-    /**
-     * 개별 API 호출을 안전하게 실행 (실패해도 다른 API 수집 계속)
-     */
     private List<ApplyHomeSubscriptionInfo> fetchSafely(
-            Supplier<List<ApplyHomeSubscriptionInfo>> fetcher, String type, List<String> failures) {
+            Supplier<List<ApplyHomeSubscriptionInfo>> fetcher, String type) {
         try {
             return fetcher.get();
         } catch (Exception e) {
             log.warn("[api.applyhome] {} 수집 실패 (계속 진행): {}", type, e.getMessage());
-            failures.add(type + ": " + e.getMessage());
             return Collections.emptyList();
-        }
-    }
-
-    private void notifyIfFailures(String context, List<String> failures) {
-        if (!failures.isEmpty()) {
-            String message = String.join("\n", failures);
-            errorNotifier.sendWarning(context, failures.size() + "건 실패\n" + message);
         }
     }
 
