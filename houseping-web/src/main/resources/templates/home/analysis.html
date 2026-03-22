@@ -764,7 +764,7 @@
 
             <!-- ========== 주변 시세 ========== -->
             <div class="section">
-                <h2 class="section-title">주변 시세<span class="muted">최근 3개월</span></h2>
+                <h2 class="section-title">주변 시세<span class="muted">최근 1년</span></h2>
 
                 <div th:if="${analysis.marketAnalysis != null}">
                     <div class="stat-row">
@@ -785,7 +785,7 @@
                     <!-- SEO 주변시세 텍스트 -->
                     <p class="market-note-seo">
                         <th:block th:if="${analysis.dongName}"><span th:text="${analysis.dongName}">역삼동</span> 일대 </th:block>최근
-                        3개월간 <span class="num" th:text="${analysis.marketAnalysis.transactionCount}">10</span>건의 아파트 실거래가 있었고,
+                        1년간 <span class="num" th:text="${analysis.marketAnalysis.transactionCount}">10</span>건의 아파트 실거래가 있었고,
                         평균 평당가는 <span class="num" th:text="${#numbers.formatInteger(analysis.marketAnalysis.averagePricePerPyeong, 0, 'COMMA')}">2,100</span>만원,
                         최고 거래가는 <span class="num" th:text="${analysis.marketAnalysis.maxAmountFormatted}">10억</span>이에요.
                     </p>

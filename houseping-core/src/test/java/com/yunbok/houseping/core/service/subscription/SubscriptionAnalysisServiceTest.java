@@ -139,7 +139,7 @@ class SubscriptionAnalysisServiceTest {
             when(addressParser.extractLawdCd(anyString())).thenReturn("11680");
             when(addressParser.extractDongName(anyString())).thenReturn("역삼동");
             when(realTransactionQueryPort.findByLawdCd("11680")).thenReturn(List.of());  // 캐시 없음
-            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 6)).thenReturn(List.of(tx));
+            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 12)).thenReturn(List.of(tx));
             when(addressParser.filterByDongName(anyList(), eq("역삼동"))).thenReturn(List.of(tx));
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of());
             when(marketAnalyzer.analyze(anyList())).thenReturn(Optional.empty());
@@ -149,7 +149,7 @@ class SubscriptionAnalysisServiceTest {
             SubscriptionAnalysisResult result = service.analyze(1L);
 
             // then
-            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("11680", 6);
+            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("11680", 12);
             assertThat(result.getRecentTransactions()).hasSize(1);
         }
 

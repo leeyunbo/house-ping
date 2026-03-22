@@ -56,7 +56,7 @@ public class RealTransactionCollectionService {
 
         for (String lawdCd : lawdCodes) {
             try {
-                List<RealTransaction> transactions = realTransactionFetchPort.fetchAndCacheRecentTransactions(lawdCd, 6);
+                List<RealTransaction> transactions = realTransactionFetchPort.fetchAndCacheRecentTransactions(lawdCd, 12);
                 allCollected.addAll(transactions);
                 successCount++;
                 ApiRateLimiter.delay(200);

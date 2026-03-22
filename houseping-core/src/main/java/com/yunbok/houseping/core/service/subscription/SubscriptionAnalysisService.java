@@ -130,7 +130,7 @@ public class SubscriptionAnalysisService {
 
         if (transactions.isEmpty()) {
             log.info("캐시 없음, API 직접 조회: lawdCd={}", lawdCd);
-            transactions = realTransactionFetchPort.fetchAndCacheRecentTransactions(lawdCd, 6);
+            transactions = realTransactionFetchPort.fetchAndCacheRecentTransactions(lawdCd, 12);
             log.info("API 조회 완료: {}건", transactions.size());
         }
 

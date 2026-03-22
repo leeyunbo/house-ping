@@ -56,14 +56,14 @@ class RealTransactionCollectionServiceTest {
             when(subscriptionPersistencePort.findAll()).thenReturn(List.of(active));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 역삼동"))
                     .thenReturn(Optional.of("11680"));
-            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 6))
+            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 12))
                     .thenReturn(List.of());
 
             // when
             service.collectRealTransactions();
 
             // then
-            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("11680", 6);
+            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("11680", 12);
         }
 
         @Test
@@ -108,14 +108,14 @@ class RealTransactionCollectionServiceTest {
             when(subscriptionPersistencePort.findAll()).thenReturn(List.of(sub1, sub2));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 역삼동")).thenReturn(Optional.of("11680"));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 삼성동")).thenReturn(Optional.of("11680")); // 같은 코드
-            when(realTransactionFetchPort.fetchAndCacheRecentTransactions(anyString(), eq(6)))
+            when(realTransactionFetchPort.fetchAndCacheRecentTransactions(anyString(), eq(12)))
                     .thenReturn(List.of());
 
             // when
             service.collectRealTransactions();
 
             // then — 중복 제거되어 1회만 호출
-            verify(realTransactionFetchPort, times(1)).fetchAndCacheRecentTransactions("11680", 6);
+            verify(realTransactionFetchPort, times(1)).fetchAndCacheRecentTransactions("11680", 12);
         }
 
         @Test
@@ -129,17 +129,17 @@ class RealTransactionCollectionServiceTest {
             when(subscriptionPersistencePort.findAll()).thenReturn(List.of(sub1, sub2));
             when(regionCodeService.findLawdCdByAddress("서울시 강남구 역삼동")).thenReturn(Optional.of("11680"));
             when(regionCodeService.findLawdCdByAddress("경기도 수원시 장안구")).thenReturn(Optional.of("41111"));
-            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 6))
+            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("11680", 12))
                     .thenThrow(new RuntimeException("API 오류"));
-            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("41111", 6))
+            when(realTransactionFetchPort.fetchAndCacheRecentTransactions("41111", 12))
                     .thenReturn(List.of());
 
             // when
             service.collectRealTransactions();
 
             // then — 첫 번째 실패에도 두 번째가 호출됨
-            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("11680", 6);
-            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("41111", 6);
+            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("11680", 12);
+            verify(realTransactionFetchPort).fetchAndCacheRecentTransactions("41111", 12);
         }
     }
 

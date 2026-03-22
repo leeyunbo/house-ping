@@ -33,11 +33,11 @@ public class RealTransactionStore implements RealTransactionPersistencePort {
     }
 
     public boolean hasCachedData(String lawdCd) {
-        // 최근 6개월 중 하나라도 캐시가 있는지 확인
+        // 최근 12개월 중 하나라도 캐시가 있는지 확인
         LocalDate now = LocalDate.now().minusMonths(2);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 12; i++) {
             String dealYmd = now.minusMonths(i).format(formatter);
             if (realTransactionCacheRepository.existsByLawdCdAndDealYmd(lawdCd, dealYmd)) {
                 return true;
