@@ -6,6 +6,7 @@ import com.yunbok.houseping.core.service.subscription.SubscriptionManagementServ
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 import com.yunbok.houseping.repository.SubscriptionRepository;
+import com.yunbok.houseping.support.CacheNames;
 import com.yunbok.houseping.support.annotation.SchedulerMonitor;
 import com.yunbok.houseping.support.dto.SchedulerResult;
 import com.yunbok.houseping.support.dto.SyncResult;
@@ -41,7 +42,7 @@ public class SubscriptionScheduler {
         SchedulerResult priceResult = collectApplyHomePriceData();
 
         // 3단계: 캐시 초기화
-        Objects.requireNonNull(cacheManager.getCache("priceBadge")).clear();
+        Objects.requireNonNull(cacheManager.getCache(CacheNames.PRICE_BADGE)).clear();
 
         return SchedulerResult.of(
                 syncResult.inserted() + syncResult.updated() + priceResult.successCount(),

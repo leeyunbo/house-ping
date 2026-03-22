@@ -2,6 +2,7 @@ package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
+import com.yunbok.houseping.support.CacheNames;
 import com.yunbok.houseping.support.dto.SchedulerResult;
 import com.yunbok.houseping.support.dto.SyncResult;
 import com.yunbok.houseping.repository.SubscriptionPriceRepository;
@@ -39,7 +40,7 @@ class SubscriptionSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        CacheManager cacheManager = new ConcurrentMapCacheManager("priceBadge");
+        CacheManager cacheManager = new ConcurrentMapCacheManager(CacheNames.PRICE_BADGE);
         scheduler = new SubscriptionScheduler(
                 subscriptionManagementService,
                 subscriptionRepository,

@@ -1,6 +1,7 @@
 package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.core.service.realtransaction.RealTransactionCollectionService;
+import com.yunbok.houseping.support.CacheNames;
 import com.yunbok.houseping.support.annotation.SchedulerMonitor;
 import com.yunbok.houseping.support.dto.SchedulerResult;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class RealTransactionScheduler {
     @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
     public SchedulerResult collectRealTransactions() {
         int failCount = realTransactionCollectionService.collectRealTransactions();
-        Objects.requireNonNull(cacheManager.getCache("priceBadge")).clear();
+        Objects.requireNonNull(cacheManager.getCache(CacheNames.PRICE_BADGE)).clear();
         return SchedulerResult.of(0, failCount);
     }
 }
