@@ -10,10 +10,12 @@ import com.yunbok.houseping.repository.SubscriptionRepository;
 import com.yunbok.houseping.support.util.ApiRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -25,6 +27,7 @@ public class SubscriptionScheduler {
     private final SubscriptionPriceRepository priceRepository;
     private final ApplyhomeApiClient applyhomeApiAdapter;
     private final SchedulerErrorSlackClient errorNotifier;
+    private final CacheManager cacheManager;
 
     @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     public void syncRecentData() {
@@ -34,6 +37,10 @@ public class SubscriptionScheduler {
 
             // 2단계: 신규 청약 분양가 수집
             collectPriceData();
+
+            // 3단계: 분양가 변경 반영을 위해 캐시 초기화
+            Objects.requireNonNull(cacheManager.getCache("priceBadge")).clear();
+            log.info("[scheduler.sync] priceBadge 캐시 초기화 완료");
         } catch (Exception e) {
             log.error("[scheduler.sync] 데이터 동기화 실패", e);
             errorNotifier.sendError("청약 데이터 동기화", e);

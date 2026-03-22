@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 @DisplayName("PublicHomeController - 공개 홈페이지 컨트롤러")
 @ExtendWith(MockitoExtension.class)
-class PublicHomeControllerTest {
+class PublicRootRedirectControllerTest {
 
     @Mock
     private SubscriptionSearchService subscriptionSearchService;
@@ -39,11 +39,11 @@ class PublicHomeControllerTest {
     @Mock
     private Model model;
 
-    private PublicHomeController controller;
+    private HomeController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new PublicHomeController(subscriptionSearchService, subscriptionAnalysisUseCase, publicCalendarService);
+        controller = new HomeController(subscriptionSearchService, subscriptionAnalysisUseCase, publicCalendarService);
     }
 
     @Nested

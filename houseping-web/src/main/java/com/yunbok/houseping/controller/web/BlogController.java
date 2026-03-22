@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @Controller
 @RequestMapping("/home/blog")
 @RequiredArgsConstructor
-public class PublicBlogController {
+public class BlogController {
 
     private final BlogPublishService blogPublishService;
     private final SubscriptionSearchService subscriptionSearchService;

@@ -9,6 +9,7 @@ import com.yunbok.houseping.support.dto.PriceBadge;
 import com.yunbok.houseping.support.util.AddressHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -37,6 +38,7 @@ public class PriceBadgeCalculator {
      *   <li>그 외 → {@code UNKNOWN}</li>
      * </ol>
      */
+    @Cacheable(value = "priceBadge", key = "#subscription.houseManageNo", unless = "#subscription.houseManageNo == null")
     public PriceBadge computePriceBadge(Subscription subscription) {
         if (subscription.getSource() != null && subscription.getSource().toUpperCase().contains("LH")) {
             return PriceBadge.UNKNOWN;
