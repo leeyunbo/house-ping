@@ -2,7 +2,6 @@ package com.yunbok.houseping.core.service.blog;
 
 import com.yunbok.houseping.core.port.BlogPostPersistencePort;
 import com.yunbok.houseping.core.domain.BlogPost;
-import com.yunbok.houseping.entity.BlogCardImageEntity;
 import com.yunbok.houseping.support.dto.BlogContentResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,14 +53,10 @@ public class BlogPublishService {
                 .orElseThrow(() -> new IllegalArgumentException("포스트를 찾을 수 없습니다: " + id));
     }
 
-    public BlogCardImageEntity findCardImage(Long postId, int rank) {
-        return blogPostStore.findCardImage(postId, rank)
+    public byte[] findCardImageData(Long postId, int rank) {
+        return blogPostStore.findCardImageData(postId, rank)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "카드 이미지를 찾을 수 없습니다: postId=" + postId + ", rank=" + rank));
-    }
-
-    public byte[] findCardImageData(Long postId, int rank) {
-        return findCardImage(postId, rank).getImageData();
     }
 
     @Transactional

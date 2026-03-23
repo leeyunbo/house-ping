@@ -90,7 +90,8 @@ public class BlogPostStore implements BlogPostPersistencePort {
     }
 
     @Transactional(readOnly = true)
-    public Optional<BlogCardImageEntity> findCardImage(Long postId, int rank) {
-        return blogCardImageRepository.findByBlogPostIdAndRank(postId, rank);
+    public Optional<byte[]> findCardImageData(Long postId, int rank) {
+        return blogCardImageRepository.findByBlogPostIdAndRank(postId, rank)
+                .map(BlogCardImageEntity::getImageData);
     }
 }

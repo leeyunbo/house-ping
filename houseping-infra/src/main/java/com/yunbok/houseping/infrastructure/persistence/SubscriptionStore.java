@@ -1,7 +1,9 @@
 package com.yunbok.houseping.infrastructure.persistence;
 
+import com.querydsl.core.BooleanBuilder;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
+import com.yunbok.houseping.entity.QSubscriptionEntity;
 import com.yunbok.houseping.entity.SubscriptionEntity;
 import com.yunbok.houseping.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -94,6 +96,20 @@ public class SubscriptionStore implements SubscriptionPersistencePort {
     public List<Subscription> findByAreaAndReceiptStartDate(String area, LocalDate receiptStartDate) {
         return subscriptionRepository.findByAreaAndReceiptStartDate(area, receiptStartDate)
                 .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    public List<Subscription> findByCalendarPeriod(LocalDate start, LocalDate end) {
+        QSubscriptionEntity s = QSubscriptionEntity.subscriptionEntity;
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.or(s.receiptStartDate.goe(start).and(s.receiptStartDate.loe(end)));
+        builder.or(s.receiptEndDate.goe(start).and(s.receiptEndDate.loe(end)));
+        builder.or(s.winnerAnnounceDate.isNotNull().and(s.winnerAnnounceDate.goe(start)).and(s.winnerAnnounceDate.loe(end)));
+        builder.or(s.receiptStartDate.loe(start).and(s.receiptEndDate.goe(end)));
+
+        return java.util.stream.StreamSupport
+                .stream(subscriptionRepository.findAll(builder).spliterator(), false)
                 .map(this::toDomain)
                 .toList();
     }

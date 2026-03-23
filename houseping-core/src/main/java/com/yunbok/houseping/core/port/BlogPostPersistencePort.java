@@ -1,7 +1,6 @@
 package com.yunbok.houseping.core.port;
 
 import com.yunbok.houseping.core.domain.BlogPost;
-import com.yunbok.houseping.entity.BlogCardImageEntity;
 import com.yunbok.houseping.support.dto.BlogContentResult;
 
 import java.util.List;
@@ -23,5 +22,5 @@ public interface BlogPostPersistencePort {
 
     List<BlogPost> findAll();
 
-    Optional<BlogCardImageEntity> findCardImage(Long postId, int rank);
+    Optional<byte[]> findCardImageData(Long postId, int rank);
 }

@@ -31,6 +31,8 @@ public interface SubscriptionPersistencePort {
 
     List<Subscription> findByAreaAndReceiptStartDate(String area, LocalDate receiptStartDate);
 
+    List<Subscription> findByCalendarPeriod(LocalDate start, LocalDate end);
+
     Set<String> findHouseManageNosByAreas(List<String> areas);
 
     void save(Subscription subscription, String source);

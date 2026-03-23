@@ -3,7 +3,7 @@ package com.yunbok.houseping.core.service.blog;
 import com.yunbok.houseping.core.domain.BlogPost;
 import com.yunbok.houseping.core.domain.BlogPostStatus;
 import com.yunbok.houseping.core.port.BlogPostPersistencePort;
-import com.yunbok.houseping.entity.BlogCardImageEntity;
+
 import com.yunbok.houseping.support.dto.BlogContentResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -193,32 +193,31 @@ class BlogPublishServiceTest {
     }
 
     @Nested
-    @DisplayName("findCardImage() - 카드 이미지 조회")
-    class FindCardImage {
+    @DisplayName("findCardImageData() - 카드 이미지 데이터 조회")
+    class FindCardImageData {
 
         @Test
-        @DisplayName("존재하는 카드 이미지를 반환한다")
-        void returnsCardImage() {
+        @DisplayName("존재하는 카드 이미지 데이터를 반환한다")
+        void returnsImageData() {
             // given
-            BlogCardImageEntity entity = BlogCardImageEntity.builder()
-                    .id(1L).blogPostId(1L).rank(1).houseName("테스트아파트").build();
-            when(blogPostStore.findCardImage(1L, 1)).thenReturn(Optional.of(entity));
+            byte[] imageData = new byte[]{1, 2, 3};
+            when(blogPostStore.findCardImageData(1L, 1)).thenReturn(Optional.of(imageData));
 
             // when
-            BlogCardImageEntity result = service.findCardImage(1L, 1);
+            byte[] result = service.findCardImageData(1L, 1);
 
             // then
-            assertThat(result.getHouseName()).isEqualTo("테스트아파트");
+            assertThat(result).isEqualTo(imageData);
         }
 
         @Test
         @DisplayName("존재하지 않는 카드 이미지 조회 시 예외가 발생한다")
         void throwsWhenNotFound() {
             // given
-            when(blogPostStore.findCardImage(99L, 1)).thenReturn(Optional.empty());
+            when(blogPostStore.findCardImageData(99L, 1)).thenReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> service.findCardImage(99L, 1))
+            assertThatThrownBy(() -> service.findCardImageData(99L, 1))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("카드 이미지를 찾을 수 없습니다");
         }
