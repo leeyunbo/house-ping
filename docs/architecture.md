@@ -15,19 +15,21 @@
 
 ```
 houseping
-├── houseping-core                  # 도메인, 서비스, Port 인터페이스
+├── houseping-core                  # 도메인, 서비스, DB, Port 인터페이스
 │   ├── core/domain                 # 도메인 모델
-│   ├── core/port                   # Port 인터페이스 (Persistence, Notification, Provider 등)
+│   ├── core/port                   # 외부 API Port 인터페이스
 │   ├── core/service                # 도메인 서비스 (subscription, notification, auth 등)
 │   ├── entity                      # JPA Entity
 │   ├── repository                  # Spring Data JPA Repository
+│   ├── persistence                 # DB 조회 (Store)
 │   └── support                     # DTO, 유틸리티, 예외
 │
-├── houseping-infra                 # 외부 시스템 어댑터 (Port 구현체)
-│   └── infrastructure
-│       ├── api                     # 외부 API (청약Home, LH, 국토부 실거래가, Claude)
-│       ├── persistence             # DB 조회 어댑터 (Store)
-│       └── formatter               # 알림 메시지 포맷터 (Slack, Telegram)
+├── houseping-external-api          # 외부 API 클라이언트 (Port 구현체)
+│   └── externalapi
+│       ├── (클라이언트)              # 청약Home, LH, 국토부 실거래가, 카카오, Claude
+│       ├── dto                     # API 요청/응답 DTO
+│       ├── formatter               # 알림 메시지 포맷터 (Slack, Telegram)
+│       └── support                 # API 관련 유틸리티
 │
 ├── houseping-web                   # 공개 웹 컨트롤러, Thymeleaf 템플릿
 ├── houseping-admin                 # 관리자 컨트롤러
@@ -36,13 +38,17 @@ houseping
 
 ## 모듈 의존 그래프
 
-<div align="center">
-<img src="module-architecture.png" alt="Module Architecture" width="600">
-</div>
+```
+houseping-app   → core, external-api, web, admin
+houseping-admin → core, external-api
+houseping-web   → core
+houseping-external-api → core
+houseping-core  → (의존 없음)
+```
 
-core 서비스는 Port 인터페이스에만 의존하고, 구현체는 infra 모듈에 위치합니다.
-외부 API 변경 시 infra만 수정하면 되어 web/admin에 변경이 전파되지 않습니다.
-Repository 등 JPA 의존은 core에 직접 둡니다.
+DB는 서비스에 완전 종속된 영역이므로 core에 포함합니다.
+외부 API만 변경 가능성이 높은 영역으로 분류하여 별도 모듈로 격리합니다.
+Port 인터페이스는 외부 API 연동에만 적용합니다.
 
 ## 확장 포인트
 
@@ -102,7 +108,7 @@ houseping-web     # 공개 웹 컨트롤러/템플릿
 
 **남은 문제:** core에 비즈니스 로직과 infrastructure(API 클라이언트, Store)가 함께 있어서, 외부 API 변경 → core 변경 → web/admin 전부 리빌드되는 구조였습니다.
 
-### 4단계: Infrastructure 모듈 분리 (현재)
+### 4단계: Infrastructure 모듈 분리 (2월 말)
 
 core 서비스가 infrastructure 구현체에 직접 의존하던 것을 Port 인터페이스 기반으로 전환하고, infrastructure를 별도 모듈로 추출했습니다.
 
@@ -116,6 +122,25 @@ houseping-core  → (의존 없음)
 
 9개 Port 인터페이스를 도입하고 14개 서비스의 주입 타입을 concrete → interface로 변경했습니다. 외부 API 변경 시 infra만 수정하면 되어 web에 변경이 전파되지 않습니다.
 
+**남은 문제:** DB 접근까지 Port/Adapter로 감싸면서 불필요한 간접 레이어가 생겼습니다. DB는 우리 서비스에 완전히 종속된 영역이라 변경 가능성이 0%에 가까운데, Entity ↔ Domain 변환 코드와 Persistence Port 인터페이스가 필드 추가할 때마다 3곳을 고치게 만들었습니다.
+
+### 5단계: infra → external-api 재편 (현재)
+
+"변경 가능성"을 기준으로 모듈을 재분류했습니다.
+
+- **변경 가능성 낮음 (core):** 도메인, 서비스, DB(Entity/Repository/Store)
+- **변경 가능성 높음 (external-api):** 외부 API 클라이언트
+
+```
+houseping-app          → core, external-api, web, admin
+houseping-admin        → core, external-api
+houseping-web          → core
+houseping-external-api → core
+houseping-core         → (의존 없음)
+```
+
+DB 관련 Persistence Port를 제거하고 서비스가 Repository/Store를 직접 사용하도록 단순화했습니다. Port 인터페이스는 외부 API 연동에만 남겨두어 실질적으로 변경 격리가 필요한 곳에만 추상화를 적용합니다.
+
 ### 요약
 
 | 단계 | 구조 | 계기 |
@@ -123,4 +148,5 @@ houseping-core  → (의존 없음)
 | 1단계 | 헥사고날 풀세트 | 초기 설계 |
 | 2단계 | 실용적 레이어드 | 도메인 대비 과한 추상화 제거 |
 | 3단계 | Gradle 멀티모듈 (4개) | admin↔production 빌드 격리 |
-| 4단계 | 5개 모듈 + Port | infrastructure 변경 전파 차단 |
+| 4단계 | 5개 모듈 + Port 전면 적용 | infrastructure 변경 전파 차단 |
+| 5단계 | external-api 분리 + DB Port 제거 | 변경 가능성 기준으로 재분류, 불필요한 간접 레이어 제거 |
