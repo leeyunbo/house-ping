@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi.formatter;
+package com.yunbok.houseping.core.port;
 
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;

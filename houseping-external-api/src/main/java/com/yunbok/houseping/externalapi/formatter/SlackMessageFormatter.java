@@ -1,5 +1,6 @@
 package com.yunbok.houseping.externalapi.formatter;
 
+import com.yunbok.houseping.core.port.SubscriptionMessageFormatter;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.support.dto.NotificationTarget;
