@@ -3,6 +3,8 @@ package com.yunbok.houseping.core.service.subscription;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionConfig;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
+import com.yunbok.houseping.core.port.SubscriptionPriceCollectPort;
+import com.yunbok.houseping.repository.SubscriptionPriceRepository;
 import com.yunbok.houseping.support.dto.SyncResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +35,12 @@ class SubscriptionManagementServiceTest {
     @Mock
     private SubscriptionProviderChain chain2;
 
+    @Mock
+    private SubscriptionPriceCollectPort priceCollectPort;
+
+    @Mock
+    private SubscriptionPriceRepository priceRepository;
+
     private SubscriptionConfig config;
 
     private SubscriptionManagementService service;
@@ -50,7 +58,7 @@ class SubscriptionManagementServiceTest {
         @DisplayName("신규 청약을 저장한다 (house_manage_no 기반 조회)")
         void insertsNewSubscriptions() {
             // given
-            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config);
+            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config, priceCollectPort, priceRepository);
             Subscription sub = createSubscription("신규아파트", "H001");
 
             when(chain1.getSourceName()).thenReturn("ApplyHome");
@@ -71,7 +79,7 @@ class SubscriptionManagementServiceTest {
         @DisplayName("house_manage_no로 기존 청약을 찾아 업데이트한다")
         void updatesExistingByHouseManageNo() {
             // given
-            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config);
+            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config, priceCollectPort, priceRepository);
             Subscription sub = createSubscription("래미안원베일리", "H001");
             Subscription existing = createSubscription("래미안 원베일리", "H001");
 
@@ -93,7 +101,7 @@ class SubscriptionManagementServiceTest {
         @DisplayName("house_manage_no 없으면 source+name+date로 조회한다 (LH)")
         void fallsBackToNameLookupForLh() {
             // given
-            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config);
+            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config, priceCollectPort, priceRepository);
             Subscription sub = createSubscription("LH아파트", null);
 
             when(chain1.getSourceName()).thenReturn("LH");
@@ -114,7 +122,7 @@ class SubscriptionManagementServiceTest {
         @DisplayName("저장 실패 시 해당 건만 건너뛰고 나머지는 계속 저장한다")
         void skipsFailedAndContinues() {
             // given
-            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config);
+            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config, priceCollectPort, priceRepository);
             Subscription failSub = createSubscription("실패아파트", "H001");
             Subscription okSub = createSubscription("성공아파트", "H002");
 
@@ -138,7 +146,7 @@ class SubscriptionManagementServiceTest {
         @DisplayName("멀티 체인으로 여러 소스를 동기화한다")
         void syncsMultipleChains() {
             // given
-            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1, chain2), config);
+            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1, chain2), config, priceCollectPort, priceRepository);
             Subscription sub1 = createSubscription("ApplyHome아파트", "H001");
             Subscription sub2 = createSubscription("LH아파트", null);
 
@@ -165,7 +173,7 @@ class SubscriptionManagementServiceTest {
         @DisplayName("빈 결과면 0건을 반환한다")
         void returnsEmptyForNoResults() {
             // given
-            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config);
+            service = new SubscriptionManagementService(subscriptionStore, List.of(chain1), config, priceCollectPort, priceRepository);
             when(chain1.executeAll(anyString())).thenReturn(List.of());
 
             // when
@@ -186,7 +194,7 @@ class SubscriptionManagementServiceTest {
         @DisplayName("삭제된 건수를 반환한다")
         void returnsDeletedCount() {
             // given
-            service = new SubscriptionManagementService(subscriptionStore, List.of(), config);
+            service = new SubscriptionManagementService(subscriptionStore, List.of(), config, priceCollectPort, priceRepository);
             when(subscriptionStore.deleteOldSubscriptions(any(LocalDate.class))).thenReturn(5);
 
             // when

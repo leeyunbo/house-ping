@@ -5,6 +5,7 @@ import com.yunbok.houseping.externalapi.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.core.domain.HouseType;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
+import com.yunbok.houseping.core.port.SubscriptionPriceCollectPort;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.config.SubscriptionProperties;
 import com.yunbok.houseping.support.external.ApplyhomeAptResponse;
@@ -36,7 +37,7 @@ import java.util.function.Supplier;
         name = "feature.subscription.applyhome-api-enabled",
         havingValue = "true"
 )
-public class ApplyhomeApiClient implements SubscriptionProvider {
+public class ApplyhomeApiClient implements SubscriptionProvider, SubscriptionPriceCollectPort {
 
     private static final String SOURCE_NAME = SubscriptionSource.APPLYHOME.getValue();
     private static final int PRICE_DETAIL_PAGE_SIZE = 100;

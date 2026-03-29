@@ -18,12 +18,12 @@ import org.springframework.stereotype.Component;
 )
 public class CompetitionRateScheduler {
 
-    private final CompetitionRateCollectorService collectorUseCase;
+    private final CompetitionRateCollectorService collectorService;
 
     @SchedulerMonitor("경쟁률 수집")
     @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Seoul")
     public SchedulerResult collectCompetitionRates() {
-        int count = collectorUseCase.collect();
+        int count = collectorService.collect();
         return SchedulerResult.success(count);
     }
 }

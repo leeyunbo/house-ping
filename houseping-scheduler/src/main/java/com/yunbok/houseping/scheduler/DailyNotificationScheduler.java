@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DailyNotificationScheduler {
 
-    private final DailyNotificationService dailyNotificationUseCase;
+    private final DailyNotificationService dailyNotificationService;
 
     @SchedulerMonitor("일일 알림")
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     public void sendDailyReport() {
-        dailyNotificationUseCase.sendDailyReport();
+        dailyNotificationService.sendDailyReport();
     }
 }

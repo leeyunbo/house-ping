@@ -1,6 +1,6 @@
-package com.yunbok.houseping.aop;
+package com.yunbok.houseping.scheduler;
 
-import com.yunbok.houseping.externalapi.SchedulerErrorSlackClient;
+import com.yunbok.houseping.core.port.SchedulerNotifier;
 import com.yunbok.houseping.support.annotation.SchedulerMonitor;
 import com.yunbok.houseping.support.dto.SchedulerResult;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SchedulerMonitorAspect {
 
-    private final SchedulerErrorSlackClient errorNotifier;
+    private final SchedulerNotifier schedulerNotifier;
 
     @Around("@annotation(monitor)")
     public Object monitor(ProceedingJoinPoint joinPoint, SchedulerMonitor monitor) throws Throwable {
@@ -32,7 +32,7 @@ public class SchedulerMonitorAspect {
             if (result instanceof SchedulerResult sr) {
                 log.info("[scheduler] {} 완료 ({}ms) - {}", taskName, elapsed, sr.summary());
                 if (sr.hasFailed()) {
-                    errorNotifier.sendWarning(taskName, sr.summary());
+                    schedulerNotifier.sendWarning(taskName, sr.summary());
                 }
             } else {
                 log.info("[scheduler] {} 완료 ({}ms)", taskName, elapsed);
@@ -42,7 +42,7 @@ public class SchedulerMonitorAspect {
         } catch (Exception e) {
             long elapsed = System.currentTimeMillis() - start;
             log.error("[scheduler] {} 실패 ({}ms)", taskName, elapsed, e);
-            errorNotifier.sendError(taskName, e);
+            schedulerNotifier.sendError(taskName, e);
             throw e;
         }
     }

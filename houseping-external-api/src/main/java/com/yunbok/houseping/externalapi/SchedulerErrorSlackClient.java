@@ -1,5 +1,6 @@
 package com.yunbok.houseping.externalapi;
 
+import com.yunbok.houseping.core.port.SchedulerNotifier;
 import com.yunbok.houseping.externalapi.dto.SlackWebhookRequest;
 import com.yunbok.houseping.externalapi.formatter.SchedulerErrorFormatter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import java.util.Arrays;
  */
 @Slf4j
 @Component
-public class SchedulerErrorSlackClient {
+public class SchedulerErrorSlackClient implements SchedulerNotifier {
 
     private static final int MAX_STACK_TRACE_LINES = 5;
 
