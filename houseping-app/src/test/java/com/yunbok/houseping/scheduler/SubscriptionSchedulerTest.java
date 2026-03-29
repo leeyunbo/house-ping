@@ -1,7 +1,7 @@
 package com.yunbok.houseping.scheduler;
 
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
-import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
+import com.yunbok.houseping.externalapi.ApplyhomeApiClient;
 import com.yunbok.houseping.support.CacheNames;
 import com.yunbok.houseping.support.dto.SchedulerResult;
 import com.yunbok.houseping.support.dto.SyncResult;

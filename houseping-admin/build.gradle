@@ -1,4 +1,4 @@
 dependencies {
     implementation project(':houseping-core')
-    implementation project(':houseping-infra')
+    implementation project(':houseping-external-api')
 }

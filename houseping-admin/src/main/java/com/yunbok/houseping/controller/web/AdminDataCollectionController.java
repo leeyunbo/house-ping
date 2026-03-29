@@ -1,6 +1,6 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
+import com.yunbok.houseping.externalapi.ApplyhomeApiClient;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionPersistencePort;

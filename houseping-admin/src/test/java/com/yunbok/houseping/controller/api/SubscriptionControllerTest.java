@@ -4,12 +4,12 @@ import com.yunbok.houseping.core.service.subscription.SubscriptionService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 
 import com.yunbok.houseping.support.dto.*;
-import com.yunbok.houseping.infrastructure.dto.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.externalapi.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.SyncResult;
 
 
-import com.yunbok.houseping.infrastructure.formatter.SubscriptionMessageFormatter;
+import com.yunbok.houseping.externalapi.formatter.SubscriptionMessageFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
