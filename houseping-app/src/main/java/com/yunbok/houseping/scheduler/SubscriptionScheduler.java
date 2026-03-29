@@ -1,6 +1,6 @@
 package com.yunbok.houseping.scheduler;
 
-import com.yunbok.houseping.infrastructure.api.ApplyhomeApiClient;
+import com.yunbok.houseping.externalapi.ApplyhomeApiClient;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import com.yunbok.houseping.entity.SubscriptionEntity;

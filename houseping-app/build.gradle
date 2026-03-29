@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation project(':houseping-core')
-    implementation project(':houseping-infra')
+    implementation project(':houseping-external-api')
     implementation project(':houseping-web')
     implementation project(':houseping-admin')
 

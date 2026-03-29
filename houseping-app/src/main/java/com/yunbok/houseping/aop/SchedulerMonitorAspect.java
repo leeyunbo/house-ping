@@ -1,6 +1,6 @@
 package com.yunbok.houseping.aop;
 
-import com.yunbok.houseping.infrastructure.api.SchedulerErrorSlackClient;
+import com.yunbok.houseping.externalapi.SchedulerErrorSlackClient;
 import com.yunbok.houseping.support.annotation.SchedulerMonitor;
 import com.yunbok.houseping.support.dto.SchedulerResult;
 import lombok.RequiredArgsConstructor;
