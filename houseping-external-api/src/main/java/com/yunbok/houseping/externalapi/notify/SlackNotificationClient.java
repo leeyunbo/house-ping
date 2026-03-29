@@ -1,7 +1,7 @@
 package com.yunbok.houseping.externalapi.notify;
 
 import com.yunbok.houseping.core.domain.Subscription;
-import com.yunbok.houseping.externalapi.formatter.SlackMessageFormatter;
+import com.yunbok.houseping.core.formatter.SlackMessageFormatter;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.core.port.NotificationSender;
 import lombok.extern.slf4j.Slf4j;

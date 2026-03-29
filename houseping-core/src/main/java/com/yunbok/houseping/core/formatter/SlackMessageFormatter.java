@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi.formatter;
+package com.yunbok.houseping.core.formatter;
 
 import com.yunbok.houseping.core.port.SubscriptionMessageFormatter;
 import com.yunbok.houseping.core.domain.Subscription;

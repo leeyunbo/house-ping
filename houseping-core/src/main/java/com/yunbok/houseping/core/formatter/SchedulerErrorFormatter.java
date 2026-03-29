@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi.formatter;
+package com.yunbok.houseping.core.formatter;
 
 public interface SchedulerErrorFormatter {
 

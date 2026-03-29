@@ -1,7 +1,7 @@
 package com.yunbok.houseping.externalapi.notify;
 
 import com.yunbok.houseping.core.domain.Subscription;
-import com.yunbok.houseping.externalapi.formatter.TelegramMessageFormatter;
+import com.yunbok.houseping.core.formatter.TelegramMessageFormatter;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
 import com.yunbok.houseping.support.external.TelegramResponseDto;
 import com.yunbok.houseping.support.external.TelegramSendMessageRequest;

@@ -2,7 +2,7 @@ package com.yunbok.houseping.externalapi.notify;
 
 import com.yunbok.houseping.core.port.SchedulerNotifier;
 import com.yunbok.houseping.externalapi.dto.SlackWebhookRequest;
-import com.yunbok.houseping.externalapi.formatter.SchedulerErrorFormatter;
+import com.yunbok.houseping.core.formatter.SchedulerErrorFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

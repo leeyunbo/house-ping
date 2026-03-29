@@ -1,6 +1,7 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.core.port.NotificationPreviewPort;
+import com.yunbok.houseping.core.formatter.SlackMessageFormatter;
+import com.yunbok.houseping.core.formatter.TelegramMessageFormatter;
 import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.service.notification.DailyNotificationService;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
@@ -25,7 +26,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminNotificationController {
 
     private final DailyNotificationService dailyNotificationService;
-    private final NotificationPreviewPort notificationPreviewPort;
+    private final SlackMessageFormatter slackMessageFormatter;
+    private final TelegramMessageFormatter telegramMessageFormatter;
     private final NotificationSubscriptionPersistencePort notificationSubscriptionPort;
 
     @GetMapping("/preview-daily-report")
@@ -35,8 +37,8 @@ public class AdminNotificationController {
             DailyNotificationReport report = dailyNotificationService.generateReport();
 
             model.addAttribute("report", report);
-            model.addAttribute("slackMessage", notificationPreviewPort.formatSlackPreview(report));
-            model.addAttribute("telegramMessage", notificationPreviewPort.formatTelegramPreview(report));
+            model.addAttribute("slackMessage", slackMessageFormatter.formatDailyReport(report));
+            model.addAttribute("telegramMessage", telegramMessageFormatter.formatDailyReport(report));
 
             log.info("[admin.notification] 미리보기 생성 완료 - 신규: {}건, 내일 접수: {}건, 오늘 마감: {}건",
                     report.newSubscriptions().size(),
