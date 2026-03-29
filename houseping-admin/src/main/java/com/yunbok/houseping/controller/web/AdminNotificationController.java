@@ -1,7 +1,7 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.externalapi.formatter.SlackMessageFormatter;
-import com.yunbok.houseping.externalapi.formatter.TelegramMessageFormatter;
+import com.yunbok.houseping.core.formatter.SlackMessageFormatter;
+import com.yunbok.houseping.core.formatter.TelegramMessageFormatter;
 import com.yunbok.houseping.core.port.NotificationSubscriptionPersistencePort;
 import com.yunbok.houseping.core.service.notification.DailyNotificationService;
 import com.yunbok.houseping.support.dto.DailyNotificationReport;
@@ -30,21 +30,15 @@ public class AdminNotificationController {
     private final TelegramMessageFormatter telegramMessageFormatter;
     private final NotificationSubscriptionPersistencePort notificationSubscriptionPort;
 
-    /**
-     * 일일 알림 미리보기 (발송 안함)
-     */
     @GetMapping("/preview-daily-report")
     public String previewDailyReport(Model model) {
         try {
             log.info("[admin.notification] 일일 알림 미리보기 요청");
             DailyNotificationReport report = dailyNotificationService.generateReport();
 
-            String slackMessage = slackMessageFormatter.formatDailyReport(report);
-            String telegramMessage = telegramMessageFormatter.formatDailyReport(report);
-
             model.addAttribute("report", report);
-            model.addAttribute("slackMessage", slackMessage);
-            model.addAttribute("telegramMessage", telegramMessage);
+            model.addAttribute("slackMessage", slackMessageFormatter.formatDailyReport(report));
+            model.addAttribute("telegramMessage", telegramMessageFormatter.formatDailyReport(report));
 
             log.info("[admin.notification] 미리보기 생성 완료 - 신규: {}건, 내일 접수: {}건, 오늘 마감: {}건",
                     report.newSubscriptions().size(),
@@ -58,15 +52,11 @@ public class AdminNotificationController {
         return "admin/system/preview";
     }
 
-    /**
-     * 일일 알림 실제 발송
-     */
     @PostMapping("/send-daily-report")
     public String sendDailyReport(RedirectAttributes redirectAttributes) {
         try {
             log.info("[admin.notification] 일일 알림 수동 발송 시작");
             dailyNotificationService.sendDailyReportManual();
-            log.info("[admin.notification] 일일 알림 수동 발송 완료");
             redirectAttributes.addFlashAttribute("message", "일일 알림이 발송되었습니다.");
         } catch (Exception e) {
             log.error("[admin.notification] 일일 알림 발송 실패", e);
@@ -75,9 +65,6 @@ public class AdminNotificationController {
         return "redirect:/admin/system";
     }
 
-    /**
-     * 알림 발송 상태 리셋 (테스트용)
-     */
     @Transactional
     @PostMapping("/reset-notification/{id}")
     public String resetNotification(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -91,9 +78,6 @@ public class AdminNotificationController {
         return "redirect:/admin/system";
     }
 
-    /**
-     * 모든 알림 발송 상태 리셋 (테스트용)
-     */
     @Transactional
     @PostMapping("/reset-all-notifications")
     public String resetAllNotifications(RedirectAttributes redirectAttributes) {

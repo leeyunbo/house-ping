@@ -1,22 +1,14 @@
 package com.yunbok.houseping.controller.web;
 
-import com.yunbok.houseping.externalapi.subscription.ApplyhomeApiClient;
-import com.yunbok.houseping.core.domain.Subscription;
-import com.yunbok.houseping.core.domain.SubscriptionSource;
-import com.yunbok.houseping.core.port.SubscriptionPersistencePort;
-import com.yunbok.houseping.core.port.SubscriptionPricePersistencePort;
 import com.yunbok.houseping.core.service.realtransaction.RealTransactionCollectionService;
-import com.yunbok.houseping.support.util.ApiRateLimiter;
+import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
+import com.yunbok.houseping.support.dto.SchedulerResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 데이터 수집 컨트롤러 (MASTER 전용)
@@ -27,31 +19,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class AdminDataCollectionController {
 
-    private static final LocalDate PRICE_COLLECTION_START_DATE = LocalDate.of(2025, 1, 1);
-
-    private final SubscriptionPersistencePort subscriptionPersistencePort;
-    private final SubscriptionPricePersistencePort subscriptionPricePersistencePort;
-    private final ApplyhomeApiClient applyhomeApiAdapter;
+    private final SubscriptionManagementService subscriptionManagementService;
     private final RealTransactionCollectionService realTransactionCollectionService;
 
-    /**
-     * ApplyHome 청약 분양가 수집
-     */
     @PostMapping("/collect-price-data")
     public String collectPriceData(RedirectAttributes redirectAttributes) {
         try {
             log.info("[admin.collect] 분양가 데이터 수집 시작");
-
-            List<Subscription> subscriptions = findPriceCollectionTargets();
-            log.info("[admin.collect] 분양가 수집 대상: {}건", subscriptions.size());
-
-            CollectionResult result = collectPriceDetails(subscriptions);
-
-            String message = String.format("분양가 수집 완료 - 성공: %d건, 실패: %d건",
-                    result.successCount(), result.failCount());
-            log.info("[admin.collect] {}", message);
+            SchedulerResult result = subscriptionManagementService.collectPriceData();
+            String message = String.format("분양가 수집 완료 - %s", result.summary());
             redirectAttributes.addFlashAttribute("message", message);
-
         } catch (Exception e) {
             log.error("[admin.collect] 분양가 수집 실패", e);
             redirectAttributes.addFlashAttribute("error", "분양가 수집 실패: " + e.getMessage());
@@ -59,9 +36,6 @@ public class AdminDataCollectionController {
         return "redirect:/admin/system";
     }
 
-    /**
-     * 실거래가 데이터 수집 (접수예정 청약 지역)
-     */
     @PostMapping("/collect-real-transactions")
     public String collectRealTransactions(RedirectAttributes redirectAttributes) {
         try {
@@ -74,37 +48,4 @@ public class AdminDataCollectionController {
         }
         return "redirect:/admin/system";
     }
-
-    private List<Subscription> findPriceCollectionTargets() {
-        return subscriptionPersistencePort.findAll().stream()
-                .filter(s -> SubscriptionSource.APPLYHOME.matches(s.getSource()))
-                .filter(s -> s.getHouseManageNo() != null && !s.getHouseManageNo().isEmpty())
-                .filter(s -> s.getReceiptStartDate() != null && !s.getReceiptStartDate().isBefore(PRICE_COLLECTION_START_DATE))
-                .filter(s -> !subscriptionPricePersistencePort.existsByHouseManageNo(s.getHouseManageNo()))
-                .toList();
-    }
-
-    private CollectionResult collectPriceDetails(List<Subscription> subscriptions) {
-        AtomicInteger successCount = new AtomicInteger(0);
-        AtomicInteger failCount = new AtomicInteger(0);
-
-        for (Subscription subscription : subscriptions) {
-            try {
-                applyhomeApiAdapter.fetchAndSavePriceDetails(
-                        subscription.getHouseManageNo(),
-                        subscription.getPblancNo(),
-                        subscription.getHouseType()
-                );
-                successCount.incrementAndGet();
-                ApiRateLimiter.delay(100);
-            } catch (Exception e) {
-                failCount.incrementAndGet();
-                log.warn("[admin.collect.price] {} 수집 실패: {}", subscription.getHouseName(), e.getMessage());
-            }
-        }
-
-        return new CollectionResult(successCount.get(), failCount.get());
-    }
-
-    private record CollectionResult(int successCount, int failCount) {}
 }

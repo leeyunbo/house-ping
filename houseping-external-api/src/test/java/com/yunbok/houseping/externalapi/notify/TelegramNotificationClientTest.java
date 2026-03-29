@@ -1,6 +1,6 @@
 package com.yunbok.houseping.externalapi.notify;
 
-import com.yunbok.houseping.externalapi.formatter.TelegramMessageFormatter;
+import com.yunbok.houseping.core.formatter.TelegramMessageFormatter;
 import com.yunbok.houseping.externalapi.subscription.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.core.domain.Subscription;
 import org.junit.jupiter.api.BeforeEach;

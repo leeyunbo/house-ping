@@ -4,7 +4,7 @@ import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.*;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionService;
-import com.yunbok.houseping.externalapi.formatter.SubscriptionMessageFormatter;
+import com.yunbok.houseping.core.port.SubscriptionMessageFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;

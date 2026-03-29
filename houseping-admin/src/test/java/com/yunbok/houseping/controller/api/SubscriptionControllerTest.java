@@ -4,12 +4,11 @@ import com.yunbok.houseping.core.service.subscription.SubscriptionService;
 import com.yunbok.houseping.core.service.subscription.SubscriptionManagementService;
 
 import com.yunbok.houseping.support.dto.*;
-import com.yunbok.houseping.externalapi.subscription.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.support.dto.SyncResult;
 
 
-import com.yunbok.houseping.externalapi.formatter.SubscriptionMessageFormatter;
+import com.yunbok.houseping.core.port.SubscriptionMessageFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -153,9 +152,9 @@ class SubscriptionControllerTest {
     }
 
     private Subscription createSubscription(String houseName) {
-        return ApplyHomeSubscriptionInfo.builder()
+        return Subscription.builder()
                 .houseName(houseName)
                 .area("서울")
-                .build().toSubscription();
+                .build();
     }
 }
