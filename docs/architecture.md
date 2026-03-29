@@ -15,10 +15,11 @@
 
 ```
 houseping
-├── houseping-core                  # 도메인, 서비스, DB, Port 인터페이스
+├── houseping-core                  # 도메인, 서비스, DB, 포맷터, Port 인터페이스
 │   ├── core/domain                 # 도메인 모델
 │   ├── core/port                   # 외부 API Port 인터페이스
 │   ├── core/service                # 도메인 서비스 (subscription, notification, auth 등)
+│   ├── core/formatter              # 알림 메시지 포맷터 (Slack, Telegram)
 │   ├── entity                      # JPA Entity
 │   ├── repository                  # Spring Data JPA Repository
 │   ├── persistence                 # DB 조회 (Store)
@@ -26,29 +27,33 @@ houseping
 │
 ├── houseping-external-api          # 외부 API 클라이언트 (Port 구현체)
 │   └── externalapi
-│       ├── (클라이언트)              # 청약Home, LH, 국토부 실거래가, 카카오, Claude
-│       ├── dto                     # API 요청/응답 DTO
-│       ├── formatter               # 알림 메시지 포맷터 (Slack, Telegram)
-│       └── support                 # API 관련 유틸리티
+│       ├── subscription            # 청약Home, LH, 경쟁률 API
+│       ├── realtransaction         # 실거래가, 카카오 지오코딩
+│       ├── notify                  # Slack, Telegram 알림
+│       ├── ai                      # Claude API
+│       └── dto                     # API 요청/응답 DTO
 │
+├── houseping-scheduler             # 스케줄러 + AOP (@SchedulerMonitor)
 ├── houseping-web                   # 공개 웹 컨트롤러, Thymeleaf 템플릿
 ├── houseping-admin                 # 관리자 컨트롤러
-└── houseping-app                   # Spring Boot 엔트리포인트, 스케줄러, 설정
+└── houseping-app                   # Spring Boot 엔트리포인트, 설정, 빈 조립
 ```
 
 ## 모듈 의존 그래프
 
 ```
-houseping-app   → core, external-api, web, admin
-houseping-admin → core, external-api
-houseping-web   → core
-houseping-external-api → core
-houseping-core  → (의존 없음)
+houseping-app          → core, external-api, scheduler, web, admin  (빈 조립)
+houseping-scheduler    → core  (스케줄러 → 서비스)
+houseping-admin        → core  (컨트롤러 → 서비스)
+houseping-web          → core  (컨트롤러 → 서비스)
+houseping-external-api → core  (Port 구현)
+houseping-core         → (의존 없음)
 ```
 
-DB는 서비스에 완전 종속된 영역이므로 core에 포함합니다.
-외부 API만 변경 가능성이 높은 영역으로 분류하여 별도 모듈로 격리합니다.
-Port 인터페이스는 외부 API 연동에만 적용합니다.
+- DB는 서비스에 완전 종속된 영역이므로 core에 포함합니다.
+- 외부 API만 변경 가능성이 높은 영역으로 분류하여 별도 모듈로 격리합니다.
+- Port 인터페이스는 외부 API 연동에만 적용합니다.
+- scheduler, admin, web은 **core만 의존**하며 external-api를 직접 참조하지 않습니다.
 
 ## 확장 포인트
 
@@ -124,22 +129,23 @@ houseping-core  → (의존 없음)
 
 **남은 문제:** DB 접근까지 Port/Adapter로 감싸면서 불필요한 간접 레이어가 생겼습니다. DB는 우리 서비스에 완전히 종속된 영역이라 변경 가능성이 0%에 가까운데, Entity ↔ Domain 변환 코드와 Persistence Port 인터페이스가 필드 추가할 때마다 3곳을 고치게 만들었습니다.
 
-### 5단계: infra → external-api 재편 (현재)
+### 5단계: 변경 가능성 기준 모듈 재편 (현재)
 
 "변경 가능성"을 기준으로 모듈을 재분류했습니다.
 
-- **변경 가능성 낮음 (core):** 도메인, 서비스, DB(Entity/Repository/Store)
+- **변경 가능성 낮음 (core):** 도메인, 서비스, DB, 포맷터
 - **변경 가능성 높음 (external-api):** 외부 API 클라이언트
 
+DB 관련 Persistence Port를 제거하고 서비스가 Repository/Store를 직접 사용하도록 단순화했습니다. 스케줄러를 별도 모듈로 분리하여 나중에 별도 프로세스로 뗄 수 있게 했습니다. admin/scheduler/web은 core만 의존하고 external-api를 직접 참조하지 않습니다.
+
 ```
-houseping-app          → core, external-api, web, admin
-houseping-admin        → core, external-api
-houseping-web          → core
-houseping-external-api → core
+houseping-app          → core, external-api, scheduler, web, admin  (빈 조립)
+houseping-scheduler    → core  (스케줄러 → 서비스)
+houseping-admin        → core  (컨트롤러 → 서비스)
+houseping-web          → core  (컨트롤러 → 서비스)
+houseping-external-api → core  (Port 구현)
 houseping-core         → (의존 없음)
 ```
-
-DB 관련 Persistence Port를 제거하고 서비스가 Repository/Store를 직접 사용하도록 단순화했습니다. Port 인터페이스는 외부 API 연동에만 남겨두어 실질적으로 변경 격리가 필요한 곳에만 추상화를 적용합니다.
 
 ### 요약
 
@@ -149,4 +155,4 @@ DB 관련 Persistence Port를 제거하고 서비스가 Repository/Store를 직�
 | 2단계 | 실용적 레이어드 | 도메인 대비 과한 추상화 제거 |
 | 3단계 | Gradle 멀티모듈 (4개) | admin↔production 빌드 격리 |
 | 4단계 | 5개 모듈 + Port 전면 적용 | infrastructure 변경 전파 차단 |
-| 5단계 | external-api 분리 + DB Port 제거 | 변경 가능성 기준으로 재분류, 불필요한 간접 레이어 제거 |
+| 5단계 | 7개 모듈 + 변경 가능성 기준 재편 | DB Port 제거, scheduler 분리, external-api만 격리 |
