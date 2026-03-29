@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.subscription;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,7 +7,7 @@ import com.yunbok.houseping.support.util.AreaCodeMapping;
 import com.yunbok.houseping.core.domain.LhApiTypeCode;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.domain.Subscription;
-import com.yunbok.houseping.externalapi.LhSubscriptionInfo;
+import com.yunbok.houseping.externalapi.subscription.LhSubscriptionInfo;
 import com.yunbok.houseping.externalapi.support.LhResidentialFilter;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.config.SubscriptionProperties;

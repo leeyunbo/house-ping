@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.ai;
 
 import com.yunbok.houseping.core.port.AiContentPort;
 import com.yunbok.houseping.externalapi.dto.ClaudeRequest;

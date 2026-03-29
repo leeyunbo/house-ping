@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.subscription;
 
 import com.yunbok.houseping.support.external.ApplyhomeApiItem;
 import com.yunbok.houseping.support.external.ApplyhomeArbitraryResponse;

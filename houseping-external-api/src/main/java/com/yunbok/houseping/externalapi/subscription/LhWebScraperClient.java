@@ -1,8 +1,8 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.subscription;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yunbok.houseping.core.domain.Subscription;
-import com.yunbok.houseping.externalapi.LhSubscriptionInfo;
+import com.yunbok.houseping.externalapi.subscription.LhSubscriptionInfo;
 import com.yunbok.houseping.externalapi.support.LhResidentialFilter;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionProvider;

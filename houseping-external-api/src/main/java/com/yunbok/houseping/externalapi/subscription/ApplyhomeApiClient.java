@@ -1,7 +1,7 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.subscription;
 
 import com.yunbok.houseping.support.util.DateParsingUtil;
-import com.yunbok.houseping.externalapi.ApplyHomeSubscriptionInfo;
+import com.yunbok.houseping.externalapi.subscription.ApplyHomeSubscriptionInfo;
 import com.yunbok.houseping.core.domain.HouseType;
 import com.yunbok.houseping.core.domain.Subscription;
 import com.yunbok.houseping.core.domain.SubscriptionSource;

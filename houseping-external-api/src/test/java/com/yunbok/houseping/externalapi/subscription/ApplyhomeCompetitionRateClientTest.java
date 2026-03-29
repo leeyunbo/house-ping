@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.subscription;
 
 import com.yunbok.houseping.support.external.CompetitionRateItem;
 import com.yunbok.houseping.support.external.CompetitionRateResponse;

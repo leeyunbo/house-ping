@@ -1,10 +1,10 @@
 package com.yunbok.houseping.config;
 
-import com.yunbok.houseping.externalapi.ApplyhomeApiClient;
-import com.yunbok.houseping.externalapi.LhApiClient;
+import com.yunbok.houseping.externalapi.subscription.ApplyhomeApiClient;
+import com.yunbok.houseping.externalapi.subscription.LhApiClient;
 import com.yunbok.houseping.persistence.ApplyhomeDbStore;
 import com.yunbok.houseping.persistence.LhDbStore;
-import com.yunbok.houseping.externalapi.LhWebScraperClient;
+import com.yunbok.houseping.externalapi.subscription.LhWebScraperClient;
 import com.yunbok.houseping.core.domain.SubscriptionSource;
 import com.yunbok.houseping.core.port.SubscriptionProvider;
 import com.yunbok.houseping.core.service.subscription.FallbackProviderChain;

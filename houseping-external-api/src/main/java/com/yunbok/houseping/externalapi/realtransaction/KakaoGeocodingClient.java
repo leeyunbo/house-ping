@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.realtransaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

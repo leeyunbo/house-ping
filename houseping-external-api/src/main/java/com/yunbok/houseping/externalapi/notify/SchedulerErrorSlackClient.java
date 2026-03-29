@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.notify;
 
 import com.yunbok.houseping.core.port.SchedulerNotifier;
 import com.yunbok.houseping.externalapi.dto.SlackWebhookRequest;

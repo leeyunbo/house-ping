@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.subscription;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yunbok.houseping.core.domain.Subscription;

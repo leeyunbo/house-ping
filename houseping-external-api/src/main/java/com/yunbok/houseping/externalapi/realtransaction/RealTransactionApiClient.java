@@ -1,4 +1,4 @@
-package com.yunbok.houseping.externalapi;
+package com.yunbok.houseping.externalapi.realtransaction;
 
 import com.yunbok.houseping.support.external.RealTransactionApiResponse;
 import com.yunbok.houseping.support.external.RealTransactionItem;
