@@ -32,7 +32,7 @@ public class SecurityConfig {
                 // 메인 페이지 (공개)
                 .requestMatchers("/").permitAll()
                 .requestMatchers("/home", "/home/**").permitAll()
-                .requestMatchers("/favicon.ico", "/favicon.svg", "/robots.txt", "/sitemap.xml", "/*.html").permitAll()
+                .requestMatchers("/favicon.ico", "/favicon.svg", "/robots.txt", "/sitemap.xml", "/ads.txt", "/*.html").permitAll()
                 // 인증 관련
                 .requestMatchers("/auth/**", "/oauth/**").permitAll()
                 // Actuator: health만 공개, 나머지는 MASTER만
