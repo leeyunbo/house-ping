@@ -16,5 +16,7 @@ public interface CompetitionRatePersistencePort {
 
     List<CompetitionRate> findByHouseManageNo(String houseManageNo);
 
+    List<CompetitionRate> findByHouseManageNos(List<String> houseManageNos);
+
     List<String> findDistinctHouseManageNos();
 }

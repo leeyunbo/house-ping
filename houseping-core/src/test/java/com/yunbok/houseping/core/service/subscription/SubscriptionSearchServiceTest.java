@@ -203,7 +203,7 @@ class SubscriptionSearchServiceTest {
                     LocalDate.now().minusDays(5), LocalDate.now().minusDays(1), "H001");
             when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(closed));
             when(competitionRatePort.findDistinctHouseManageNos()).thenReturn(List.of("H001"));
-            when(competitionRatePort.findByHouseManageNo("H001")).thenReturn(List.of(
+            when(competitionRatePort.findByHouseManageNos(List.of("H001"))).thenReturn(List.of(
                     CompetitionRate.builder()
                             .houseManageNo("H001")
                             .rank(1)

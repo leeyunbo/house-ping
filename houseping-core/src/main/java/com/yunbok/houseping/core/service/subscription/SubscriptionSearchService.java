@@ -19,8 +19,10 @@ import java.time.YearMonth;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 청약 조회 서비스
@@ -55,14 +57,17 @@ public class SubscriptionSearchService {
     }
 
     public HomePageResult getHomeData(String area) {
-        List<Subscription> activeUpcoming = findActiveAndUpcomingSubscriptions(area);
+        LocalDate today = LocalDate.now();
+        List<Subscription> all = findByAreaWithFilter(area);
 
-        List<SubscriptionCardView> activeCards = filterActiveSubscriptions(activeUpcoming).stream()
+        List<SubscriptionCardView> activeCards = all.stream()
+                .filter(s -> s.getStatus(today) == SubscriptionStatus.ACTIVE)
                 .sorted(Comparator.comparing(Subscription::getReceiptEndDate, Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(this::toCardView)
                 .toList();
 
-        List<SubscriptionCardView> upcomingCards = filterUpcomingSubscriptions(activeUpcoming).stream()
+        List<SubscriptionCardView> upcomingCards = all.stream()
+                .filter(s -> s.getStatus(today) == SubscriptionStatus.UPCOMING)
                 .sorted(Comparator.comparing(Subscription::getReceiptStartDate, Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(this::toCardView)
                 .toList();
@@ -70,42 +75,55 @@ public class SubscriptionSearchService {
         return HomePageResult.builder()
                 .activeSubscriptions(activeCards)
                 .upcomingSubscriptions(upcomingCards)
-                .announcedSubscriptions(findAnnouncedSubscriptions(area))
+                .announcedSubscriptions(buildAnnouncedView(all, today))
                 .areas(SUPPORTED_AREAS)
                 .selectedArea(area)
                 .build();
     }
 
     public List<AnnouncedSubscriptionView> findAnnouncedSubscriptions(String area) {
-        Set<String> houseManageNosWithRates = new HashSet<>(competitionRatePort.findDistinctHouseManageNos());
-        LocalDate twoWeeksAgo = LocalDate.now().minusWeeks(2);
+        return buildAnnouncedView(findByAreaWithFilter(area), LocalDate.now());
+    }
 
-        return findByAreaWithFilter(area).stream()
-                .filter(s -> s.getStatus(LocalDate.now()) == SubscriptionStatus.CLOSED)
+    private List<AnnouncedSubscriptionView> buildAnnouncedView(List<Subscription> all, LocalDate today) {
+        LocalDate twoWeeksAgo = today.minusWeeks(2);
+        Set<String> houseManageNosWithRates = new HashSet<>(competitionRatePort.findDistinctHouseManageNos());
+
+        List<Subscription> announced = all.stream()
+                .filter(s -> s.getStatus(today) == SubscriptionStatus.CLOSED)
                 .filter(s -> s.getReceiptEndDate() != null && !s.getReceiptEndDate().isBefore(twoWeeksAgo))
                 .filter(s -> s.getHouseManageNo() != null && houseManageNosWithRates.contains(s.getHouseManageNo()))
-                .map(s -> {
-                    BigDecimal topRate = computeTopRate(s.getHouseManageNo());
-                    return AnnouncedSubscriptionView.builder()
-                            .subscription(s)
-                            .topRate(topRate)
-                            .build();
-                })
+                .toList();
+
+        if (announced.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, BigDecimal> topRateByHouseManageNo = computeTopRates(
+                announced.stream().map(Subscription::getHouseManageNo).toList()
+        );
+
+        return announced.stream()
+                .map(s -> AnnouncedSubscriptionView.builder()
+                        .subscription(s)
+                        .topRate(topRateByHouseManageNo.get(s.getHouseManageNo()))
+                        .build())
                 .sorted(Comparator.comparing(
                         v -> v.getSubscription().getReceiptStartDate(),
                         Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
     }
 
-    private BigDecimal computeTopRate(String houseManageNo) {
-        List<CompetitionRate> rates = competitionRatePort.findByHouseManageNo(houseManageNo);
-        return rates.stream()
+    private Map<String, BigDecimal> computeTopRates(List<String> houseManageNos) {
+        return competitionRatePort.findByHouseManageNos(houseManageNos).stream()
                 .filter(r -> r.getRank() != null && r.getRank() == 1)
                 .filter(r -> "해당지역".equals(r.getResidenceArea()))
-                .map(CompetitionRate::getEffectiveRate)
-                .filter(rate -> rate != null)
-                .max(Comparator.naturalOrder())
-                .orElse(null);
+                .filter(r -> r.getEffectiveRate() != null)
+                .collect(Collectors.toMap(
+                        CompetitionRate::getHouseManageNo,
+                        CompetitionRate::getEffectiveRate,
+                        BigDecimal::max
+                ));
     }
 
     private List<Subscription> filterActiveSubscriptions(List<Subscription> subscriptions) {

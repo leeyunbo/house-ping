@@ -49,6 +49,16 @@ public class CompetitionRateDbStore implements CompetitionRatePersistencePort {
     }
 
     @Override
+    public List<CompetitionRate> findByHouseManageNos(List<String> houseManageNos) {
+        if (houseManageNos.isEmpty()) {
+            return List.of();
+        }
+        return repository.findByHouseManageNoIn(houseManageNos).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<String> findDistinctHouseManageNos() {
         return repository.findDistinctHouseManageNos();
     }

@@ -41,4 +41,9 @@ public interface CompetitionRateRepository extends JpaRepository<CompetitionRate
      * 특정 houseManageNo의 경쟁률 조회
      */
     List<CompetitionRateEntity> findByHouseManageNo(String houseManageNo);
+
+    /**
+     * 여러 houseManageNo의 경쟁률 일괄 조회 (N+1 방지)
+     */
+    List<CompetitionRateEntity> findByHouseManageNoIn(List<String> houseManageNos);
 }
