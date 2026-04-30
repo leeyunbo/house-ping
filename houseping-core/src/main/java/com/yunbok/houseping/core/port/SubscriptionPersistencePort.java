@@ -13,9 +13,13 @@ public interface SubscriptionPersistencePort {
 
     List<Subscription> findByAreaContaining(String area);
 
+    List<Subscription> findByAreaContainingSince(String area, LocalDate since);
+
     List<Subscription> findBySourceAndAreas(String source, List<String> areas);
 
     List<Subscription> findBySupportedAreas(List<String> areas);
+
+    List<Subscription> findBySupportedAreasSince(List<String> areas, LocalDate since);
 
     List<Subscription> findByReceiptStartDateBetween(LocalDate startDate, LocalDate endDate);
 

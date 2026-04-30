@@ -35,6 +35,12 @@ public class SubscriptionStore implements SubscriptionPersistencePort {
                 .toList();
     }
 
+    public List<Subscription> findByAreaContainingSince(String area, LocalDate since) {
+        return subscriptionRepository.findByAreaContainingSince(area, since).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
     public List<Subscription> findBySourceAndAreas(String source, List<String> areas) {
         return subscriptionRepository.findBySourceAndAreaIn(source, areas).stream()
                 .map(this::toDomain)
@@ -48,6 +54,19 @@ public class SubscriptionStore implements SubscriptionPersistencePort {
                     .toList();
         } else if (areas.size() == 1) {
             return subscriptionRepository.findByAreaContaining(areas.get(0)).stream()
+                    .map(this::toDomain)
+                    .toList();
+        }
+        return List.of();
+    }
+
+    public List<Subscription> findBySupportedAreasSince(List<String> areas, LocalDate since) {
+        if (areas.size() >= 2) {
+            return subscriptionRepository.findByAreaLikeOrAreaLikeSince(areas.get(0), areas.get(1), since).stream()
+                    .map(this::toDomain)
+                    .toList();
+        } else if (areas.size() == 1) {
+            return subscriptionRepository.findByAreaContainingSince(areas.get(0), since).stream()
                     .map(this::toDomain)
                     .toList();
         }

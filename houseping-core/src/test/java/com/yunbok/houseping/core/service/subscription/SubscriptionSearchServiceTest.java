@@ -86,14 +86,14 @@ class SubscriptionSearchServiceTest {
             // given
             Subscription active = createSubscription(1L, "서울", "서울아파트",
                     LocalDate.now().minusDays(1), LocalDate.now().plusDays(5));
-            when(subscriptionQueryPort.findByAreaContaining("서울")).thenReturn(List.of(active));
+            when(subscriptionQueryPort.findByAreaContainingSince(eq("서울"), any())).thenReturn(List.of(active));
 
             // when
             List<Subscription> result = service.findActiveAndUpcomingSubscriptions("서울");
 
             // then
             assertThat(result).hasSize(1);
-            verify(subscriptionQueryPort).findByAreaContaining("서울");
+            verify(subscriptionQueryPort).findByAreaContainingSince(eq("서울"), any());
         }
 
         @Test
@@ -104,7 +104,7 @@ class SubscriptionSearchServiceTest {
                     LocalDate.now().minusDays(1), LocalDate.now().plusDays(5));
             Subscription gyeonggi = createSubscription(2L, "경기", "경기아파트",
                     LocalDate.now().plusDays(1), LocalDate.now().plusDays(10));
-            when(subscriptionQueryPort.findBySupportedAreas(List.of("서울", "경기")))
+            when(subscriptionQueryPort.findBySupportedAreasSince(eq(List.of("서울", "경기")), any()))
                     .thenReturn(List.of(seoul, gyeonggi));
 
             // when
@@ -118,7 +118,7 @@ class SubscriptionSearchServiceTest {
         @DisplayName("빈 결과를 반환한다")
         void returnsEmptyList() {
             // given
-            when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of());
+            when(subscriptionQueryPort.findBySupportedAreasSince(any(), any())).thenReturn(List.of());
 
             // when
             List<Subscription> result = service.findActiveAndUpcomingSubscriptions(null);
@@ -133,7 +133,7 @@ class SubscriptionSearchServiceTest {
             // given
             Subscription closed = createSubscription(1L, "서울", "마감아파트",
                     LocalDate.now().minusDays(10), LocalDate.now().minusDays(1));
-            when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(closed));
+            when(subscriptionQueryPort.findBySupportedAreasSince(any(), any())).thenReturn(List.of(closed));
 
             // when
             List<Subscription> result = service.findActiveAndUpcomingSubscriptions(null);
@@ -153,7 +153,7 @@ class SubscriptionSearchServiceTest {
             // given
             Subscription sub = createSubscription(1L, "서울", "테스트아파트",
                     LocalDate.now().minusDays(1), LocalDate.now().plusDays(5));
-            when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(sub));
+            when(subscriptionQueryPort.findBySupportedAreasSince(any(), any())).thenReturn(List.of(sub));
             when(priceBadgeCalculator.computePriceBadge(any())).thenReturn(PriceBadge.CHEAP);
 
             // when
@@ -177,7 +177,7 @@ class SubscriptionSearchServiceTest {
                     LocalDate.now().minusDays(1), LocalDate.now().plusDays(5));
             Subscription upcoming = createSubscription(2L, "경기", "예정아파트",
                     LocalDate.now().plusDays(1), LocalDate.now().plusDays(10));
-            when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(active, upcoming));
+            when(subscriptionQueryPort.findBySupportedAreasSince(any(), any())).thenReturn(List.of(active, upcoming));
             when(priceBadgeCalculator.computePriceBadge(any())).thenReturn(PriceBadge.UNKNOWN);
             when(competitionRatePort.findDistinctHouseManageNos()).thenReturn(List.of());
 
@@ -201,7 +201,7 @@ class SubscriptionSearchServiceTest {
             // given
             Subscription closed = createSubscriptionWithHouseManageNo(1L, "서울", "발표아파트",
                     LocalDate.now().minusDays(5), LocalDate.now().minusDays(1), "H001");
-            when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(closed));
+            when(subscriptionQueryPort.findBySupportedAreasSince(any(), any())).thenReturn(List.of(closed));
             when(competitionRatePort.findDistinctHouseManageNos()).thenReturn(List.of("H001"));
             when(competitionRatePort.findByHouseManageNos(List.of("H001"))).thenReturn(List.of(
                     CompetitionRate.builder()
@@ -226,7 +226,7 @@ class SubscriptionSearchServiceTest {
             // given
             Subscription oldClosed = createSubscriptionWithHouseManageNo(1L, "서울", "오래된아파트",
                     LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), "H001");
-            when(subscriptionQueryPort.findBySupportedAreas(any())).thenReturn(List.of(oldClosed));
+            when(subscriptionQueryPort.findBySupportedAreasSince(any(), any())).thenReturn(List.of(oldClosed));
             when(competitionRatePort.findDistinctHouseManageNos()).thenReturn(List.of("H001"));
 
             // when

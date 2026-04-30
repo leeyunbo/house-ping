@@ -120,6 +120,15 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     List<SubscriptionEntity> findByAreaContaining(@Param("area") String area);
 
     /**
+     * 지역명 부분 일치 + 종료일 컷오프 (홈/안내 페이지용 — OOM 방지)
+     */
+    @Query("SELECT s FROM SubscriptionEntity s " +
+           "WHERE s.area LIKE %:area% " +
+           "AND (s.receiptEndDate >= :since OR s.receiptEndDate IS NULL) " +
+           "ORDER BY s.receiptStartDate DESC")
+    List<SubscriptionEntity> findByAreaContainingSince(@Param("area") String area, @Param("since") LocalDate since);
+
+    /**
      * 소스와 지역 목록으로 청약 조회
      */
     @Query("SELECT s FROM SubscriptionEntity s WHERE s.source = :source AND s.area IN :areas ORDER BY s.receiptStartDate DESC")
@@ -130,6 +139,18 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
      */
     @Query("SELECT s FROM SubscriptionEntity s WHERE s.area LIKE %:area1% OR s.area LIKE %:area2% ORDER BY s.receiptStartDate DESC")
     List<SubscriptionEntity> findByAreaLikeOrAreaLike(@Param("area1") String area1, @Param("area2") String area2);
+
+    /**
+     * 두 지역 + 종료일 컷오프 (홈/안내 페이지용 — OOM 방지)
+     */
+    @Query("SELECT s FROM SubscriptionEntity s " +
+           "WHERE (s.area LIKE %:area1% OR s.area LIKE %:area2%) " +
+           "AND (s.receiptEndDate >= :since OR s.receiptEndDate IS NULL) " +
+           "ORDER BY s.receiptStartDate DESC")
+    List<SubscriptionEntity> findByAreaLikeOrAreaLikeSince(
+            @Param("area1") String area1,
+            @Param("area2") String area2,
+            @Param("since") LocalDate since);
 
     /**
      * 접수 기간이 주어진 기간과 겹치는 청약 조회

@@ -176,11 +176,12 @@ public class SubscriptionSearchService {
     }
 
     private List<Subscription> findByAreaWithFilter(String area) {
+        LocalDate since = LocalDate.now().minusWeeks(2);
         List<Subscription> subscriptions;
         if (area != null && !area.isBlank()) {
-            subscriptions = subscriptionQueryPort.findByAreaContaining(area);
+            subscriptions = subscriptionQueryPort.findByAreaContainingSince(area, since);
         } else {
-            subscriptions = subscriptionQueryPort.findBySupportedAreas(SUPPORTED_AREAS);
+            subscriptions = subscriptionQueryPort.findBySupportedAreasSince(SUPPORTED_AREAS, since);
         }
         return subscriptions.stream()
                 .filter(s -> s.getArea() != null && SUPPORTED_AREAS.stream()
