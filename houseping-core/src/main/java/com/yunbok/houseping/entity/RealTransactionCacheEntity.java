@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 @Table(name = "real_transaction_cache",
        indexes = {
            @Index(name = "idx_lawd_cd_deal_ymd", columnList = "lawd_cd, deal_ymd"),
+           @Index(name = "idx_lawd_cd_umd_nm", columnList = "lawd_cd, umd_nm"),
            @Index(name = "idx_apt_name", columnList = "apt_name"),
            @Index(name = "idx_deal_date", columnList = "deal_date"),
            @Index(name = "idx_cached_at", columnList = "cached_at")

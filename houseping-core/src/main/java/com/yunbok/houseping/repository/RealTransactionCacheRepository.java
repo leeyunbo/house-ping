@@ -70,4 +70,20 @@ public interface RealTransactionCacheRepository extends JpaRepository<RealTransa
      */
     @Query("SELECT r FROM RealTransactionCacheEntity r WHERE r.lawdCd = :lawdCd ORDER BY r.dealDate DESC")
     List<RealTransactionCacheEntity> findByLawdCdOrderByDealDateDesc(@Param("lawdCd") String lawdCd);
+
+    /**
+     * 가격 배지 계산용 — 동 prefix + 신축 + 면적 범위까지 DB에서 모두 필터링.
+     * lawdCd 전체를 메모리에 올리지 않기 위함.
+     */
+    @Query("SELECT r FROM RealTransactionCacheEntity r " +
+           "WHERE r.lawdCd = :lawdCd " +
+           "AND r.umdNm LIKE CONCAT(:dongPrefix, '%') " +
+           "AND r.buildYear >= :buildYearMin " +
+           "AND r.excluUseAr BETWEEN :minArea AND :maxArea")
+    List<RealTransactionCacheEntity> findByLawdCdAndDongPrefixAndAreaRange(
+            @Param("lawdCd") String lawdCd,
+            @Param("dongPrefix") String dongPrefix,
+            @Param("buildYearMin") int buildYearMin,
+            @Param("minArea") java.math.BigDecimal minArea,
+            @Param("maxArea") java.math.BigDecimal maxArea);
 }

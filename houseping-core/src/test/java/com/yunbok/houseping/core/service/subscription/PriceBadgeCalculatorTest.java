@@ -60,11 +60,13 @@ class PriceBadgeCalculatorTest {
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of(price));
             when(addressHelper.extractLawdCd("서울시 강남구 역삼동 123")).thenReturn("11680");
             when(addressHelper.extractDongName("서울시 강남구 역삼동 123")).thenReturn("역삼동");
-            when(realTransactionQueryPort.findByLawdCd("11680")).thenReturn(List.of(
-                    createTransaction(60000L, new BigDecimal("84.0"), currentYear),
-                    createTransaction(65000L, new BigDecimal("83.0"), currentYear)
-            ));
-            when(addressHelper.filterByDongName(anyList(), eq("역삼동"))).thenAnswer(inv -> inv.getArgument(0));
+            when(addressHelper.normalizeDongName("역삼동")).thenReturn("역삼동");
+            when(realTransactionQueryPort.findByLawdCdAndDongPrefixAndAreaRange(
+                    eq("11680"), eq("역삼동"), anyInt(), any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(List.of(
+                            createTransaction(60000L, new BigDecimal("84.0"), currentYear),
+                            createTransaction(65000L, new BigDecimal("83.0"), currentYear)
+                    ));
 
             // when
             PriceBadge result = calculator.computePriceBadge(sub);
@@ -84,11 +86,13 @@ class PriceBadgeCalculatorTest {
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of(price));
             when(addressHelper.extractLawdCd("서울시 강남구 역삼동 123")).thenReturn("11680");
             when(addressHelper.extractDongName("서울시 강남구 역삼동 123")).thenReturn("역삼동");
-            when(realTransactionQueryPort.findByLawdCd("11680")).thenReturn(List.of(
-                    createTransaction(50000L, new BigDecimal("84.0"), currentYear),
-                    createTransaction(55000L, new BigDecimal("83.0"), currentYear)
-            ));
-            when(addressHelper.filterByDongName(anyList(), eq("역삼동"))).thenAnswer(inv -> inv.getArgument(0));
+            when(addressHelper.normalizeDongName("역삼동")).thenReturn("역삼동");
+            when(realTransactionQueryPort.findByLawdCdAndDongPrefixAndAreaRange(
+                    eq("11680"), eq("역삼동"), anyInt(), any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(List.of(
+                            createTransaction(50000L, new BigDecimal("84.0"), currentYear),
+                            createTransaction(55000L, new BigDecimal("83.0"), currentYear)
+                    ));
 
             // when
             PriceBadge result = calculator.computePriceBadge(sub);
@@ -172,19 +176,14 @@ class PriceBadgeCalculatorTest {
         }
 
         @Test
-        @DisplayName("신축 거래가 없으면 UNKNOWN을 반환한다")
-        void returnsUnknownWhenNoNewBuild() {
+        @DisplayName("동 이름을 추출할 수 없으면 UNKNOWN을 반환한다")
+        void returnsUnknownWhenDongNameNull() {
             // given
-            Subscription sub = createSubscription("H001", "서울시 강남구 역삼동 123", "ApplyHome");
+            Subscription sub = createSubscription("H001", "서울시 강남구", "ApplyHome");
             SubscriptionPrice price = createPrice("084.9543T", 50000L, 100);
-
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of(price));
-            when(addressHelper.extractLawdCd(anyString())).thenReturn("11680");
-            when(addressHelper.extractDongName(anyString())).thenReturn("역삼동");
-            when(realTransactionQueryPort.findByLawdCd("11680")).thenReturn(List.of(
-                    createTransaction(50000L, new BigDecimal("84.0"), 2000)  // 매우 오래된 건물
-            ));
-            when(addressHelper.filterByDongName(anyList(), eq("역삼동"))).thenAnswer(inv -> inv.getArgument(0));
+            when(addressHelper.extractLawdCd("서울시 강남구")).thenReturn("11680");
+            when(addressHelper.extractDongName("서울시 강남구")).thenReturn(null);
 
             // when
             PriceBadge result = calculator.computePriceBadge(sub);
@@ -194,20 +193,19 @@ class PriceBadgeCalculatorTest {
         }
 
         @Test
-        @DisplayName("유사 면적 거래가 없으면 UNKNOWN을 반환한다")
-        void returnsUnknownWhenNoSimilarAreaTransactions() {
+        @DisplayName("매칭되는 신축/면적 거래가 없으면 UNKNOWN을 반환한다")
+        void returnsUnknownWhenNoMatchingTransactions() {
             // given
             Subscription sub = createSubscription("H001", "서울시 강남구 역삼동 123", "ApplyHome");
             SubscriptionPrice price = createPrice("084.9543T", 50000L, 100);
-            int currentYear = LocalDate.now().getYear();
 
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of(price));
             when(addressHelper.extractLawdCd(anyString())).thenReturn("11680");
             when(addressHelper.extractDongName(anyString())).thenReturn("역삼동");
-            when(realTransactionQueryPort.findByLawdCd("11680")).thenReturn(List.of(
-                    createTransaction(50000L, new BigDecimal("30.0"), currentYear)  // 면적 차이 큼
-            ));
-            when(addressHelper.filterByDongName(anyList(), eq("역삼동"))).thenAnswer(inv -> inv.getArgument(0));
+            when(addressHelper.normalizeDongName("역삼동")).thenReturn("역삼동");
+            when(realTransactionQueryPort.findByLawdCdAndDongPrefixAndAreaRange(
+                    eq("11680"), eq("역삼동"), anyInt(), any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(List.of());
 
             // when
             PriceBadge result = calculator.computePriceBadge(sub);
@@ -227,12 +225,14 @@ class PriceBadgeCalculatorTest {
             when(subscriptionPriceQueryPort.findByHouseManageNo("H001")).thenReturn(List.of(price));
             when(addressHelper.extractLawdCd(anyString())).thenReturn("11680");
             when(addressHelper.extractDongName(anyString())).thenReturn("역삼동");
+            when(addressHelper.normalizeDongName("역삼동")).thenReturn("역삼동");
             // 중앙값 = (50000 + 60000) / 2 = 55000, 40000 < 55000 * 0.95 = 52250 → CHEAP
-            when(realTransactionQueryPort.findByLawdCd("11680")).thenReturn(List.of(
-                    createTransaction(50000L, new BigDecimal("84.0"), currentYear),
-                    createTransaction(60000L, new BigDecimal("83.0"), currentYear)
-            ));
-            when(addressHelper.filterByDongName(anyList(), eq("역삼동"))).thenAnswer(inv -> inv.getArgument(0));
+            when(realTransactionQueryPort.findByLawdCdAndDongPrefixAndAreaRange(
+                    eq("11680"), eq("역삼동"), anyInt(), any(BigDecimal.class), any(BigDecimal.class)))
+                    .thenReturn(List.of(
+                            createTransaction(50000L, new BigDecimal("84.0"), currentYear),
+                            createTransaction(60000L, new BigDecimal("83.0"), currentYear)
+                    ));
 
             // when
             PriceBadge result = calculator.computePriceBadge(sub);

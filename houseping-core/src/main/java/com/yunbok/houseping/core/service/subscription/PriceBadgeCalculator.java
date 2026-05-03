@@ -60,16 +60,16 @@ public class PriceBadgeCalculator {
 
         String lawdCd = addressHelper.extractLawdCd(subscription.getAddress());
         String dongName = addressHelper.extractDongName(subscription.getAddress());
-        if (lawdCd == null) {
+        if (lawdCd == null || dongName == null) {
             return PriceBadge.UNKNOWN;
         }
 
-        List<RealTransaction> newBuildTx = findNewBuildTransactions(lawdCd, dongName);
+        List<RealTransaction> newBuildTx = findNewBuildTransactions(lawdCd, dongName, area);
         if (newBuildTx.isEmpty()) {
             return PriceBadge.UNKNOWN;
         }
 
-        Long median = calculateMedianPrice(newBuildTx, area);
+        Long median = calculateMedianPrice(newBuildTx);
         if (median == null) {
             return PriceBadge.UNKNOWN;
         }
@@ -86,22 +86,17 @@ public class PriceBadgeCalculator {
         return comparisonBuilder.extractAreaFromHouseType(representative.getHouseType());
     }
 
-    private List<RealTransaction> findNewBuildTransactions(String lawdCd, String dongName) {
-        List<RealTransaction> allTransactions = realTransactionQueryPort.findByLawdCd(lawdCd);
-        List<RealTransaction> dongTransactions = addressHelper.filterByDongName(allTransactions, dongName);
+    private List<RealTransaction> findNewBuildTransactions(String lawdCd, String dongName, BigDecimal area) {
+        String dongPrefix = addressHelper.normalizeDongName(dongName);
         int threshold = HouseTypeComparisonBuilder.newBuildYearThreshold();
-        return dongTransactions.stream()
-                .filter(t -> t.getBuildYear() != null && t.getBuildYear() >= threshold)
-                .toList();
-    }
-
-    private Long calculateMedianPrice(List<RealTransaction> transactions, BigDecimal area) {
         BigDecimal minArea = area.subtract(HouseTypeComparisonBuilder.AREA_TOLERANCE);
         BigDecimal maxArea = area.add(HouseTypeComparisonBuilder.AREA_TOLERANCE);
+        return realTransactionQueryPort.findByLawdCdAndDongPrefixAndAreaRange(
+                lawdCd, dongPrefix, threshold, minArea, maxArea);
+    }
+
+    private Long calculateMedianPrice(List<RealTransaction> transactions) {
         List<Long> amounts = transactions.stream()
-                .filter(t -> t.getExclusiveArea() != null)
-                .filter(t -> t.getExclusiveArea().compareTo(minArea) >= 0
-                          && t.getExclusiveArea().compareTo(maxArea) <= 0)
                 .map(RealTransaction::getDealAmount)
                 .sorted()
                 .toList();

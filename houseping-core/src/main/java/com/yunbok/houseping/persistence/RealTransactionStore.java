@@ -7,6 +7,7 @@ import com.yunbok.houseping.repository.RealTransactionCacheRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -28,6 +29,19 @@ public class RealTransactionStore implements RealTransactionPersistencePort {
 
     public List<RealTransaction> findByLawdCd(String lawdCd) {
         return realTransactionCacheRepository.findByLawdCdOrderByDealDateDesc(lawdCd).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    public List<RealTransaction> findByLawdCdAndDongPrefixAndAreaRange(
+            String lawdCd,
+            String dongNamePrefix,
+            int buildYearMin,
+            BigDecimal minArea,
+            BigDecimal maxArea) {
+        return realTransactionCacheRepository
+                .findByLawdCdAndDongPrefixAndAreaRange(lawdCd, dongNamePrefix, buildYearMin, minArea, maxArea)
+                .stream()
                 .map(this::toDomain)
                 .toList();
     }
